@@ -121,16 +121,23 @@ export function MineIslandsCanvas({
             }
           }
 
-          if (incorrectlyFlagged && classic) {
-            addPixelTile(assets.misflagged, x, y);
+          if (incorrectlyFlagged) {
+            if (classic) {
+              addPixelTile(assets.misflagged, x, y);
+            } else if (assets.misflagged) {
+              addSprite(root, textures.get(assets.misflagged), x + cellWidth / 2, y + cellHeight / 2, cellWidth * 0.48);
+            }
           } else if (revealed && value === MINE) {
             if (pressedMine?.[0] === row && pressedMine[1] === col) {
               addRect(root, x + 4, y + 4, cellWidth - 8, cellHeight - 8, danger, undefined, 4).alpha = 0.22;
             }
+            const hazardAsset = pressedMine?.[0] === row && pressedMine[1] === col
+              ? assets.death ?? assets.hazard
+              : assets.hazard;
             if (classic) {
-              addPixelTile(pressedMine?.[0] === row && pressedMine[1] === col ? assets.death : assets.hazard, x, y);
+              addPixelTile(hazardAsset, x, y);
             } else {
-              addSprite(root, textures.get(assets.hazard), x + cellWidth / 2, y + cellHeight / 2, cellWidth * 0.56);
+              addSprite(root, textures.get(hazardAsset), x + cellWidth / 2, y + cellHeight / 2, cellWidth * 0.56);
             }
           } else if (revealed && value > 0) {
             const clueAsset = assets.clueTiles?.[value - 1];

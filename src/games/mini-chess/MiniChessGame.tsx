@@ -39,6 +39,14 @@ type PointerDrag = {
   startY: number;
 };
 
+type PointerPress = {
+  moved: boolean;
+  pointerId: number;
+  square: SquareId;
+  startX: number;
+  startY: number;
+};
+
 function getStoredBestTime(puzzle: Puzzle): number | null {
   const current = window.localStorage.getItem(`mini-chess-best-${puzzle.boardWidth}`);
   if (current) {
@@ -83,6 +91,7 @@ export function MiniChessGame() {
   const replyTimerRef = useRef<number | null>(null);
   const wrongTimerRef = useRef<number | null>(null);
   const pointerDragRef = useRef<PointerDrag | null>(null);
+  const pointerPressRef = useRef<PointerPress | null>(null);
 
   const currentState = puzzle?.states[ply] ?? null;
   const pieces = useMemo(
@@ -307,6 +316,14 @@ export function MiniChessGame() {
       return;
     }
 
+    pointerPressRef.current = {
+      moved: false,
+      pointerId: event.pointerId,
+      square,
+      startX: event.clientX,
+      startY: event.clientY,
+    };
+
     const piece = pieces.get(square);
     const movingColor = currentState.turn === "white" ? "w" : "b";
     if (piece?.color !== movingColor) {
@@ -324,6 +341,16 @@ export function MiniChessGame() {
   };
 
   const movePointerDrag = ({ event, x, y }: CanvasBoardPointer) => {
+    const press = pointerPressRef.current;
+    if (
+      press &&
+      press.pointerId === event.pointerId &&
+      !press.moved &&
+      Math.hypot(event.clientX - press.startX, event.clientY - press.startY) >= 7
+    ) {
+      press.moved = true;
+    }
+
     const drag = pointerDragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) {
       return;
@@ -346,20 +373,27 @@ export function MiniChessGame() {
   };
 
   const endPointerDrag = ({ event, row, col }: CanvasBoardPointer) => {
+    const press = pointerPressRef.current;
     const drag = pointerDragRef.current;
+    pointerPressRef.current = null;
     pointerDragRef.current = null;
-    if (!drag || drag.pointerId !== event.pointerId) {
-      setDragPreview(null);
-      return;
-    }
-
-    if (!drag.active) {
-      selectOrMove(drag.square);
-      setDragPreview(null);
-      return;
-    }
-
     const square = squares[row * (puzzle?.boardWidth ?? selectedSize) + col];
+
+    if (!press || press.pointerId !== event.pointerId) {
+      setDraggingSquare(null);
+      setDragPreview(null);
+      return;
+    }
+
+    if (!drag?.active || drag.pointerId !== event.pointerId) {
+      setDraggingSquare(null);
+      setDragPreview(null);
+      if (!press.moved && square === press.square) {
+        selectOrMove(square);
+      }
+      return;
+    }
+
     setDraggingSquare(null);
     setDragPreview(null);
 
@@ -373,6 +407,7 @@ export function MiniChessGame() {
   };
 
   const cancelPointerDrag = () => {
+    pointerPressRef.current = null;
     pointerDragRef.current = null;
     setDraggingSquare(null);
     setDragPreview(null);

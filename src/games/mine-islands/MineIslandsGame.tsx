@@ -58,7 +58,6 @@ export function MineIslandsGame() {
   const [lost, setLost] = useState(false);
   const [pressedMine, setPressedMine] = useState<Position | null>(null);
   const [isBoardPressed, setIsBoardPressed] = useState(false);
-  const [flagMode, setFlagMode] = useState(false);
   const [attemptKey, setAttemptKey] = useState<object>(() => ({}));
 
   const requestSequenceRef = useRef(0);
@@ -100,7 +99,6 @@ export function MineIslandsGame() {
     setLost(false);
     setPressedMine(null);
     setIsBoardPressed(false);
-    setFlagMode(false);
     setAttemptKey({});
     const stored = window.localStorage.getItem(`mine-islands-best-${size}`);
     setBestTime(stored ? Number(stored) : null);
@@ -187,14 +185,6 @@ export function MineIslandsGame() {
     }
   };
 
-  const activateCell = (row: number, col: number) => {
-    if (flagMode) {
-      toggleFlagAt(row, col);
-    } else {
-      revealAt(row, col);
-    }
-  };
-
   const beginPress = ({ event, row, col }: CanvasBoardPointer) => {
     if (!puzzle || showSolution || solved || lost) {
       return;
@@ -218,6 +208,11 @@ export function MineIslandsGame() {
   };
 
   const retry = () => {
+    if (lost) {
+      void loadPuzzle(selectedSize);
+      return;
+    }
+
     if (!puzzle) {
       return;
     }
@@ -356,7 +351,7 @@ export function MineIslandsGame() {
                   minusAsset: skin.assets.hud?.minus,
                   action: skin.assets.hud
                     ? {
-                        label: "Reset the Mine Islands board",
+                        label: lost ? "Start a new Mine Islands board" : "Reset the Mine Islands board",
                         onActivate: retry,
                       }
                     : undefined,
@@ -378,7 +373,7 @@ export function MineIslandsGame() {
                     skipClickRef.current.delete(key);
                     return;
                   }
-                  activateCell(row, col);
+                  revealAt(row, col);
                 }}
                 onContextMenu={({ row, col }) => toggleFlagAt(row, col)}
                 onPointerDown={beginPress}
@@ -390,7 +385,7 @@ export function MineIslandsGame() {
                   <Asterisk aria-hidden="true" size={28} />
                   <div>
                     <strong>Hidden hazard found.</strong>
-                    <p>Retry keeps the timer running and resets the same board.</p>
+                    <p>Retry starts a fresh board with a new timer.</p>
                   </div>
                   <button className="win-action" type="button" onClick={retry}>
                     <RotateCcw aria-hidden="true" size={18} />
@@ -446,20 +441,6 @@ export function MineIslandsGame() {
         </div>
 
         <div className="action-row" aria-label="Game controls">
-          <button
-            className="secondary-action"
-            type="button"
-            onClick={() => setFlagMode((current) => !current)}
-            disabled={!puzzle || isLoading || showSolution || solved || lost}
-            aria-pressed={flagMode}
-          >
-            <Flag aria-hidden="true" size={18} />
-            Mark
-          </button>
-          <button className="secondary-action" type="button" onClick={retry} disabled={!puzzle || isLoading}>
-            <RotateCcw aria-hidden="true" size={18} />
-            Retry
-          </button>
           <button className="secondary-action" type="button" onClick={revealHint} disabled={!puzzle || isLoading || showSolution || solved || lost}>
             <ShieldCheck aria-hidden="true" size={18} />
             Hint
@@ -520,11 +501,11 @@ export function MineIslandsGame() {
               </li>
               <li>
                 <strong>Mark likely hazards</strong>
-                <span>Use mark mode, right-click, or long-press to place a flag.</span>
+                <span>Right-click, or long-press on touch screens, to place a flag.</span>
               </li>
               <li>
                 <strong>Avoid hidden hazards</strong>
-                <span>Revealing one pauses the run; retry keeps the timer.</span>
+                <span>Revealing one ends the run; retry starts a fresh board.</span>
               </li>
               <li>
                 <strong>Records stay clean</strong>

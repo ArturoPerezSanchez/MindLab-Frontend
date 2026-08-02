@@ -32,6 +32,7 @@ export type GameSkinAssetMap = {
     node: string;
     flowParticle?: {
       src: string;
+      material?: "liquid" | "energy";
       size: number;
       spacing: number;
       speed: number;
@@ -218,13 +219,13 @@ export const GAME_SKINS = {
         node: "/games/tracks/skins/liquid/node.png",
         flowParticle: {
           src: "/games/tracks/skins/liquid/particle.png",
-          size: 0.12,
-          spacing: 0.38,
-          speed: 0.55,
-          opacity: 0.72,
-          drift: 0.018,
-          flicker: 0.08,
-          pulseOpacity: 0.28,
+          material: "liquid",
+          size: 0.078,
+          spacing: 0.26,
+          speed: 0.44,
+          opacity: 0.62,
+          drift: 0.026,
+          flicker: 0.04,
         },
       },
       unlock: { type: "starter" },
@@ -244,6 +245,7 @@ export const GAME_SKINS = {
         node: "/games/tracks/skins/electric/node.png",
         flowParticle: {
           src: "/games/tracks/skins/electric/particle.png",
+          material: "energy",
           size: 0.25,
           spacing: 0.72,
           speed: 1.05,
@@ -347,6 +349,44 @@ export const GAME_SKINS = {
           ],
           minus: "/games/mine-islands/skins/xp-classic/digit-.png",
         },
+      },
+      unlock: { type: "starter" },
+    },
+    {
+      id: "deep-sea",
+      name: "Deep Sea",
+      description: "Navigate a submerged field of blowfish, anchors, and lurking sharks.",
+      preview: {
+        sources: [
+          "/games/mine-islands/skins/deep-sea/hazard.svg",
+          "/games/mine-islands/skins/deep-sea/flag.svg",
+        ],
+        presentation: "pair",
+      },
+      assets: {
+        hazard: "/games/mine-islands/skins/deep-sea/hazard.svg",
+        flag: "/games/mine-islands/skins/deep-sea/flag.svg",
+        death: "/games/mine-islands/skins/deep-sea/death.svg",
+        misflagged: "/games/mine-islands/skins/deep-sea/misflagged.svg",
+      },
+      unlock: { type: "starter" },
+    },
+    {
+      id: "cosmic",
+      name: "Cosmic",
+      description: "Chart a quiet orbit of saucers, satellites, and incoming comets.",
+      preview: {
+        sources: [
+          "/games/mine-islands/skins/cosmic/hazard.svg",
+          "/games/mine-islands/skins/cosmic/flag.svg",
+        ],
+        presentation: "pair",
+      },
+      assets: {
+        hazard: "/games/mine-islands/skins/cosmic/hazard.svg",
+        flag: "/games/mine-islands/skins/cosmic/flag.svg",
+        death: "/games/mine-islands/skins/cosmic/death.svg",
+        misflagged: "/games/mine-islands/skins/cosmic/misflagged.svg",
       },
       unlock: { type: "starter" },
     },

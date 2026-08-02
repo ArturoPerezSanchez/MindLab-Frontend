@@ -67,6 +67,7 @@ const PIPE_WIDTH_RATIO = 0.18;
 const CHANNEL_WIDTH_RATIO = 0.105;
 const FLUID_WIDTH_RATIO = 0.082;
 const PULSE_WIDTH_RATIO = 0.046;
+const UNDERPASS_GAP_RATIO = 0.64;
 
 type FlowParticleDefinition = NonNullable<GameSkinAssetMap["tracks"]["flowParticle"]>;
 
@@ -89,6 +90,25 @@ function midpointKey(segment: PipeSegment): string {
   const x = Math.round(((segment.from.x + segment.to.x) / 2) * 1000);
   const y = Math.round(((segment.from.y + segment.to.y) / 2) * 1000);
   return `${x}:${y}`;
+}
+
+function splitAroundMidpoint(segment: PipeSegment, gapLength: number): PipeSegment[] {
+  const dx = segment.to.x - segment.from.x;
+  const dy = segment.to.y - segment.from.y;
+  const segmentLength = Math.hypot(dx, dy);
+  if (segmentLength <= gapLength || segmentLength === 0) {
+    return [];
+  }
+
+  const midpointX = (segment.from.x + segment.to.x) / 2;
+  const midpointY = (segment.from.y + segment.to.y) / 2;
+  const halfGapScale = gapLength / segmentLength / 2;
+  const gapStart = { x: midpointX - dx * halfGapScale, y: midpointY - dy * halfGapScale };
+  const gapEnd = { x: midpointX + dx * halfGapScale, y: midpointY + dy * halfGapScale };
+  return [
+    { from: segment.from, to: gapStart, layer: segment.layer },
+    { from: gapEnd, to: segment.to, layer: segment.layer },
+  ];
 }
 
 function buildGeometry(
@@ -247,6 +267,7 @@ function strokeSegments(
   color: CssColor,
   width: number,
   alpha = 1,
+  cap: CanvasLineCap = "round",
 ): void {
   if (segments.length === 0) {
     return;
@@ -255,7 +276,7 @@ function strokeSegments(
   segments.forEach(({ from, to }) => {
     graphic.moveTo(from.x, from.y).lineTo(to.x, to.y);
   });
-  graphic.stroke({ color, width, alpha, cap: "round", join: "round" });
+  graphic.stroke({ color, width, alpha, cap, join: "round" });
   root.addChild(graphic);
 }
 
@@ -277,6 +298,177 @@ function drawCanvasSegments(
     context.stroke();
   });
   context.setLineDash([]);
+}
+
+function flowTurnPoints(segments: readonly FlowSegment[]): Point[] {
+  const junctions = new Map<string, { point: Point; vectors: Point[] }>();
+  const addVector = (point: Point, other: Point) => {
+    const key = `${Math.round(point.x * 1000)}:${Math.round(point.y * 1000)}`;
+    const junction = junctions.get(key) ?? { point, vectors: [] };
+    junction.vectors.push({ x: other.x - point.x, y: other.y - point.y });
+    junctions.set(key, junction);
+  };
+
+  segments.forEach(({ from, to }) => {
+    addVector(from, to);
+    addVector(to, from);
+  });
+
+  return [...junctions.values()]
+    .filter(({ vectors }) =>
+      vectors.some((first, firstIndex) =>
+        vectors.slice(firstIndex + 1).some((second) => {
+          const magnitude = Math.hypot(first.x, first.y) * Math.hypot(second.x, second.y);
+          return magnitude > 0 && Math.abs(first.x * second.y - first.y * second.x) / magnitude > 0.08;
+        }),
+      ),
+    )
+    .map(({ point }) => point);
+}
+
+function drawLiquidSegments(
+  context: CanvasRenderingContext2D,
+  segments: readonly FlowSegment[],
+  elapsedMilliseconds: number,
+  cellWidth: number,
+  colors: { body: string; glow: string; highlight: string; shadow: string },
+): void {
+  if (segments.length === 0) {
+    return;
+  }
+
+  const liquidWidth = cellWidth * FLUID_WIDTH_RATIO * 1.06;
+  const travelled = -(elapsedMilliseconds * cellWidth * 0.34) / 1000;
+  const turns = flowTurnPoints(segments);
+
+  context.save();
+  context.lineCap = "round";
+  context.lineJoin = "round";
+  context.shadowColor = colors.glow;
+  context.shadowBlur = cellWidth * 0.02;
+
+  context.lineWidth = liquidWidth * 1.14;
+  context.strokeStyle = colors.shadow;
+  context.globalAlpha = 0.66;
+  segments.forEach(({ from, to }) => {
+    context.beginPath();
+    context.moveTo(from.x, from.y);
+    context.lineTo(to.x, to.y);
+    context.stroke();
+  });
+  turns.forEach((point) => {
+    context.fillStyle = colors.shadow;
+    context.beginPath();
+    context.arc(point.x, point.y, liquidWidth * 0.57, 0, Math.PI * 2);
+    context.fill();
+  });
+
+  context.lineWidth = liquidWidth;
+  context.globalAlpha = 0.94;
+
+  segments.forEach(({ from, to }) => {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const length = Math.hypot(dx, dy);
+    if (length === 0) {
+      return;
+    }
+
+    const normalX = -dy / length;
+    const normalY = dx / length;
+    const midpointX = (from.x + to.x) / 2;
+    const midpointY = (from.y + to.y) / 2;
+    const gradient = context.createLinearGradient(
+      midpointX - normalX * liquidWidth * 0.58,
+      midpointY - normalY * liquidWidth * 0.58,
+      midpointX + normalX * liquidWidth * 0.58,
+      midpointY + normalY * liquidWidth * 0.58,
+    );
+    gradient.addColorStop(0, colors.shadow);
+    gradient.addColorStop(0.15, colors.body);
+    gradient.addColorStop(0.38, colors.highlight);
+    gradient.addColorStop(0.53, colors.body);
+    gradient.addColorStop(0.82, colors.body);
+    gradient.addColorStop(1, colors.shadow);
+    context.strokeStyle = gradient;
+    context.beginPath();
+    context.moveTo(from.x, from.y);
+    context.lineTo(to.x, to.y);
+    context.stroke();
+  });
+
+  context.shadowBlur = 0;
+  turns.forEach((point) => {
+    const gradient = context.createRadialGradient(
+      point.x - liquidWidth * 0.16,
+      point.y - liquidWidth * 0.18,
+      0,
+      point.x,
+      point.y,
+      liquidWidth * 0.56,
+    );
+    gradient.addColorStop(0, colors.highlight);
+    gradient.addColorStop(0.18, colors.body);
+    gradient.addColorStop(0.72, colors.body);
+    gradient.addColorStop(1, colors.shadow);
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.arc(point.x, point.y, liquidWidth * 0.54, 0, Math.PI * 2);
+    context.fill();
+  });
+
+  context.globalCompositeOperation = "lighter";
+  context.strokeStyle = colors.highlight;
+  context.shadowColor = colors.glow;
+  context.shadowBlur = cellWidth * 0.025;
+  context.lineWidth = Math.max(1, cellWidth * 0.011);
+  context.globalAlpha = 0.22;
+  context.setLineDash([cellWidth * 0.22, cellWidth * 0.13]);
+  segments.forEach(({ from, to, phase }) => {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const length = Math.hypot(dx, dy) || 1;
+    const offsetX = (-dy / length) * liquidWidth * 0.2;
+    const offsetY = (dx / length) * liquidWidth * 0.2;
+    context.lineDashOffset = travelled - phase;
+    context.beginPath();
+    context.moveTo(from.x + offsetX, from.y + offsetY);
+    context.lineTo(to.x + offsetX, to.y + offsetY);
+    context.stroke();
+  });
+
+  context.globalAlpha = 0.1;
+  context.lineWidth = Math.max(0.8, cellWidth * 0.009);
+  context.setLineDash([cellWidth * 0.12, cellWidth * 0.2]);
+  segments.forEach(({ from, to, phase }) => {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const length = Math.hypot(dx, dy) || 1;
+    const offsetX = (dy / length) * liquidWidth * 0.22;
+    const offsetY = (-dx / length) * liquidWidth * 0.22;
+    context.lineDashOffset = travelled * 0.72 - phase + cellWidth * 0.09;
+    context.beginPath();
+    context.moveTo(from.x + offsetX, from.y + offsetY);
+    context.lineTo(to.x + offsetX, to.y + offsetY);
+    context.stroke();
+  });
+
+  context.setLineDash([]);
+  context.globalAlpha = 0.18;
+  context.lineWidth = Math.max(1, cellWidth * 0.012);
+  turns.forEach((point, index) => {
+    const startAngle = elapsedMilliseconds * 0.0022 + index * 1.73;
+    context.beginPath();
+    context.arc(point.x, point.y, liquidWidth * 0.25, startAngle, startAngle + Math.PI * 0.72);
+    context.stroke();
+    context.globalAlpha = 0.1;
+    context.beginPath();
+    context.arc(point.x, point.y, liquidWidth * 0.36, -startAngle, -startAngle + Math.PI * 0.55);
+    context.stroke();
+    context.globalAlpha = 0.18;
+  });
+
+  context.restore();
 }
 
 function drawFlowParticles(
@@ -443,9 +635,17 @@ export function TracksCanvas({
       gridGraphic.stroke({ color: grid, width: 2, alpha: 0.24 });
       root.addChild(gridGraphic);
 
-      const pipeSegments = [...geometry.arms, ...geometry.bridges];
-      strokeSegments(root, pipeSegments, track, pipeWidth);
-      strokeSegments(root, pipeSegments, channel, channelWidth);
+      const underpassSegments = geometry.bridges
+        .filter((segment) => segment.layer === "underpass")
+        .flatMap((segment) => splitAroundMidpoint(segment, pipeWidth * UNDERPASS_GAP_RATIO));
+      const foregroundSegments = [
+        ...geometry.arms,
+        ...geometry.bridges.filter((segment) => segment.layer !== "underpass"),
+      ];
+      strokeSegments(root, underpassSegments, track, pipeWidth, 1, "butt");
+      strokeSegments(root, foregroundSegments, track, pipeWidth);
+      strokeSegments(root, underpassSegments, channel, channelWidth, 1, "butt");
+      strokeSegments(root, foregroundSegments, channel, channelWidth);
 
       board.forEach((rowValues, row) => {
         rowValues.forEach((mask, col) => {
@@ -470,9 +670,8 @@ export function TracksCanvas({
       strokeSegments(root, lowerFlow, fluid, fluidWidth);
 
       const overpassBridges = geometry.bridges.filter((segment) => segment.layer === "overpass");
-      strokeSegments(root, overpassBridges, cell, pipeWidth * 1.42);
-      strokeSegments(root, overpassBridges, track, pipeWidth);
-      strokeSegments(root, overpassBridges, channel, channelWidth);
+      strokeSegments(root, overpassBridges, track, pipeWidth, 1, "butt");
+      strokeSegments(root, overpassBridges, channel, channelWidth, 1, "butt");
       strokeSegments(root, overpassFlow, fluid, fluidWidth * 1.7, 0.18);
       strokeSegments(root, overpassFlow, fluid, fluidWidth);
 
@@ -501,57 +700,48 @@ export function TracksCanvas({
       const glow = solutionShown
         ? cssVar(host, "--gold", "#d3a44a")
         : cssVar(host, "--flow-glow", "rgba(21, 150, 127, 0.42)");
+      const fluid = solutionShown
+        ? cssVar(host, "--gold", "#d3a44a")
+        : cssVar(host, "--flow", "#15967f");
+      const fluidShadow = solutionShown
+        ? cssVar(host, "--gold", "#d3a44a")
+        : cssVar(host, "--flow-shadow", "#0b6658");
       const start = cssVar(host, "--start", "#3686ae");
       const end = cssVar(host, "--end", "#d85f50");
       const surface = cssVar(host, "--game-surface", "#ffffff");
       const lowerFlow = geometry.flowSegments.filter((segment) => segment.layer !== "overpass");
       const overpassFlow = geometry.flowSegments.filter((segment) => segment.layer === "overpass");
+      const overpassBridges = geometry.bridges.filter((segment) => segment.layer === "overpass");
 
-      context.save();
-      context.lineCap = "round";
-      context.lineJoin = "round";
-      context.lineWidth = cellWidth * PULSE_WIDTH_RATIO;
-      context.strokeStyle = pulse;
-      context.shadowColor = glow;
-      context.shadowBlur = cellWidth * 0.075;
-      context.globalAlpha = particleDefinition?.pulseOpacity ?? 1;
-      drawCanvasSegments(context, lowerFlow, elapsedMilliseconds, cellWidth);
-      context.globalAlpha = 1;
-      if (particleImage && particleDefinition) {
-        drawFlowParticles(
-          context,
-          lowerFlow,
-          particleImage,
-          particleDefinition,
-          elapsedMilliseconds,
-          cellWidth,
-          glow,
-        );
-      }
+      const drawFlowLayer = (segments: readonly FlowSegment[]) => {
+        if (segments.length === 0) {
+          return;
+        }
 
-      if (overpassFlow.length > 0) {
-        context.save();
-        context.globalCompositeOperation = "destination-out";
-        context.shadowBlur = 0;
-        context.lineWidth = Math.max(
-          cellWidth * FLUID_WIDTH_RATIO * 1.35,
-          particleDefinition ? cellWidth * particleDefinition.size * 1.2 : 0,
-        );
-        context.setLineDash([]);
-        overpassFlow.forEach(({ from, to }) => {
-          context.beginPath();
-          context.moveTo(from.x, from.y);
-          context.lineTo(to.x, to.y);
-          context.stroke();
-        });
-        context.restore();
-        context.globalAlpha = particleDefinition?.pulseOpacity ?? 1;
-        drawCanvasSegments(context, overpassFlow, elapsedMilliseconds, cellWidth);
-        context.globalAlpha = 1;
+        if (particleDefinition?.material === "liquid") {
+          drawLiquidSegments(context, segments, elapsedMilliseconds, cellWidth, {
+            body: fluid,
+            glow,
+            highlight: pulse,
+            shadow: fluidShadow,
+          });
+        } else {
+          context.save();
+          context.lineCap = "round";
+          context.lineJoin = "round";
+          context.lineWidth = cellWidth * PULSE_WIDTH_RATIO;
+          context.strokeStyle = pulse;
+          context.shadowColor = glow;
+          context.shadowBlur = cellWidth * 0.075;
+          context.globalAlpha = particleDefinition?.pulseOpacity ?? 1;
+          drawCanvasSegments(context, segments, elapsedMilliseconds, cellWidth);
+          context.restore();
+        }
+
         if (particleImage && particleDefinition) {
           drawFlowParticles(
             context,
-            overpassFlow,
+            segments,
             particleImage,
             particleDefinition,
             elapsedMilliseconds,
@@ -559,7 +749,30 @@ export function TracksCanvas({
             glow,
           );
         }
+      };
+
+      context.save();
+      drawFlowLayer(lowerFlow);
+
+      if (overpassBridges.length > 0) {
+        context.save();
+        context.globalCompositeOperation = "destination-out";
+        context.globalAlpha = 1;
+        context.lineCap = "butt";
+        context.shadowBlur = 0;
+        context.lineWidth = cellWidth * PIPE_WIDTH_RATIO * 1.08;
+        context.strokeStyle = "#000";
+        context.setLineDash([]);
+        overpassBridges.forEach(({ from, to }) => {
+          context.beginPath();
+          context.moveTo(from.x, from.y);
+          context.lineTo(to.x, to.y);
+          context.stroke();
+        });
+        context.restore();
       }
+
+      drawFlowLayer(overpassFlow);
 
       const drawEndpoint = (point: Point, color: string) => {
         context.shadowBlur = 0;
