@@ -1,7 +1,7 @@
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import type { GameId } from "@/shared/gameOptions";
 import { SkinContext, type SkinContextValue } from "./SkinContext";
-import { findGameSkin, type GameSkinDefinition } from "./skins";
+import { resolveGameSkin, type ResolvedGameSkin } from "./skins";
 
 export function useSkins(): SkinContextValue {
   const value = useContext(SkinContext);
@@ -11,13 +11,12 @@ export function useSkins(): SkinContextValue {
   return value;
 }
 
-export function useGameSkin<G extends GameId>(gameId: G): GameSkinDefinition<G> {
+/**
+ * Renderers keep consuming stable roles. They never learn that a role now comes
+ * from an independently chosen part rather than from a whole skin.
+ */
+export function useGameSkin<G extends GameId>(gameId: G): ResolvedGameSkin<G> {
   const { selectedSkins } = useSkins();
-  const skin = findGameSkin(gameId, selectedSkins[gameId]);
-
-  if (!skin) {
-    throw new Error(`No skin definition found for ${gameId}.`);
-  }
-
-  return skin;
+  const customization = selectedSkins[gameId];
+  return useMemo(() => resolveGameSkin(gameId, customization), [customization, gameId]);
 }

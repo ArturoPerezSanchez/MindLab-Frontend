@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Incorrect marker</title>
+  <circle cx="32" cy="32" r="17" fill="#3b434b"/>
+  <circle cx="25" cy="25" r="4.5" fill="#93a0ab" opacity=".8"/>
+  <g stroke="#cf3b34" stroke-width="7" stroke-linecap="round">
+    <path d="M13 13 51 51M51 13 13 51"/>
+  </g>
+</svg>

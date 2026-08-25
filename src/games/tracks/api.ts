@@ -1,4 +1,5 @@
 import { apiPath } from "@/shared/api";
+import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
 import { isConnectedSolution, isValidMask, trackCount } from "./game";
 import type { Board, Position, Puzzle, TracksResponse } from "./types";
 
@@ -51,6 +52,8 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
   ) {
     throw new Error("The API returned an invalid Tracks puzzle.");
   }
+
+  rememberPuzzleHandleFrom("tracks", squareDifficulty(size), payload);
 
   return {
     size,

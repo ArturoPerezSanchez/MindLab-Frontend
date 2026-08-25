@@ -337,6 +337,10 @@ a {
   }
 
   .suite-leaderboard-button {
+    right: 190px;
+  }
+
+  .suite-appearance-button {
     right: 146px;
   }
 
@@ -382,6 +386,27 @@ a {
 
   .skin-game-tab span {
     display: none;
+  }
+
+  .kart-rack {
+    padding-inline: 10px;
+  }
+
+  .kart-track {
+    gap: 8px;
+  }
+
+  .kart-column {
+    width: 104px;
+  }
+
+  .kart-frame {
+    width: 92px;
+    height: 76px;
+  }
+
+  .appearance-shell {
+    width: min(100% - 20px, 680px);
   }
 
   .game-card {
@@ -533,55 +558,344 @@ a {
   background: color-mix(in srgb, var(--accent) 9%, var(--surface-solid));
 }
 
-.skin-options {
+/*
+ * Appearance screen. The rack sits on the neutral app surface and only the
+ * preview below carries the board and tint attributes, so choosing a board
+ * recolours the board rather than the screen you are choosing it on.
+ */
+.appearance-shell {
   display: grid;
-  border-block: 1px solid var(--line);
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 40px) 0 56px;
+  gap: 18px;
+  justify-items: center;
 }
 
-.skin-option {
+.appearance-shell .skin-game-tabs {
+  justify-content: center;
+  max-width: 100%;
+}
+
+.appearance-rack {
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr) 24px;
-  align-items: center;
-  gap: 12px;
-  min-height: 76px;
-  padding: 11px 4px;
-  border: 0;
-  border-top: 1px solid var(--line);
-  color: var(--ink);
-  background: transparent;
-  text-align: left;
-}
-
-.skin-option:first-child {
-  border-top: 0;
-}
-
-.skin-option:hover:not(:disabled),
-.skin-option:focus-visible {
-  background: color-mix(in srgb, var(--accent) 5%, transparent);
-  outline: none;
-}
-
-.skin-option[aria-checked="true"] {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-}
-
-.skin-option:disabled {
-  cursor: not-allowed;
-  opacity: 0.48;
-}
-
-.skin-preview {
-  display: grid;
-  width: 88px;
-  height: 56px;
-  overflow: hidden;
+  width: 100%;
+  gap: 14px;
+  justify-items: center;
+  padding: clamp(14px, 2.5vw, 22px) 0;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 12px;
   background: var(--surface-solid);
 }
 
-.skin-preview img {
+.appearance-preview {
+  display: grid;
+  justify-items: center;
+}
+
+/*
+ * A static miniature drawn from the same tokens and asset roles the real
+ * renderers consume, so a choice is visible the moment it is made. The status
+ * bar is included because it belongs to the board: XP Classic replaces it
+ * entirely.
+ */
+.board-preview {
+  display: grid;
+  width: clamp(224px, 32vw, 300px);
+  gap: 0;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  border-radius: 10px;
+  background: var(--game-logo-bg, var(--surface-solid));
+  box-shadow: 0 6px 18px rgba(30, 41, 59, 0.12);
+}
+
+[data-theme="dark"] .board-preview {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.34);
+}
+
+/*
+ * Status bar. This mirrors `drawSuiteHud` and `drawXpHud` in CanvasBoard: three
+ * metric columns with dividers and an accent rule, or the bevelled grey panel
+ * with digit boxes for XP Classic. Keep the two in step.
+ */
+.board-preview-hud {
+  display: grid;
+  position: relative;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 5px 0 7px;
+  border-radius: 4px 4px 0 0;
+  background: var(--game-elevated, var(--surface-solid));
+}
+
+.board-preview-hud::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--game-accent);
+  content: "";
+}
+
+.board-preview-metric {
+  display: grid;
+  gap: 1px;
+  justify-items: center;
+  min-width: 0;
+  padding: 0 4px;
+}
+
+.board-preview-metric + .board-preview-metric {
+  border-left: 1px solid color-mix(in srgb, var(--game-grid, var(--ink)) 30%, transparent);
+}
+
+.board-preview-metric > span {
+  color: var(--game-muted, var(--muted));
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.board-preview-metric > strong {
+  color: var(--game-text, var(--ink));
+  font-size: 0.86rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.board-preview-hud-xp {
+  padding: 6px 5px 8px;
+  border-radius: 0;
+  background: #c0c0c0;
+  box-shadow:
+    inset 2px 2px 0 #ffffff,
+    inset -2px -2px 0 #808080;
+}
+
+.board-preview-hud-xp::after {
+  display: none;
+}
+
+.board-preview-hud-xp .board-preview-metric + .board-preview-metric {
+  border-left: 0;
+}
+
+.board-preview-hud-xp .board-preview-metric > span {
+  color: #111111;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+}
+
+.board-preview-xp-slot {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.board-preview-xp-box {
+  display: flex;
+  gap: 1px;
+  padding: 2px;
+  background: #050505;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff;
+}
+
+.board-preview-xp-box img {
+  display: block;
+  width: 8px;
+  height: 15px;
+  image-rendering: pixelated;
+}
+
+.board-preview-xp-face {
+  display: block;
+  width: 17px;
+  height: 17px;
+  image-rendering: pixelated;
+}
+
+/* Clue numerals for boards that bring no pixel clue tiles of their own. */
+.board-preview-clue {
+  display: grid;
+  position: absolute;
+  place-items: center;
+  font-size: 0.78rem;
+  font-weight: 850;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.board-preview-grid {
+  display: grid;
+  position: relative;
+  aspect-ratio: 1;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.board-preview-cell {
+  display: block;
+  min-width: 0;
+  outline: 0.5px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  outline-offset: -0.5px;
+}
+
+.board-preview-piece,
+.board-preview-tinted,
+.board-preview-overlay {
+  position: absolute;
+  pointer-events: none;
+}
+
+.board-preview-piece {
+  object-fit: contain;
+}
+
+.board-preview-overlay {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/*
+ * `color` blending takes hue and saturation from the tint layer and luminosity
+ * from the artwork underneath, so one sprite serves every bulb colour. The
+ * isolation keeps the blend inside the sprite instead of the whole cell.
+ */
+.board-preview-tinted {
+  display: block;
+  isolation: isolate;
+}
+
+.board-preview-tinted img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.board-preview-tint {
+  position: absolute;
+  inset: 0;
+  background: var(--glow);
+  mix-blend-mode: color;
+}
+
+.board-preview-flow {
+  animation: board-preview-flow 1.4s linear infinite;
+}
+
+.board-preview-hud + .board-preview-grid {
+  border-radius: 0 0 4px 4px;
+}
+
+@keyframes board-preview-flow {
+  to {
+    stroke-dashoffset: -0.92;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-preview-flow {
+    animation: none;
+  }
+}
+
+.appearance-preview[data-pixelated="true"] .board-preview-piece {
+  image-rendering: pixelated;
+}
+
+/* The track centres itself while it fits and scrolls once it no longer does. */
+.kart-rack {
+  width: 100%;
+  padding: 2px 12px 4px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+
+.kart-track {
+  display: flex;
+  width: max-content;
+  margin-inline: auto;
+  gap: 10px;
+}
+
+.kart-column {
+  display: grid;
+  width: 118px;
+  flex: 0 0 auto;
+  gap: 6px;
+  justify-items: center;
+  scroll-snap-align: center;
+}
+
+.kart-label {
+  margin: 0;
+  height: 26px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.kart-arrow {
+  display: grid;
+  width: 36px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--ink);
+  background: var(--surface-solid);
+}
+
+.kart-arrow:hover:not(:disabled),
+.kart-arrow:focus-visible {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface-solid));
+  outline: none;
+}
+
+.kart-arrow:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.kart-frame {
+  display: grid;
+  position: relative;
+  width: 100px;
+  height: 84px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-solid);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.kart-frame:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.kart-art {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+}
+
+.kart-art img {
   display: block;
   width: 100%;
   height: 100%;
@@ -589,64 +903,108 @@ a {
   object-fit: contain;
 }
 
-.skin-preview img[src*="/xp-classic/"] {
-  image-rendering: pixelated;
-}
-
-.skin-preview-pair img[src*="/mini-chess/"]:first-child {
-  background: #647a70;
-}
-
-.skin-preview-pair img[src*="/mini-chess/"]:last-child {
-  background: #d7d0bf;
-}
-
-.skin-preview img[src*="/tracks/skins/liquid/"],
-.skin-preview img[src*="/tracks/skins/electric/"] {
-  background: #20272d;
-}
-
-.skin-preview-contain {
-  padding: 6px;
-}
-
-.skin-preview-pair {
+.kart-art-pair {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  padding: 5px;
-  gap: 3px;
+  gap: 4px;
 }
 
-.skin-preview-cover img {
+.kart-art-cover {
+  padding: 0;
+}
+
+.kart-art-cover img {
   object-fit: cover;
 }
 
-.skin-option-copy {
+.kart-art-pair img[src*="/mini-chess/"]:first-child {
+  border-radius: 3px;
+  background: #647a70;
+}
+
+.kart-art-pair img[src*="/mini-chess/"]:last-child {
+  border-radius: 3px;
+  background: #d7d0bf;
+}
+
+.kart-art img[src*="/tracks/skins/liquid/"],
+.kart-art img[src*="/tracks/skins/electric/"] {
+  border-radius: 3px;
+  background: #20272d;
+}
+
+.appearance-rack[data-pixelated="true"] .kart-art img {
+  image-rendering: pixelated;
+}
+
+.kart-swatch {
   display: grid;
-  gap: 3px;
+  width: 100%;
+  height: 100%;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+}
+
+.kart-swatch > span {
+  display: block;
   min-width: 0;
 }
 
-.skin-option-copy strong {
-  font-size: 0.92rem;
-}
-
-.skin-option-copy > span {
-  color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.35;
-}
-
-.skin-option-status {
-  display: grid;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  border-radius: 50%;
+.kart-locked {
+  display: inline-flex;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 5px;
+  border-radius: 99px;
   color: var(--surface-solid);
+  background: color-mix(in srgb, var(--ink) 62%, transparent);
+  font-size: 0.64rem;
+  font-weight: 800;
 }
 
-.skin-option[aria-checked="true"] .skin-option-status {
-  background: var(--accent);
+.kart-value {
+  margin: 0;
+  height: 32px;
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 760;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.kart-count {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.kart-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--surface-solid);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.kart-reset:hover:not(:disabled),
+.kart-reset:focus-visible {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface-solid));
+  outline: none;
+}
+
+.kart-reset:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 .config-row-copy {
@@ -2264,4 +2622,89 @@ a {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.024), rgba(255, 255, 255, 0) 90%),
     color-mix(in srgb, var(--route) 24%, #2d2d30);
+}
+
+/*
+ * Player picture. The portrait frame is a ring drawn over the image rather than
+ * a border, so a frame can overhang the circle without changing the layout box
+ * every avatar occupies.
+ */
+.avatar {
+  display: inline-grid;
+  position: relative;
+  flex: 0 0 auto;
+  place-items: center;
+}
+
+.avatar-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--surface-solid);
+}
+
+.avatar-portrait {
+  position: absolute;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
+  pointer-events: none;
+}
+
+.avatar-sm {
+  width: 28px;
+  height: 28px;
+}
+
+.avatar-md {
+  width: 44px;
+  height: 44px;
+}
+
+.avatar-lg {
+  width: 72px;
+  height: 72px;
+}
+
+.avatar-xl {
+  width: 112px;
+  height: 112px;
+}
+
+/* ------------------------------------------------------------------ flags -- */
+
+/**
+ * Country flags, shown in the multiplayer lobby, the leaderboard and profiles.
+ *
+ * Neither class had any CSS, which was invisible in review and unmissable in
+ * play: `public/flags/` is generated by `scripts/fetch-flags.mjs` rather than
+ * committed, so in any fresh clone every flag fails to load and falls back to
+ * the code chip. An unstyled chip is a bare two-letter string sitting in the
+ * middle of a roster row.
+ */
+.flag {
+  display: inline-block;
+  flex: none;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
+  object-fit: cover;
+  vertical-align: middle;
+}
+
+.flag-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 26%, transparent);
+  color: inherit;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
 }

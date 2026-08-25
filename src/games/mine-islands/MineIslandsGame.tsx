@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { useWinSequence } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
 import type { CanvasBoardPointer, CanvasCellPosition } from "@/shared/canvas/CanvasBoard";
@@ -76,6 +77,8 @@ export function MineIslandsGame() {
     () => (showSolution && puzzle ? revealAll(visibility) : visibility),
     [puzzle, showSolution, visibility],
   );
+
+  const win = useWinSequence({ solved, runKey: attemptKey, skip: showSolution });
 
   useGameResultReporter({
     runKey: attemptKey,
@@ -330,11 +333,13 @@ export function MineIslandsGame() {
           ) : (
             <>
               <MineIslandsCanvas
+                surface={skin.assets.surface}
                 puzzle={puzzle}
                 visibility={displayedVisibility}
                 assets={skin.assets}
                 lost={lost}
                 pressedMine={pressedMine}
+                celebration={win.isCelebrating ? win.progress : null}
                 disabled={showSolution || solved || lost}
                 hud={{
                   variant: skin.assets.hud?.variant ?? "suite",
@@ -394,7 +399,7 @@ export function MineIslandsGame() {
                 </div>
               )}
 
-              {solved && (
+              {win.isRevealed && (
                 <div className="board-popup win-popup" role="dialog" aria-modal="true" aria-label="Puzzle solved">
                   <div className="confetti-field" aria-hidden="true">
                     {Array.from({ length: 18 }, (_, index) => (

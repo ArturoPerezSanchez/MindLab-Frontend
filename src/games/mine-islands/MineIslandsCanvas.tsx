@@ -1,19 +1,32 @@
 import { useCallback, useMemo } from "react";
 import { Graphics } from "pixi.js";
 import type { GameSkinAssetMap } from "@/features/skins/skins";
-import { CanvasBoard, type CanvasBoardHud, type CanvasBoardPointer, type CanvasCellPosition } from "@/shared/canvas/CanvasBoard";
+import {
+  CanvasBoard,
+  type CanvasBoardAnimationFrame,
+  type CanvasBoardHud,
+  type CanvasBoardPointer,
+  type CanvasCellPosition,
+} from "@/shared/canvas/CanvasBoard";
+import { drawCellSurface, withSurfaceAssets } from "@/shared/canvas/surface";
+import type { BoardSurface } from "@/features/skins/skins";
 import { addLabel, addLine, addRect, addSprite, cssVar } from "@/shared/canvas/drawing";
+import { drawMinesCelebration, type CellRef } from "@/shared/canvas/winCelebration";
 import { MINE, positionKey } from "./game";
 import type { Position, Puzzle, VisibilityBoard } from "./types";
 
 const CLUE_COLORS = ["#000000", "#2f73bf", "#23845f", "#c4544c", "#8359a6", "#b5792e", "#267a80", "#36393d", "#6f7479"];
 
 type MineIslandsCanvasProps = {
+  /** Material laid over the cell colours by the chosen board. */
+  surface?: BoardSurface;
   puzzle: Puzzle;
   visibility: VisibilityBoard;
   assets: GameSkinAssetMap["mine-islands"];
   lost: boolean;
   pressedMine: Position | null;
+  /** 0..1 while the solved board celebrates, null when idle. */
+  celebration: number | null;
   disabled: boolean;
   hud: CanvasBoardHud;
   onActivate: (position: CanvasCellPosition) => void;
@@ -23,11 +36,13 @@ type MineIslandsCanvasProps = {
 };
 
 export function MineIslandsCanvas({
+  surface,
   puzzle,
   visibility,
   assets,
   lost,
   pressedMine,
+  celebration,
   disabled,
   hud,
   onActivate,
@@ -96,6 +111,7 @@ export function MineIslandsCanvas({
           const revealed = status === "revealed" || revealedMine || incorrectlyFlagged;
           const flagged = status === "flagged" && !revealed;
           addRect(root, x, y, cellWidth, cellHeight, revealed ? revealedColor : covered);
+          drawCellSurface(root, textures, surface, x, y, cellWidth, cellHeight);
 
           if (!revealed) {
             const inset = classic ? cellWidth * 0.05 : 3;
@@ -163,7 +179,7 @@ export function MineIslandsCanvas({
       }
       addRect(root, 2, 2, 996, 996, "transparent", { color: grid, width: 5 }, 4);
     },
-    [assets, classic, lost, pressedMine, puzzle, visibility],
+    [assets, classic, lost, pressedMine, puzzle, surface, visibility],
   );
 
   const boardAssets = [
@@ -174,6 +190,35 @@ export function MineIslandsCanvas({
     ...(assets.clueTiles ?? []),
   ].filter((asset): asset is string => Boolean(asset));
 
+  const animate = useCallback(
+    ({ context, host, cellWidth, cellHeight }: CanvasBoardAnimationFrame) => {
+      if (celebration === null) {
+        return;
+      }
+      const mines: CellRef[] = [];
+      puzzle.solution.forEach((rowValues, row) => {
+        rowValues.forEach((value, col) => {
+          if (value === MINE) {
+            mines.push({ row, col });
+          }
+        });
+      });
+      drawMinesCelebration(
+        {
+          context,
+          cellWidth,
+          cellHeight,
+          progress: celebration,
+          color: cssVar(host, "--hazard", "#263c3d"),
+        },
+        mines,
+        puzzle.size,
+        puzzle.size,
+      );
+    },
+    [celebration, puzzle],
+  );
+
   return (
     <CanvasBoard
       className="board"
@@ -181,9 +226,10 @@ export function MineIslandsCanvas({
       rows={puzzle.size}
       cols={puzzle.size}
       cells={cells}
-      assetUrls={boardAssets}
-      hud={hud}
+      assetUrls={withSurfaceAssets(boardAssets, surface)}
+      hud={hud && surface?.hud ? { ...hud, style: surface.hud } : hud}
       draw={draw}
+      animate={celebration === null ? undefined : animate}
       onCellActivate={onActivate}
       onCellContextMenu={onContextMenu}
       onPointerDown={onPointerDown}

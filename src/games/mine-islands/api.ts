@@ -1,4 +1,5 @@
 import { apiPath } from "@/shared/api";
+import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
 import { mineCount, validateClues } from "./game";
 import type { Board, MineIslandsResponse, Puzzle } from "./types";
 
@@ -37,6 +38,8 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
   ) {
     throw new Error("The API returned an invalid Mine Islands puzzle.");
   }
+
+  rememberPuzzleHandleFrom("mine-islands", squareDifficulty(size), payload);
 
   return {
     size,

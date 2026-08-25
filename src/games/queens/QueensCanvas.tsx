@@ -1,12 +1,28 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Graphics } from "pixi.js";
-import { CanvasBoard, type CanvasBoardHud, type CanvasBoardPointer, type CanvasCellPosition } from "@/shared/canvas/CanvasBoard";
+import {
+  CanvasBoard,
+  type CanvasBoardAnimationFrame,
+  type CanvasBoardHud,
+  type CanvasBoardPointer,
+  type CanvasCellPosition,
+} from "@/shared/canvas/CanvasBoard";
 import { addLine, addRect, addSprite, cssVar } from "@/shared/canvas/drawing";
+import { drawCellSurface, withSurfaceAssets } from "@/shared/canvas/surface";
+import type { BoardSurface } from "@/features/skins/skins";
+import { drawQueensCelebration, type CellRef } from "@/shared/canvas/winCelebration";
 import { positionKey } from "./game";
 
 type QueensCanvasProps = {
+  /** 0..1 while the solved board celebrates, null when idle. */
+  celebration: number | null;
   board: number[][];
   marker: string;
+  /**
+   * Material laid over the region colours by the chosen board. Absent for the
+   * flat boards, which are still the default.
+   */
+  surface?: BoardSurface;
   queens: ReadonlySet<string>;
   marks: ReadonlySet<string>;
   conflicts: ReadonlySet<string>;
@@ -24,8 +40,10 @@ type QueensCanvasProps = {
 };
 
 export function QueensCanvas({
+  celebration,
   board,
   marker,
+  surface,
   queens,
   marks,
   conflicts,
@@ -75,6 +93,8 @@ export function QueensCanvas({
           const y = row * cellHeight;
           const regionColor = cssVar(host, `--region-${(Math.abs(region) % 10) + 1}`, "#d6d9dd");
           addRect(root, x, y, cellWidth, cellHeight, regionColor);
+
+          drawCellSurface(root, textures, surface, x, y, cellWidth, cellHeight);
 
           if (showPatterns) {
             const pattern = new Graphics();
@@ -145,11 +165,60 @@ export function QueensCanvas({
           }
         });
       });
-      borders.stroke({ color: grid, width: Math.max(2, 15 / size), alpha: 0.65 });
+      const edge = surface?.edgeColor ?? grid;
+      borders.stroke({ color: edge, width: Math.max(2, 15 / size), alpha: 0.65 });
       root.addChild(borders);
-      addRect(root, 2, 2, 996, 996, "transparent", { color: grid, width: 5 }, 4);
+      addRect(root, 2, 2, 996, 996, "transparent", { color: edge, width: 5 }, 4);
     },
-    [board, conflictHints, conflicts, marker, queens, showPatterns, showSolution, size, solutionCells, marks],
+    [
+      board,
+      conflictHints,
+      conflicts,
+      marker,
+      queens,
+      showPatterns,
+      showSolution,
+      size,
+      solutionCells,
+      marks,
+      surface,
+    ],
+  );
+
+  // The celebration redraws the marker on the 2D layer, so it needs its own
+  // decoded copy - the PIXI texture atlas is not reachable from there.
+  const [markerImage, setMarkerImage] = useState<HTMLImageElement | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = () => {
+      if (!cancelled) {
+        setMarkerImage(image);
+      }
+    };
+    image.src = marker;
+    return () => {
+      cancelled = true;
+    };
+  }, [marker]);
+
+  const animate = useCallback(
+    ({ context, cellWidth, cellHeight }: CanvasBoardAnimationFrame) => {
+      if (celebration === null || !markerImage) {
+        return;
+      }
+      const queenCells: CellRef[] = [...queens].map((key) => {
+        const [row, col] = key.split(":").map(Number);
+        return { row, col };
+      });
+      drawQueensCelebration(
+        { context, cellWidth, cellHeight, progress: celebration },
+        queenCells,
+        markerImage,
+      );
+    },
+    [celebration, markerImage, queens],
   );
 
   return (
@@ -159,9 +228,14 @@ export function QueensCanvas({
       rows={size}
       cols={size}
       cells={cells}
-      assetUrls={[marker]}
-      hud={hud}
+      assetUrls={withSurfaceAssets([marker], surface)}
+      // The status bar is part of the board, not a neutral frame around it: a
+      // carved stone grid under a flat white panel looks like two products
+      // stacked. Callers still pass only the metrics; the board supplies the
+      // material.
+      hud={surface?.hud ? { ...hud, style: surface.hud } : hud}
       draw={draw}
+      animate={celebration === null ? undefined : animate}
       onCellActivate={onActivate}
       onCellContextMenu={onContextMenu}
       onPointerDown={onPointerDown}

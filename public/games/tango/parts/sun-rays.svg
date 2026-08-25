@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Rayed sun</title>
+  <g fill="#e0a32c">
+    <path d="M32 1.5 36 13h-8Zm0 61L28 51h8ZM1.5 32 13 28v8Zm61 0L51 36v-8ZM10.4 10.4 21 15.6 15.6 21Zm43.2 43.2L43 48.4l5.4-5.4Zm0-43.2L48.4 21 43 15.6Zm-43.2 43.2L15.6 43l5.4 5.4Z"/>
+  </g>
+  <circle cx="32" cy="32" r="16" fill="#e8b93f"/>
+  <circle cx="32" cy="32" r="16" fill="none" stroke="#c78f21" stroke-width="2"/>
+  <circle cx="27" cy="27" r="5" fill="#f6d98a" opacity=".75"/>
+</svg>

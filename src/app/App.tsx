@@ -1,11 +1,12 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { Check, Lock, Moon, Palette, Settings, Sun, Trophy, UserRound } from "lucide-react";
+import { Gamepad2, Moon, Palette, Settings, Sun, Swords, Trophy, UserRound } from "lucide-react";
 import { AccountView } from "@/features/account/AccountView";
 import { LeaderboardView } from "@/features/leaderboard/LeaderboardView";
 import { PlayerProfileView } from "@/features/profiles/PlayerProfileView";
 import { useQueensPatternsSetting } from "@/features/settings/useConfig";
 import { useTheme } from "@/features/settings/useTheme";
-import { GAME_SKINS } from "@/features/skins/skins";
+import { AppearanceView } from "@/features/skins/AppearanceView";
+import { paletteToken, resolveGameSkin } from "@/features/skins/skins";
 import { useSkins } from "@/features/skins/useSkins";
 import { GAME_ICONS } from "@/shared/icons/gameIcons";
 import "@/games/lights/styles.css";
@@ -15,6 +16,7 @@ import "@/games/queens/styles.css";
 import "@/games/tango/styles.css";
 import "@/games/tracks/styles.css";
 import "@/games/zip/styles.css";
+import "@/features/multiplayer/styles.css";
 import "@/styles/game-frame.css";
 import "@/styles/game-skins.css";
 import "@/styles/canvas-board.css";
@@ -45,6 +47,11 @@ const MineIslandsGame = lazy(() =>
 const MiniChessGame = lazy(() =>
   import("@/games/mini-chess/MiniChessGame").then((module) => ({
     default: module.MiniChessGame,
+  })),
+);
+const MultiplayerView = lazy(() =>
+  import("@/features/multiplayer/MultiplayerView").then((module) => ({
+    default: module.MultiplayerView,
   })),
 );
 
@@ -122,7 +129,57 @@ const GAMES = {
 } as const;
 
 type GameId = keyof typeof GAMES;
-type RouteState = GameId | "menu" | "config" | "account" | "leaderboard" | "player";
+type RouteState =
+  | GameId
+  | "menu"
+  | "config"
+  | "appearance"
+  | "account"
+  | "leaderboard"
+  | "player"
+  /** The list of multiplayer modes. */
+  | "multiplayer"
+  /** The elimination race itself. */
+  | "knockout";
+
+/**
+ * Multiplayer modes. Only knockout is built; the others are listed so the shape
+ * of the section is visible rather than implied by a single lonely card.
+ */
+const MULTIPLAYER_MODES = [
+  {
+    id: "knockout",
+    path: "/multiplayer/knockout",
+    label: "Knockout",
+    description: "Same board, everyone at once. Slowest solver drops out each round.",
+    meta: "2 to 8 players",
+    ready: true,
+  },
+  {
+    id: "versus",
+    path: "/multiplayer/versus",
+    label: "Versus",
+    description: "One on one, best of a set number of boards.",
+    meta: "Coming soon",
+    ready: false,
+  },
+  {
+    id: "custom",
+    path: "/multiplayer/custom",
+    label: "Custom game",
+    description: "Pick the rules: game, board size, round length, elimination style.",
+    meta: "Coming soon",
+    ready: false,
+  },
+] as const;
+
+/**
+ * Knockout is Queens-only for now, so it borrows the Queens frame: the same
+ * palette variables, buttons, and board chrome the single-player route uses.
+ * When a second game gets a race mode this becomes a lookup rather than a
+ * constant.
+ */
+const MULTIPLAYER_FRAME_GAME: GameId = "queens";
 
 function pathFromLocation(): string {
   const hashPath = window.location.hash.replace(/^#/, "").replace(/^\/+/, "");
@@ -138,11 +195,29 @@ function playerIdFromLocation(): number | null {
   return Number.isSafeInteger(playerId) && playerId > 0 ? playerId : null;
 }
 
+/**
+ * `#/multiplayer/knockout/ABC123` prefills the join field, so a room code is
+ * shareable as a link.
+ */
+function roomCodeFromLocation(): string | null {
+  const [first, second, third] = pathFromLocation().split("?")[0].split("/");
+  if (first.toLowerCase() !== "multiplayer" || second?.toLowerCase() !== "knockout" || !third) {
+    return null;
+  }
+  return third.toUpperCase();
+}
+
 function routeFromLocation(): RouteState {
   const path = pathFromLocation();
-  const firstSegment = path.split("/")[0].split("?")[0].toLowerCase();
+  const [firstSegment, secondSegment] = path.split("?")[0].toLowerCase().split("/");
+  if (firstSegment === "multiplayer") {
+    return secondSegment === "knockout" ? "knockout" : "multiplayer";
+  }
   if (firstSegment === "config") {
     return "config";
+  }
+  if (firstSegment === "appearance") {
+    return "appearance";
   }
   if (firstSegment === "account") {
     return "account";
@@ -169,18 +244,25 @@ function setFavicon(href: string): void {
 export default function App() {
   const [route, setRoute] = useState<RouteState>(() => routeFromLocation());
   const [playerId, setPlayerId] = useState<number | null>(() => playerIdFromLocation());
+  const [roomCode, setRoomCode] = useState<string | null>(() => roomCodeFromLocation());
   const { theme, toggleTheme } = useTheme();
   const { selectedSkins } = useSkins();
   const activeGame = route in GAMES ? (route as GameId) : null;
   const game = activeGame ? GAMES[activeGame] : null;
   const GameComponent = game?.component;
-  const activeSkin = activeGame ? selectedSkins[activeGame] : undefined;
+  /** The game whose chrome the page wears, which multiplayer borrows. */
+  const framedGame = activeGame ?? (route === "knockout" ? MULTIPLAYER_FRAME_GAME : null);
+  const activeSkin = useMemo(
+    () => (framedGame ? resolveGameSkin(framedGame, selectedSkins[framedGame]) : null),
+    [framedGame, selectedSkins],
+  );
   const navItems = useMemo(() => Object.entries(GAMES) as Array<[GameId, (typeof GAMES)[GameId]]>, []);
 
   useEffect(() => {
     const updateRoute = () => {
       setRoute(routeFromLocation());
       setPlayerId(playerIdFromLocation());
+      setRoomCode(roomCodeFromLocation());
     };
     window.addEventListener("hashchange", updateRoute);
     window.addEventListener("popstate", updateRoute);
@@ -195,25 +277,35 @@ export default function App() {
   }, [playerId, route]);
 
   useEffect(() => {
-    document.title = game
-      ? `${game.label} | ${APP_NAME}`
-      : route === "config"
-        ? `Config | ${APP_NAME}`
-        : route === "account"
-          ? `Account | ${APP_NAME}`
-          : route === "leaderboard"
-            ? `Leaderboard | ${APP_NAME}`
-            : route === "player"
-              ? `Player Profile | ${APP_NAME}`
-          : APP_NAME;
-    setFavicon(game?.favicon ?? APP_FAVICON);
+    const routeTitles: Partial<Record<RouteState, string>> = {
+      config: "Config",
+      appearance: "Appearance",
+      account: "Account",
+      leaderboard: "Leaderboard",
+      player: "Player Profile",
+      multiplayer: "Multiplayer",
+      knockout: "Knockout",
+    };
+    const label = game?.label ?? routeTitles[route];
+    document.title = label ? `${label} | ${APP_NAME}` : APP_NAME;
+    setFavicon(game?.favicon ?? (route === "knockout" ? GAMES.queens.favicon : APP_FAVICON));
   }, [game, route]);
 
   return (
     <div
-      className={`suite-shell ${activeGame ? `game-${activeGame}` : route === "config" || route === "account" || route === "leaderboard" || route === "player" ? "game-config" : "game-menu"}`}
-      data-game={activeGame ?? undefined}
-      data-skin={activeSkin}
+      className={`suite-shell ${framedGame ? `game-${framedGame}` : route === "config" ||
+            route === "appearance" ||
+            route === "account" ||
+            route === "leaderboard" ||
+            route === "player" ? "game-config" : "game-menu"}`}
+      data-game={framedGame ?? undefined}
+      data-palette={
+        framedGame && activeSkin ? paletteToken(framedGame, activeSkin.palette.id) : undefined
+      }
+      data-tint={
+        framedGame && activeSkin?.tint ? paletteToken(framedGame, activeSkin.tint.id) : undefined
+      }
+      data-pixelated={activeSkin?.pixelated ? "true" : undefined}
     >
       <nav className="suite-nav" aria-label="Game navigation">
         <a className="suite-brand" href="#/" aria-label={`${APP_NAME} menu`}>
@@ -221,20 +313,22 @@ export default function App() {
           <span>{APP_NAME}</span>
         </a>
         <div className="suite-tabs">
-          {navItems.map(([id, item]) => {
-            const Icon = item.icon;
-            return (
-              <a
-                key={id}
-                className={`suite-tab ${id === activeGame ? "is-active" : ""}`}
-                href={`#${item.path}`}
-                aria-current={id === activeGame ? "page" : undefined}
-              >
-                <Icon aria-hidden="true" size={17} />
-                <span>{item.label}</span>
-              </a>
-            );
-          })}
+          <a
+            className={`suite-tab ${activeGame || route === "menu" ? "is-active" : ""}`}
+            href="#/"
+            aria-current={activeGame || route === "menu" ? "page" : undefined}
+          >
+            <Gamepad2 aria-hidden="true" size={17} />
+            <span>Single player</span>
+          </a>
+          <a
+            className={`suite-tab ${route === "multiplayer" || route === "knockout" ? "is-active" : ""}`}
+            href="#/multiplayer"
+            aria-current={route === "multiplayer" || route === "knockout" ? "page" : undefined}
+          >
+            <Swords aria-hidden="true" size={17} />
+            <span>Multiplayer</span>
+          </a>
         </div>
         <a
           className={`suite-config-button suite-leaderboard-button ${route === "leaderboard" ? "is-active" : ""}`}
@@ -253,6 +347,15 @@ export default function App() {
           title="Account"
         >
           <UserRound aria-hidden="true" size={18} />
+        </a>
+        <a
+          className={`suite-config-button suite-appearance-button ${route === "appearance" ? "is-active" : ""}`}
+          href="#/appearance"
+          aria-label="Open appearance"
+          aria-current={route === "appearance" ? "page" : undefined}
+          title="Appearance"
+        >
+          <Palette aria-hidden="true" size={18} />
         </a>
         <a
           className={`suite-config-button suite-settings-button ${route === "config" ? "is-active" : ""}`}
@@ -286,12 +389,26 @@ export default function App() {
         </Suspense>
       ) : route === "config" ? (
         <ConfigView />
+      ) : route === "appearance" ? (
+        <AppearanceView />
       ) : route === "account" ? (
         <AccountView />
       ) : route === "leaderboard" ? (
         <LeaderboardView />
       ) : route === "player" && playerId !== null ? (
         <PlayerProfileView playerId={playerId} />
+      ) : route === "multiplayer" ? (
+        <MultiplayerModes />
+      ) : route === "knockout" ? (
+        <Suspense
+          fallback={(
+            <main className="game-route-loading" role="status">
+              <span className="sr-only">Loading multiplayer</span>
+            </main>
+          )}
+        >
+          <MultiplayerView initialCode={roomCode} />
+        </Suspense>
       ) : (
         <MainMenu navItems={navItems} />
       )}
@@ -301,90 +418,12 @@ export default function App() {
 
 function ConfigView() {
   const [showQueensPatterns, setShowQueensPatterns] = useQueensPatternsSetting();
-  const [skinGame, setSkinGame] = useState<GameId>("queens");
-  const { selectedSkins, selectSkin, isSkinUnlocked } = useSkins();
-  const selectedGame = GAMES[skinGame];
-  const SkinGameIcon = selectedGame.icon;
 
   return (
     <main className="config-shell" aria-labelledby="config-title">
       <section className="config-heading">
         <h1 id="config-title">Config</h1>
         <p>Shared preferences for MindLab.</p>
-      </section>
-
-      <section className="config-panel skin-config-panel" aria-labelledby="skins-title">
-        <div className="config-section-title">
-          <Palette aria-hidden="true" size={21} />
-          <div>
-            <h2 id="skins-title">Game skins</h2>
-            <span className="config-section-caption">
-              <SkinGameIcon aria-hidden="true" size={15} />
-              {selectedGame.label}
-            </span>
-          </div>
-        </div>
-
-        <div className="skin-game-tabs" role="tablist" aria-label="Choose game">
-          {(Object.entries(GAMES) as Array<[GameId, (typeof GAMES)[GameId]]>).map(([gameId, item]) => {
-            const Icon = item.icon;
-            return (
-              <button
-                className="skin-game-tab"
-                type="button"
-                role="tab"
-                aria-selected={gameId === skinGame}
-                aria-label={item.label}
-                title={item.label}
-                key={gameId}
-                onClick={() => setSkinGame(gameId)}
-              >
-                <Icon aria-hidden="true" size={18} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="skin-options" role="radiogroup" aria-label={`${selectedGame.label} skins`}>
-          {GAME_SKINS[skinGame].map((skin) => {
-            const unlocked = isSkinUnlocked(skinGame, skin.id);
-            const selected = selectedSkins[skinGame] === skin.id;
-            return (
-              <button
-                className="skin-option"
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                disabled={!unlocked}
-                key={skin.id}
-                onClick={() => selectSkin(skinGame, skin.id)}
-              >
-                <span
-                  className={`skin-preview skin-preview-${skin.preview.presentation}`}
-                  aria-hidden="true"
-                >
-                  {skin.preview.sources.map((source, index) => (
-                    <img
-                      key={`${source}-${index}`}
-                      src={source}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ))}
-                </span>
-                <span className="skin-option-copy">
-                  <strong>{skin.name}</strong>
-                  <span>{skin.description}</span>
-                </span>
-                <span className="skin-option-status" aria-hidden="true">
-                  {unlocked ? (selected ? <Check size={18} /> : null) : <Lock size={17} />}
-                </span>
-              </button>
-            );
-          })}
-        </div>
       </section>
 
       <section className="config-panel" aria-labelledby="accessibility-title">
@@ -415,6 +454,52 @@ function ConfigView() {
   );
 }
 
+/**
+ * The multiplayer section. It lists modes rather than games, because which game
+ * a race is played with is a room setting, not a menu choice.
+ */
+function MultiplayerModes() {
+  return (
+    <main className="menu-shell" aria-labelledby="modes-title">
+      <section className="menu-heading">
+        <h1 id="modes-title">Multiplayer</h1>
+        <p>Play against other people in real time.</p>
+      </section>
+
+      <section className="game-picker" aria-label="Multiplayer modes">
+        {MULTIPLAYER_MODES.map((mode) =>
+          mode.ready ? (
+            <a className="game-card game-card-queens" href={`#${mode.path}`} key={mode.id}>
+              <span className="game-card-logo" aria-hidden="true">
+                <img src={GAMES.queens.logo} alt="" />
+              </span>
+              <span className="game-card-copy">
+                <span className="game-card-title">
+                  <Swords aria-hidden="true" size={19} />
+                  {mode.label}
+                </span>
+                <span className="game-card-description">{mode.description}</span>
+                <span className="game-card-meta">{mode.meta}</span>
+              </span>
+            </a>
+          ) : (
+            <span className="game-card is-disabled" key={mode.id} aria-disabled="true">
+              <span className="game-card-logo" aria-hidden="true">
+                <Swords size={26} />
+              </span>
+              <span className="game-card-copy">
+                <span className="game-card-title">{mode.label}</span>
+                <span className="game-card-description">{mode.description}</span>
+                <span className="game-card-meta">{mode.meta}</span>
+              </span>
+            </span>
+          ),
+        )}
+      </section>
+    </main>
+  );
+}
+
 function MainMenu({
   navItems,
 }: {
@@ -423,7 +508,7 @@ function MainMenu({
   return (
     <main className="menu-shell" aria-labelledby="menu-title">
       <section className="menu-heading">
-        <h1 id="menu-title">MindLab</h1>
+        <h1 id="menu-title">Single player</h1>
         <p>Choose a game and jump straight into a fresh puzzle.</p>
       </section>
 

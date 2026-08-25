@@ -1,0 +1,1006 @@
+/**
+ * Multiplayer Queens.
+ *
+ * Everything here lives inside `.suite-shell[data-game="queens"]`, so the race
+ * inherits the same frame tokens, buttons, and palette variables as the
+ * single-player board. Spectator tiles then override `--region-*` per tile by
+ * carrying their own `data-palette`, which is how eight boards in eight
+ * different skins can share one page (requirement 10).
+ */
+
+.mp-shell {
+  width: min(1360px, 100%);
+  margin: 0 auto;
+  padding: 22px clamp(12px, 3vw, 30px) 40px;
+}
+
+.mp-shell-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+}
+
+/* ------------------------------------------------------------------- entry -- */
+
+.mp-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: min(460px, 100%);
+  padding: 30px;
+  border: 1px solid var(--game-border);
+  border-radius: 14px;
+  background: var(--game-surface);
+  box-shadow: var(--game-shadow);
+}
+
+.mp-entry h1 {
+  margin: 0;
+  font-size: 1.55rem;
+  color: var(--game-text);
+}
+
+.mp-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--game-border);
+  border-radius: 10px;
+  background: var(--game-elevated);
+}
+
+.mp-tabs button {
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--game-muted);
+  font: inherit;
+  font-weight: 760;
+  cursor: pointer;
+}
+
+.mp-tabs button[aria-selected="true"] {
+  border-color: var(--game-border);
+  background: var(--game-surface);
+  color: var(--game-text);
+}
+
+.mp-entry-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mp-entry-panel .primary-action {
+  padding: 11px 16px;
+}
+
+.mp-code-input {
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 1.15rem;
+}
+
+.mp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--game-muted);
+}
+
+.mp-field input {
+  padding: 10px 12px;
+  border: 1px solid var(--game-border);
+  border-radius: 8px;
+  background: var(--game-elevated);
+  color: var(--game-text);
+  font: inherit;
+  font-weight: 620;
+}
+
+.mp-entry-note,
+.mp-settings-note {
+  margin: 0;
+  color: var(--game-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.mp-connecting {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--game-muted);
+  font-weight: 700;
+}
+
+.mp-error {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--game-danger) 40%, var(--game-border));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--game-danger) 10%, var(--game-surface));
+  color: var(--game-danger);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------------- lobby -- */
+
+.mp-lobby {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: min(760px, 100%);
+  margin: 0 auto;
+}
+
+.mp-lobby-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mp-lobby-head h1 {
+  margin: 0 0 4px;
+  font-size: 1.5rem;
+}
+
+.mp-lobby-head p {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--game-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.mp-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--game-border);
+  border-radius: 10px;
+  background: var(--game-elevated);
+  color: var(--game-text);
+  cursor: pointer;
+}
+
+.mp-code-value {
+  font-size: 1.3rem;
+  font-weight: 820;
+  letter-spacing: 0.22em;
+}
+
+.mp-roster,
+.mp-settings {
+  padding: 18px;
+  border: 1px solid var(--game-border);
+  border-radius: 12px;
+  background: var(--game-surface);
+}
+
+.mp-roster h2,
+.mp-settings h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  color: var(--game-muted);
+}
+
+.mp-roster ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mp-roster li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--game-elevated);
+}
+
+.mp-roster li[data-self="true"] {
+  border-color: color-mix(in srgb, var(--game-accent) 45%, var(--game-border));
+}
+
+.mp-roster-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mp-roster-name strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.98rem;
+}
+
+.mp-roster-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--game-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.mp-you,
+.mp-guest {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--game-accent) 16%, transparent);
+  color: var(--game-accent-strong);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mp-guest {
+  background: color-mix(in srgb, var(--game-muted) 18%, transparent);
+  color: var(--game-muted);
+}
+
+.mp-host-badge {
+  color: var(--game-accent-strong);
+}
+
+.mp-offline {
+  color: var(--game-danger);
+}
+
+.mp-settings {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.mp-settings h2 {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.mp-settings label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--game-muted);
+}
+
+.mp-settings select {
+  padding: 9px 10px;
+  border: 1px solid var(--game-border);
+  border-radius: 8px;
+  background: var(--game-elevated);
+  color: var(--game-text);
+  font: inherit;
+  font-weight: 620;
+}
+
+.mp-settings-note {
+  grid-column: 1 / -1;
+}
+
+.mp-lobby-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.mp-lobby-actions .primary-action,
+.mp-lobby-actions .secondary-action {
+  padding: 11px 18px;
+}
+
+.mp-waiting {
+  margin: 0;
+  color: var(--game-muted);
+  font-weight: 700;
+}
+
+/* -------------------------------------------------------------------- race -- */
+
+.mp-race {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mp-race-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mp-race-title h1 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.mp-race-title span {
+  color: var(--game-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.mp-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--game-border);
+  border-radius: 999px;
+  background: var(--game-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-clock strong {
+  font-size: 1.25rem;
+  font-weight: 820;
+}
+
+.mp-clock[data-urgent="true"] {
+  border-color: var(--game-danger);
+  color: var(--game-danger);
+}
+
+.mp-race-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.mp-race-body {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .mp-race-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.mp-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.mp-stage-empty {
+  padding: 60px 0;
+  color: var(--game-muted);
+  font-weight: 700;
+}
+
+.mp-solved-note {
+  margin: 0;
+  color: var(--game-success);
+  font-weight: 760;
+}
+
+.mp-countdown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--game-page) 62%, transparent);
+  backdrop-filter: blur(1.5px);
+  pointer-events: none;
+}
+
+.mp-countdown strong {
+  font-size: clamp(4rem, 13vw, 8rem);
+  font-weight: 860;
+  line-height: 1;
+  color: var(--game-accent-strong);
+}
+
+.mp-countdown span {
+  color: var(--game-text);
+  font-weight: 760;
+}
+
+/* -------------------------------------------------------------- spectating -- */
+
+.mp-spectate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.mp-spectate-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.mp-spectate-head > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.mp-spectate-head strong {
+  font-size: 1.05rem;
+}
+
+.mp-spectate-head em {
+  color: var(--game-muted);
+  font-size: 0.82rem;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.mp-spectate-hint {
+  margin: 0;
+  color: var(--game-muted);
+  font-size: 0.8rem;
+}
+
+/* -------------------------------------------------------------------- rail -- */
+
+.mp-rail {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+
+@media (min-width: 901px) {
+  .mp-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/**
+ * A rival, as numbers. There is deliberately no board here: while you are
+ * racing, the only thing the rail may tell you is how well someone is doing,
+ * never where they put anything.
+ */
+.mp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--game-border);
+  border-radius: 10px;
+  background: var(--game-surface);
+}
+
+.mp-card[data-done="true"] {
+  border-color: color-mix(in srgb, var(--game-success) 55%, var(--game-border));
+}
+
+.mp-card[data-watched="true"] {
+  border-color: var(--game-accent);
+  box-shadow: 0 0 0 1px var(--game-accent);
+}
+
+.mp-card[data-out="true"] {
+  opacity: 0.5;
+}
+
+.mp-card header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.mp-card-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.84rem;
+  font-weight: 780;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-card-name em {
+  color: var(--game-muted);
+  font-style: normal;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-card-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mp-card-marker {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  flex: none;
+}
+
+[data-pixelated="true"] .mp-card-marker {
+  image-rendering: pixelated;
+}
+
+.mp-card-counts {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mp-card-counts strong {
+  font-size: 1.35rem;
+  font-weight: 840;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-card-counts strong span {
+  color: var(--game-muted);
+  font-size: 0.9rem;
+  font-weight: 760;
+}
+
+.mp-card-counts em {
+  color: var(--game-muted);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 720;
+}
+
+.mp-card-bar {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--game-elevated);
+}
+
+.mp-card-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--game-accent);
+  transition: width 180ms ease;
+}
+
+.mp-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.mp-card-status {
+  color: var(--game-muted);
+  font-size: 0.72rem;
+  font-weight: 780;
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-card-watch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--game-border);
+  border-radius: 7px;
+  background: var(--game-elevated);
+  color: var(--game-muted);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 780;
+  cursor: pointer;
+}
+
+.mp-card-watch[aria-pressed="true"] {
+  border-color: var(--game-accent);
+  color: var(--game-accent-strong);
+}
+
+.mp-rail-empty {
+  margin: 0;
+  color: var(--game-muted);
+  font-size: 0.82rem;
+}
+
+/* ------------------------------------------------------------ spectating -- */
+
+/**
+ * Spectator mode should never be mistakable for a board you can still play. The
+ * page gets a banner, a tinted frame, and the Auto X control disappears.
+ */
+.mp-spectator-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 11px 16px;
+  border: 1px solid color-mix(in srgb, var(--game-accent) 45%, var(--game-border));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--game-accent) 12%, var(--game-surface));
+  color: var(--game-accent-strong);
+}
+
+.mp-spectator-banner strong {
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-size: 0.82rem;
+}
+
+.mp-spectator-banner span {
+  color: var(--game-text);
+  font-size: 0.86rem;
+  font-weight: 620;
+}
+
+.mp-race[data-mode="spectating"] .mp-stage {
+  padding: 14px;
+  border: 1px dashed color-mix(in srgb, var(--game-accent) 45%, var(--game-border));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--game-accent) 5%, transparent);
+}
+
+/* ------------------------------------------------------------------ chat -- */
+
+.mp-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--game-border);
+  border-radius: 12px;
+  background: var(--game-surface);
+}
+
+.mp-chat h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--game-muted);
+}
+
+.mp-chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 180px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.mp-chat-compact {
+  padding: 10px;
+}
+
+.mp-chat-compact .mp-chat-log {
+  height: 140px;
+}
+
+.mp-chat-log li {
+  font-size: 0.84rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.mp-chat-log li strong {
+  margin-right: 6px;
+  color: var(--game-accent-strong);
+  font-weight: 780;
+}
+
+.mp-chat-log li[data-self="true"] strong {
+  color: var(--game-muted);
+}
+
+.mp-chat-empty {
+  color: var(--game-muted);
+  font-style: italic;
+}
+
+.mp-chat-form {
+  display: flex;
+  gap: 8px;
+}
+
+.mp-chat-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--game-border);
+  border-radius: 8px;
+  background: var(--game-elevated);
+  color: var(--game-text);
+  font: inherit;
+  font-size: 0.86rem;
+}
+
+.mp-chat-form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 11px;
+  border: 1px solid var(--game-border);
+  border-radius: 8px;
+  background: var(--game-elevated);
+  color: var(--game-accent-strong);
+  cursor: pointer;
+}
+
+.mp-chat-form button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------ boards -- */
+
+.mp-board {
+  display: grid;
+  grid-template-columns: repeat(var(--mp-board-size), 1fr);
+  aspect-ratio: 1;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--game-surface);
+}
+
+.mp-board-stage {
+  width: min(560px, 100%);
+  border-radius: 10px;
+  box-shadow: var(--game-board-shadow);
+}
+
+.mp-board[data-dimmed="true"] {
+  filter: grayscale(0.55);
+}
+
+.mp-board-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--game-grid, var(--game-text)) 55%, transparent);
+  border-width: 0;
+}
+
+.mp-board-piece {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+}
+
+.mp-board[data-pixelated="true"] .mp-board-piece {
+  image-rendering: pixelated;
+}
+
+/* --------------------------------------------------------------- overlays --- */
+
+.mp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: color-mix(in srgb, #000000 45%, transparent);
+}
+
+.mp-overlay-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: min(400px, 100%);
+  padding: 30px;
+  border: 1px solid var(--game-border);
+  border-radius: 14px;
+  background: var(--game-surface);
+  box-shadow: var(--game-shadow);
+  text-align: center;
+  color: var(--game-accent-strong);
+}
+
+.mp-overlay-card h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--game-text);
+}
+
+.mp-overlay-card p {
+  margin: 0;
+  color: var(--game-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.mp-overlay-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/**
+ * The end of a game has to feel different from the end of a round. Both used
+ * this same card, so winning looked exactly like being knocked out — the one
+ * moment that should make someone want another game was the flattest screen in
+ * the feature.
+ */
+.mp-overlay-final {
+  border-color: color-mix(in srgb, var(--game-accent) 55%, var(--game-border));
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      color-mix(in srgb, var(--game-accent) 18%, transparent),
+      transparent 70%
+    ),
+    var(--game-surface);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--game-accent) 30%, transparent),
+    var(--game-shadow);
+}
+
+.mp-overlay-final > svg:first-child {
+  color: var(--game-accent-strong);
+  filter: drop-shadow(0 3px 10px color-mix(in srgb, var(--game-accent) 45%, transparent));
+}
+
+.mp-overlay-final h2 {
+  font-size: 1.55rem;
+  letter-spacing: -0.01em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mp-overlay-final {
+    animation: mp-final-in 320ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  }
+}
+
+@keyframes mp-final-in {
+  from {
+    transform: scale(0.94);
+    opacity: 0;
+  }
+}
+
+.mp-final-elo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 22px;
+  border-radius: 12px;
+  background: var(--game-elevated);
+}
+
+.mp-final-elo > span:first-child {
+  color: var(--game-muted);
+  font-size: 0.78rem;
+  font-weight: 780;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mp-final-position {
+  color: var(--game-muted);
+  font-size: 0.82rem;
+  font-weight: 720;
+}
+
+/* ------------------------------------------------------------------- rating -- */
+
+.mp-elo-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  color: var(--game-text);
+}
+
+.mp-elo-badge strong {
+  font-size: 2rem;
+  font-weight: 840;
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-elo-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.95rem;
+  font-weight: 820;
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-elo-badge[data-direction="up"] .mp-elo-delta {
+  color: var(--game-success);
+}
+
+.mp-elo-badge[data-direction="down"] .mp-elo-delta {
+  color: var(--game-danger);
+}
+
+/* ------------------------------------------------------------------ profile -- */
+
+.player-elo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.player-elo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-solid);
+  font-weight: 760;
+}
+
+.player-elo-chip strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.player-elo-chip span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------- modes ----- */
+
+.game-card.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.game-card.is-disabled .game-card-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}

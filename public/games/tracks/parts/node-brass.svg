@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Brass junction</title>
+  <circle cx="32" cy="32" r="28" fill="#8a6a2f"/>
+  <circle cx="32" cy="32" r="23" fill="#c49a4a"/>
+  <circle cx="32" cy="32" r="15" fill="#e0be74"/>
+  <circle cx="32" cy="32" r="7" fill="#7d5f2b"/>
+  <g fill="#6d5426">
+    <circle cx="32" cy="10" r="2.6"/><circle cx="32" cy="54" r="2.6"/>
+    <circle cx="10" cy="32" r="2.6"/><circle cx="54" cy="32" r="2.6"/>
+    <circle cx="16.5" cy="16.5" r="2.2"/><circle cx="47.5" cy="47.5" r="2.2"/>
+    <circle cx="47.5" cy="16.5" r="2.2"/><circle cx="16.5" cy="47.5" r="2.2"/>
+  </g>
+  <path d="M22 20a20 20 0 0 1 12-5" fill="none" stroke="#f2dcae" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+</svg>

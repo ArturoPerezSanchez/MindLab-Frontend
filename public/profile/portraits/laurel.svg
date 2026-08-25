@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img">
+  <title>Laurel frame</title>
+  <circle cx="50" cy="50" r="46" fill="none" stroke="#4f9c68" stroke-width="5"/>
+  <g fill="#67b47f">
+    <ellipse cx="50" cy="3" rx="7" ry="4"/><ellipse cx="50" cy="97" rx="7" ry="4"/>
+    <ellipse cx="3" cy="50" rx="4" ry="7"/><ellipse cx="97" cy="50" rx="4" ry="7"/>
+    <ellipse cx="17" cy="17" rx="6" ry="4" transform="rotate(-45 17 17)"/>
+    <ellipse cx="83" cy="83" rx="6" ry="4" transform="rotate(-45 83 83)"/>
+    <ellipse cx="83" cy="17" rx="6" ry="4" transform="rotate(45 83 17)"/>
+    <ellipse cx="17" cy="83" rx="6" ry="4" transform="rotate(45 17 83)"/>
+  </g>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Lotus</title>
+  <path d="M32 8c7 9 9 18 8 26H24c-1-8 1-17 8-26Z" fill="#e07fa8"/>
+  <path d="M8 22c11 2 18 7 21 13l-2 6C18 38 11 31 8 22Z" fill="#c95f8d"/>
+  <path d="M56 22c-11 2-18 7-21 13l2 6c9-3 16-10 19-19Z" fill="#c95f8d"/>
+  <path d="M4 34c9 0 16 3 21 8H14c-4-2-8-4-10-8Z" fill="#b04c78"/>
+  <path d="M60 34c-9 0-16 3-21 8h11c4-2 8-4 10-8Z" fill="#b04c78"/>
+  <path d="M10 40h44c-3 9-11 14-22 14s-19-5-22-14Z" fill="#f0a3c2"/>
+  <circle cx="32" cy="26" r="5" fill="#f7d489"/>
+</svg>

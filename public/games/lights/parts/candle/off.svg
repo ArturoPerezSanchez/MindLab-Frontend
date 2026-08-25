@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Candle out</title>
+  <rect x="22" y="20" width="20" height="34" rx="3" fill="#d8d3c6"/>
+  <rect x="22" y="20" width="7" height="34" rx="3" fill="#e6e2d8"/>
+  <ellipse cx="32" cy="20" rx="10" ry="3.4" fill="#eae6dc"/>
+  <path d="M32 20v-6" stroke="#6b6459" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M16 54h32l3 6H13Z" fill="#9aa4ab"/>
+</svg>

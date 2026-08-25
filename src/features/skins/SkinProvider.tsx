@@ -1,39 +1,68 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { GameId } from "@/shared/gameOptions";
 import { SkinContext } from "./SkinContext";
+import { paletteStyleSheet } from "./palettes";
 import {
+  customizationFromLegacySkinId,
   DEFAULT_GAME_SKINS,
-  findGameSkin,
-  isGameSkinUnlocked,
+  isPartOptionUnlocked,
+  sanitizeCustomization,
+  type GameCustomization,
   type GameSkinSelections,
 } from "./skins";
 
-const STORAGE_KEY = "mindlab-game-skins-v1";
+const STORAGE_KEY = "mindlab-game-skins-v2";
+/** Selections written before skins were split into parts. */
+const LEGACY_STORAGE_KEY = "mindlab-game-skins-v1";
+const STYLE_ELEMENT_ID = "mindlab-palette-tokens";
 const NO_ACHIEVEMENTS: readonly string[] = [];
 
-function parseStoredSelections(value: string | null): GameSkinSelections {
+type StoredShape = Partial<Record<string, Readonly<Record<string, unknown>>>>;
+
+const GAME_IDS = Object.keys(DEFAULT_GAME_SKINS) as GameId[];
+
+/**
+ * v1 stored one skin id per game. Those ids were kept as the preset ids, so the
+ * migration expands each one into the full set of parts it stood for.
+ */
+function readLegacySelections(): StoredShape {
   try {
-    const stored = JSON.parse(value ?? "{}") as Record<string, unknown>;
-    return Object.fromEntries(
-      Object.entries(DEFAULT_GAME_SKINS).map(([gameId, fallback]) => {
-        const requested = stored[gameId];
-        const valid = typeof requested === "string" && findGameSkin(gameId as GameId, requested);
-        return [gameId, valid ? requested : fallback];
-      }),
-    ) as GameSkinSelections;
+    const raw = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+    const stored = JSON.parse(raw) as Record<string, unknown>;
+    const migrated: StoredShape = {};
+    for (const gameId of GAME_IDS) {
+      const skinId = stored[gameId];
+      if (typeof skinId !== "string") {
+        continue;
+      }
+      const parts = customizationFromLegacySkinId(gameId, skinId);
+      if (parts) {
+        migrated[gameId] = parts;
+      }
+    }
+    return migrated;
   } catch {
-    return { ...DEFAULT_GAME_SKINS };
+    return {};
   }
 }
 
-function readStoredSelections(): GameSkinSelections {
-  return parseStoredSelections(window.localStorage.getItem(STORAGE_KEY));
+function parseStoredSelections(
+  value: string | null,
+  unlocked: ReadonlySet<string>,
+): GameSkinSelections {
+  let stored: StoredShape = {};
+  try {
+    stored = value ? (JSON.parse(value) as StoredShape) : readLegacySelections();
+  } catch {
+    stored = {};
+  }
+
+  return Object.fromEntries(
+    GAME_IDS.map((gameId) => [gameId, sanitizeCustomization(gameId, stored[gameId], unlocked)]),
+  ) as GameSkinSelections;
 }
 
 function writeStoredSelections(selections: GameSkinSelections): void {
@@ -42,6 +71,23 @@ function writeStoredSelections(selections: GameSkinSelections): void {
   } catch {
     // Keep the current session usable when browser storage is unavailable.
   }
+}
+
+/**
+ * Palette and tint tokens are generated from data rather than hand-written CSS,
+ * so they are injected once into a single style element instead of shipping a
+ * rule per palette in the stylesheet.
+ */
+function usePaletteStyleSheet(): void {
+  useEffect(() => {
+    let element = document.getElementById(STYLE_ELEMENT_ID) as HTMLStyleElement | null;
+    if (!element) {
+      element = document.createElement("style");
+      element.id = STYLE_ELEMENT_ID;
+      document.head.append(element);
+    }
+    element.textContent = paletteStyleSheet();
+  }, []);
 }
 
 export function SkinProvider({
@@ -55,57 +101,71 @@ export function SkinProvider({
     () => new Set(unlockedAchievementIds),
     [unlockedAchievementIds],
   );
-  const [storedSelections, setStoredSelections] = useState(readStoredSelections);
-
-  const isSkinUnlocked = useCallback(
-    (gameId: GameId, skinId: string) => {
-      const skin = findGameSkin(gameId, skinId);
-      return Boolean(skin && isGameSkinUnlocked(skin, unlockedAchievements));
-    },
-    [unlockedAchievements],
+  const [rawSelections, setRawSelections] = useState<GameSkinSelections>(() =>
+    parseStoredSelections(window.localStorage.getItem(STORAGE_KEY), new Set()),
   );
 
+  usePaletteStyleSheet();
+
+  // Achievements can arrive after the first render, so anything the player is
+  // no longer entitled to is folded back to the default here rather than at
+  // write time.
   const selectedSkins = useMemo(
     () =>
       Object.fromEntries(
-        Object.entries(storedSelections).map(([gameId, skinId]) => {
-          const typedGameId = gameId as GameId;
-          return [
-            gameId,
-            isSkinUnlocked(typedGameId, skinId)
-              ? skinId
-              : DEFAULT_GAME_SKINS[typedGameId],
-          ];
-        }),
+        GAME_IDS.map((gameId) => [
+          gameId,
+          sanitizeCustomization(gameId, rawSelections[gameId], unlockedAchievements),
+        ]),
       ) as GameSkinSelections,
-    [isSkinUnlocked, storedSelections],
+    [rawSelections, unlockedAchievements],
   );
 
   useEffect(() => {
     const refreshFromStorage = (event: StorageEvent) => {
       if (event.key === STORAGE_KEY) {
-        setStoredSelections(parseStoredSelections(event.newValue));
+        setRawSelections(parseStoredSelections(event.newValue, new Set()));
       }
     };
     window.addEventListener("storage", refreshFromStorage);
     return () => window.removeEventListener("storage", refreshFromStorage);
   }, []);
 
-  const selectSkin = useCallback(
-    (gameId: GameId, skinId: string) => {
-      if (!isSkinUnlocked(gameId, skinId) || storedSelections[gameId] === skinId) {
+  const commit = useCallback((gameId: GameId, next: GameCustomization) => {
+    setRawSelections((current) => {
+      const updated = { ...current, [gameId]: next };
+      writeStoredSelections(updated);
+      return updated;
+    });
+  }, []);
+
+  const isPartUnlocked = useCallback(
+    (gameId: GameId, partId: string, optionId: string) =>
+      isPartOptionUnlocked(gameId, partId, optionId, unlockedAchievements),
+    [unlockedAchievements],
+  );
+
+  const selectPart = useCallback(
+    (gameId: GameId, partId: string, optionId: string) => {
+      const current = selectedSkins[gameId];
+      if (current[partId] === optionId || !isPartUnlocked(gameId, partId, optionId)) {
         return;
       }
-      const nextSelections = { ...storedSelections, [gameId]: skinId };
-      setStoredSelections(nextSelections);
-      writeStoredSelections(nextSelections);
+      commit(gameId, { ...current, [partId]: optionId });
     },
-    [isSkinUnlocked, storedSelections],
+    [commit, isPartUnlocked, selectedSkins],
+  );
+
+  const resetGame = useCallback(
+    (gameId: GameId) => {
+      commit(gameId, DEFAULT_GAME_SKINS[gameId]);
+    },
+    [commit],
   );
 
   const value = useMemo(
-    () => ({ selectedSkins, selectSkin, isSkinUnlocked }),
-    [isSkinUnlocked, selectSkin, selectedSkins],
+    () => ({ selectedSkins, selectPart, resetGame, isPartUnlocked }),
+    [isPartUnlocked, resetGame, selectPart, selectedSkins],
   );
 
   return <SkinContext.Provider value={value}>{children}</SkinContext.Provider>;

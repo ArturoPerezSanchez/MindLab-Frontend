@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Lantern off</title>
+  <path d="M28 4h8v5h-8z" fill="#7b858c"/>
+  <path d="M18 12h28l-3 6H21Z" fill="#8b959c"/>
+  <path d="M21 18h22v30H21Z" fill="#cfd6da"/>
+  <path d="M21 18h8v30h-8Z" fill="#dde3e6"/>
+  <path d="M18 48h28l3 6H15Z" fill="#8b959c"/>
+  <rect x="30" y="28" width="4" height="10" rx="2" fill="#9aa4ab"/>
+</svg>

@@ -8,11 +8,15 @@ import {
   type CanvasBoardPointer,
   type CanvasCellPosition,
 } from "@/shared/canvas/CanvasBoard";
+import { drawCellSurface, withSurfaceAssets } from "@/shared/canvas/surface";
+import type { BoardSurface } from "@/features/skins/skins";
 import { addCircle, addLabel, addLine, addRect, cssVar } from "@/shared/canvas/drawing";
 import { positionKey } from "./game";
 import type { InvalidMove, Position, Puzzle } from "./types";
 
 type ZipCanvasProps = {
+  /** Material laid over the cell colours by the chosen board. */
+  surface?: BoardSurface;
   puzzle: Puzzle;
   path: readonly Position[];
   revealImage?: string;
@@ -32,6 +36,7 @@ type ZipCanvasProps = {
 const COMPLETION_REVEAL_DURATION_MS = 1200;
 
 export function ZipCanvas({
+  surface,
   puzzle,
   path,
   revealImage,
@@ -152,6 +157,7 @@ export function ZipCanvas({
           const x = col * cellWidth;
           const y = row * cellHeight;
           addRect(root, x, y, cellWidth, cellHeight, visited.has(key) && !texture ? routeVisited : (row + col) % 2 ? alternate : cell);
+          drawCellSurface(root, textures, surface, x, y, cellWidth, cellHeight);
           if (
             !showSolution &&
             invalidMove?.target[0] === row &&
@@ -239,7 +245,7 @@ export function ZipCanvas({
       }
       addRect(root, 2, 2, 996, 996, "transparent", { color: grid, width: 5 }, 4);
     },
-    [completionRevealComplete, invalidMove, path, puzzle, revealImage, routePoints, showSolution, visited],
+    [completionRevealComplete, invalidMove, path, puzzle, revealImage, routePoints, showSolution, surface, visited],
   );
 
   const animateCompletionReveal = useCallback(
@@ -278,8 +284,8 @@ export function ZipCanvas({
       rows={puzzle.size}
       cols={puzzle.size}
       cells={cells}
-      assetUrls={revealImage ? [revealImage] : []}
-      hud={hud}
+      assetUrls={withSurfaceAssets(revealImage ? [revealImage] : [], surface)}
+      hud={hud && surface?.hud ? { ...hud, style: surface.hud } : hud}
       draw={draw}
       animate={completed && revealImage && !completionRevealComplete ? animateCompletionReveal : undefined}
       animationFps={30}

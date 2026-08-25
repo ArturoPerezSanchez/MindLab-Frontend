@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { apiPath } from "@/shared/api";
+import { takePuzzleHandle } from "@/shared/puzzleHandles";
 
 const TOKEN_KEY = "mindlab-auth-token";
 
@@ -43,8 +44,21 @@ export type PlayerGameSummary = {
   average_time_seconds: number | null;
 };
 
+/**
+ * A ranked rating, one per multiplayer mode. `provisional` means fewer than ten
+ * rated games: the rating still moves fast and is kept off public leaderboards.
+ * See `docs/multiplayer.md`.
+ */
+export type PlayerEloSummary = {
+  mode: string;
+  rating: number;
+  games_played: number;
+  provisional: boolean;
+};
+
 export type PlayerProfile = Omit<UserProfile, "email"> & {
   stats: PlayerGameSummary[];
+  elo: PlayerEloSummary[];
 };
 
 export type ProfileUpdateInput = {
@@ -97,6 +111,8 @@ export type LeaderboardPage = {
 
 export type GameResult = {
   result_id: string;
+  /** Signed proof that this puzzle came from the API. Required by the backend. */
+  puzzle_handle: string;
   game: string;
   difficulty: string;
   won: boolean;
@@ -109,6 +125,17 @@ export type OAuthProvider = {
   label: string;
   enabled: boolean;
 };
+
+/**
+ * Rendered before `/auth/providers` answers, and kept as the fallback if that
+ * request fails. The account screen shows these disabled rather than hiding
+ * social sign-in entirely, so the option is visible while credentials are
+ * still being set up. The server remains the source of truth for `enabled`.
+ */
+const KNOWN_PROVIDERS: OAuthProvider[] = [
+  { id: "google", label: "Google", enabled: false },
+  { id: "facebook", label: "Facebook", enabled: false },
+];
 
 type AuthContextValue = {
   user: UserProfile | null;
@@ -192,12 +219,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(token));
   const [authError, setAuthError] = useState<string | null>(initialSession.error);
-  const [socialProviders, setSocialProviders] = useState<OAuthProvider[]>([]);
+  const [socialProviders, setSocialProviders] = useState<OAuthProvider[]>(KNOWN_PROVIDERS);
 
   useEffect(() => {
     requestJson<OAuthProvider[]>("/auth/providers")
-      .then(setSocialProviders)
-      .catch(() => setSocialProviders([]));
+      .then((providers) => setSocialProviders(providers.length > 0 ? providers : KNOWN_PROVIDERS))
+      .catch(() => setSocialProviders(KNOWN_PROVIDERS));
   }, []);
 
   useEffect(() => {
@@ -404,14 +431,22 @@ export function useAuth() {
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function reportGameResult(result: Omit<GameResult, "result_id">): void {
+export function reportGameResult(result: Omit<GameResult, "result_id" | "puzzle_handle">): void {
+  // The handle was stored when this board was generated. Without it the backend
+  // has no way to tell a real solve from a fabricated one, so drop the report
+  // rather than send something that will be rejected.
+  const puzzleHandle = takePuzzleHandle(result.game, result.difficulty);
+  if (!puzzleHandle) {
+    return;
+  }
+
   const resultId =
     typeof window.crypto?.randomUUID === "function"
       ? window.crypto.randomUUID()
       : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
   window.dispatchEvent(
     new CustomEvent<GameResult>("mindlab:game-result", {
-      detail: { ...result, result_id: resultId },
+      detail: { ...result, result_id: resultId, puzzle_handle: puzzleHandle },
     }),
   );
 }
@@ -428,7 +463,7 @@ export function useGameResultReporter({
 }: {
   runKey: object | null;
   completed: boolean;
-} & Omit<GameResult, "result_id">): void {
+} & Omit<GameResult, "result_id" | "puzzle_handle">): void {
   const reportedRunRef = useRef<object | null>(null);
 
   useEffect(() => {

@@ -1,0 +1,6 @@
+# Normalise line endings so Windows checkouts stop producing CRLF-only diffs.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.svg text eol=lf

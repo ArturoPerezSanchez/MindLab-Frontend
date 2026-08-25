@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Droplet</title>
+  <path d="M32 4c10 13 18 22 18 32a18 18 0 0 1-36 0C14 26 22 17 32 4Z" fill="#3f92cc"/>
+  <path d="M32 4c-10 13-18 22-18 32a18 18 0 0 0 9 15.6C18 42 20 26 32 4Z" fill="#6fb6e6" opacity=".8"/>
+  <ellipse cx="24" cy="41" rx="4" ry="6" fill="#bfe2f7" opacity=".65"/>
+</svg>

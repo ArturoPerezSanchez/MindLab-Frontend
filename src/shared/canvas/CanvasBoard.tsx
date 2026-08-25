@@ -10,6 +10,7 @@ import {
 } from "react";
 import { Application, Assets, Container, Graphics, type Texture } from "pixi.js";
 import { addLabel, addRect, addSprite, cssVar } from "./drawing";
+import type { BoardHudStyle } from "@/features/skins/types";
 
 export const CANVAS_BOARD_SIZE = 1000;
 export const CANVAS_BOARD_HUD_HEIGHT = 110;
@@ -22,6 +23,12 @@ export type CanvasBoardMetric = {
 export type CanvasBoardHud = {
   metrics: readonly CanvasBoardMetric[];
   variant?: "suite" | "xp-classic";
+  /**
+   * Restyles the standard bar in the board's own material. Distinct from
+   * `variant`, which swaps the bar for a different *kind* of bar; this keeps
+   * the three-column layout and only changes what it is made of.
+   */
+  style?: BoardHudStyle;
   iconAsset?: string;
   digitAssets?: readonly string[];
   minusAsset?: string;
@@ -230,26 +237,81 @@ function drawDigitalValue(
   });
 }
 
-function drawSuiteHud(root: Container, host: HTMLElement, metrics: readonly CanvasBoardMetric[]): void {
-  const background = cssVar(host, "--game-elevated", "#ffffff");
-  const border = cssVar(host, "--game-grid", "#626a70");
-  const text = cssVar(host, "--game-text", "#202124");
-  const muted = cssVar(host, "--game-muted", "#686d73");
-  const accent = cssVar(host, "--game-accent", "#3478bd");
+function drawSuiteHud(
+  root: Container,
+  host: HTMLElement,
+  textures: ReadonlyMap<string, Texture>,
+  metrics: readonly CanvasBoardMetric[],
+  style?: BoardHudStyle,
+): void {
+  // Without a style the bar reads the theme's own tokens, exactly as before.
+  // With one, every colour comes from the board instead, so the bar is made of
+  // the same material as the cells under it.
+  const background = style?.panel ?? cssVar(host, "--game-elevated", "#ffffff");
+  const border = style?.divider ?? cssVar(host, "--game-grid", "#626a70");
+  const text = style?.value ?? cssVar(host, "--game-text", "#202124");
+  const muted = style?.label ?? cssVar(host, "--game-muted", "#686d73");
+  const accent = style?.rule ?? cssVar(host, "--game-accent", "#3478bd");
+
   addRect(root, 0, 0, CANVAS_BOARD_SIZE, CANVAS_BOARD_HUD_HEIGHT, background);
+  if (style?.panelShade) {
+    addRect(
+      root,
+      0,
+      CANVAS_BOARD_HUD_HEIGHT * 0.55,
+      CANVAS_BOARD_SIZE,
+      CANVAS_BOARD_HUD_HEIGHT * 0.45,
+      style.panelShade,
+    );
+  }
+  if (style?.texture) {
+    // Tiled across the bar at cell scale, so the grain runs at the same size it
+    // does on the board rather than being stretched to a 1000x110 smear.
+    const tile = CANVAS_BOARD_HUD_HEIGHT;
+    for (let x = 0; x < CANVAS_BOARD_SIZE; x += tile) {
+      const sprite = addSprite(
+        root,
+        textures.get(style.texture),
+        x + tile / 2,
+        CANVAS_BOARD_HUD_HEIGHT / 2,
+        tile,
+        CANVAS_BOARD_HUD_HEIGHT,
+        { alpha: style.textureAlpha ?? 0.5 },
+      );
+      if (sprite && style.pixelated) {
+        sprite.texture.source.scaleMode = "nearest";
+      }
+    }
+  }
+  if (style?.bevel) {
+    drawBevel(
+      root,
+      0,
+      0,
+      CANVAS_BOARD_SIZE,
+      CANVAS_BOARD_HUD_HEIGHT,
+      style.bevel.light,
+      style.bevel.dark,
+      style.bevel.width,
+    );
+  }
 
   const columnWidth = CANVAS_BOARD_SIZE / Math.max(1, metrics.length);
   metrics.forEach((metric, index) => {
     const centerX = index * columnWidth + columnWidth / 2;
-    addLabel(root, metric.label.toUpperCase(), centerX, 28, {
-      color: muted,
-      fontSize: 22,
-      fontWeight: "700",
-    });
+    const label = metric.label.toUpperCase();
+    addLabel(
+      root,
+      style?.labelTracking ? [...label].join(" ".repeat(style.labelTracking)) : label,
+      centerX,
+      28,
+      { color: muted, fontSize: 22, fontWeight: "700", fontFamily: style?.valueFont },
+    );
     addLabel(root, metric.value, centerX, 72, {
       color: text,
       fontSize: 38,
       fontWeight: "800",
+      fontFamily: style?.valueFont,
     });
   });
 
@@ -258,7 +320,7 @@ function drawSuiteHud(root: Container, host: HTMLElement, metrics: readonly Canv
     lines.moveTo(index * columnWidth, 15).lineTo(index * columnWidth, CANVAS_BOARD_HUD_HEIGHT - 15);
   }
   lines.moveTo(0, CANVAS_BOARD_HUD_HEIGHT - 2).lineTo(CANVAS_BOARD_SIZE, CANVAS_BOARD_HUD_HEIGHT - 2);
-  lines.stroke({ color: border, width: 2, alpha: 0.38 });
+  lines.stroke({ color: border, width: style ? 3 : 2, alpha: style ? 0.7 : 0.38 });
   root.addChild(lines);
   addRect(root, 0, CANVAS_BOARD_HUD_HEIGHT - 5, CANVAS_BOARD_SIZE, 5, accent);
 }
@@ -308,7 +370,7 @@ function drawHud(
   if (hud.variant === "xp-classic") {
     drawXpHud(root, textures, hud);
   } else {
-    drawSuiteHud(root, host, hud.metrics);
+    drawSuiteHud(root, host, textures, hud.metrics, hud.style);
   }
 }
 
@@ -343,7 +405,9 @@ export function CanvasBoard({
   const surfaceHeight = CANVAS_BOARD_SIZE + hudHeight;
   const assetKey = assetUrls.join("|");
   const stableAssetUrls = useMemo(() => assetKey.split("|").filter(Boolean), [assetKey]);
-  const hudAssetKey = [hud?.iconAsset, ...(hud?.digitAssets ?? []), hud?.minusAsset].filter(Boolean).join("|");
+  const hudAssetKey = [hud?.iconAsset, ...(hud?.digitAssets ?? []), hud?.minusAsset, hud?.style?.texture]
+    .filter(Boolean)
+    .join("|");
   const stableHudAssetUrls = useMemo(() => hudAssetKey.split("|").filter(Boolean), [hudAssetKey]);
 
   useEffect(() => {

@@ -11,6 +11,7 @@ import {
   Instagram,
   Linkedin,
   MapPin,
+  Swords,
   Trophy,
   UserRound,
   type LucideIcon,
@@ -31,6 +32,11 @@ const GAME_LOGOS: Record<GameId, string> = {
   zip: "/games/zip/logo.png",
   "mine-islands": "/games/mine-islands/logo.svg",
   "mini-chess": "/games/mini-chess/skins/club/bn.svg",
+};
+
+/** Rating modes are server strings; a missing label falls back to the raw mode. */
+const MODE_LABELS: Record<string, string> = {
+  queens: "Queens race",
 };
 
 const GENDER_LABELS: Record<ProfileGender, string> = {
@@ -159,6 +165,29 @@ export function PlayerProfileView({ playerId }: { playerId: number }) {
           ) : null}
         </div>
       </section>
+
+      {profile.elo.length > 0 ? (
+        <section className="player-stats-section" aria-labelledby="player-elo-title">
+          <header>
+            <div>
+              <h2 id="player-elo-title">Online rating</h2>
+              <p>Earned in multiplayer races, one ladder per mode.</p>
+            </div>
+          </header>
+          <div className="player-elo-row">
+            {profile.elo.map((rating) => (
+              <span className="player-elo-chip" key={rating.mode}>
+                <Swords aria-hidden="true" size={16} />
+                <strong>{rating.rating}</strong>
+                <span>
+                  {MODE_LABELS[rating.mode] ?? rating.mode} · {rating.games_played} rated
+                  {rating.provisional ? " · provisional" : ""}
+                </span>
+              </span>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="player-stats-section" aria-labelledby="player-stats-title">
         <header>

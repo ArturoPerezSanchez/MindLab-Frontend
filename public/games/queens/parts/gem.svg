@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Gem</title>
+  <path d="M18 10h28l12 16-26 30L6 26Z" fill="#5aa6d8"/>
+  <path d="M18 10h14v46L6 26Z" fill="#7cc3ea"/>
+  <path d="M6 26h52l-6 8H12Z" fill="#3f86b8" opacity=".35"/>
+  <path d="M18 10 12 26h40l-6-16Z" fill="#a8dcf5" opacity=".55"/>
+</svg>

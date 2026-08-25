@@ -1,557 +1,306 @@
 import type { GameId } from "@/shared/gameOptions";
+import { GAME_OPTIONS } from "@/shared/gameOptions";
+import {
+  findPalette,
+  findTint,
+  gameTints,
+  GAME_PALETTES,
+  type PaletteOption,
+  type TintOption,
+} from "./palettes";
+import { GAME_PART_ORDER, PART_RESOLVERS, partDefinition, partOption } from "./parts";
+import { defaultPreset, findPreset, type SkinPreset } from "./presets";
+import {
+  PALETTE_PART,
+  TINT_PART,
+  type AssetPart,
+  type BoardSurface,
+  type GameSkinAssetMap,
+  type SkinPreview,
+  type SkinUnlock,
+} from "./types";
 
-export type SkinUnlock =
-  | { type: "starter" }
-  | { type: "achievement"; achievementId: string };
+export type {
+  BoardHudStyle,
+  BoardSurface,
+  ChessPieceSource,
+  FlowParticle,
+  GameSkinAssetMap,
+  MineHud,
+  PartOption,
+  SkinPreview,
+  SkinSymbolAsset,
+  SkinUnlock,
+} from "./types";
+export type { PaletteOption, TintOption } from "./palettes";
+export { GAME_PALETTES, gameTints, paletteStyleSheet, paletteToken } from "./palettes";
+export { GAME_ASSET_PARTS, GAME_PART_ORDER } from "./parts";
+export { PALETTE_PART, TINT_PART } from "./types";
 
-export type SkinPreview = {
-  sources: readonly [string, ...string[]];
-  presentation: "contain" | "pair" | "cover";
-};
-
-export type SkinSymbolAsset = {
-  src: string;
-  label: string;
-};
+const GAME_IDS = GAME_OPTIONS.map((option) => option.id) as readonly GameId[];
 
 /**
- * Asset roles are game-specific on purpose. Adding a skin should be a data and
- * asset change; renderers consume stable roles instead of knowing skin IDs.
+ * What a player has chosen for one game: one option id per part id. There is no
+ * preset id in the stored shape. Presets survive only as the source of the
+ * defaults and as the target of the v1 migration.
  */
-export type GameSkinAssetMap = {
-  queens: {
-    marker: string;
-  };
-  tango: {
-    symbols: readonly [SkinSymbolAsset, SkinSymbolAsset];
-  };
-  lights: {
-    bulbs: readonly [string, string];
-  };
-  tracks: {
-    node: string;
-    flowParticle?: {
-      src: string;
-      material?: "liquid" | "energy";
-      size: number;
-      spacing: number;
-      speed: number;
-      opacity?: number;
-      drift?: number;
-      flicker?: number;
-      rotateToPath?: boolean;
-      additive?: boolean;
-      pulseOpacity?: number;
-    };
-  };
-  zip: {
-    revealImage?: string;
-  };
-  "mine-islands": {
-    hazard: string;
-    flag: string;
-    death?: string;
-    misflagged?: string;
-    clueTiles?: readonly string[];
-    hud?: {
-      variant: "xp-classic";
-      faces: {
-        neutral: string;
-        won: string;
-        lost: string;
-        pressed: string;
-      };
-      digits: readonly string[];
-      minus: string;
-    };
-  };
-  "mini-chess": {
-    pieceSetRoot: string;
-    pieceExtension: "svg" | "png" | "webp";
-  };
+export type GameCustomization = Readonly<Record<string, string>>;
+
+export type GameSkinSelections = Record<GameId, GameCustomization>;
+
+export type ResolvedGameSkin<G extends GameId = GameId> = {
+  gameId: G;
+  /**
+   * The game's own asset roles, plus the material the chosen board supplies.
+   * `surface` is an intersection rather than a field on each game's entry
+   * because it comes from the board, not from a sprite slot, and is identical
+   * for all seven games.
+   */
+  assets: GameSkinAssetMap[G] & { surface?: BoardSurface };
+  palette: PaletteOption;
+  tint: TintOption | null;
+  /** True when any chosen asset is pixel art and must not be smoothed. */
+  pixelated: boolean;
 };
 
-export type GameSkinDefinition<G extends GameId = GameId> = {
+/* ------------------------------------------------------------------- slots -- */
+
+/**
+ * The config screen treats colour and asset parts identically: a labelled
+ * column of options it can step through. Both kinds are flattened into this one
+ * shape so the UI needs no per-part branching.
+ */
+export type SlotPreview =
+  | { kind: "images"; sources: readonly string[]; presentation: SkinPreview["presentation"] }
+  | { kind: "swatch"; colors: readonly string[] };
+
+export type SkinSlotOption = {
   id: string;
   name: string;
   description: string;
-  preview: SkinPreview;
-  assets: GameSkinAssetMap[G];
-  unlock: SkinUnlock;
+  preview: SlotPreview;
+  unlock?: SkinUnlock;
 };
 
-type GameSkinCatalog = {
-  [G in GameId]: readonly GameSkinDefinition<G>[];
+export type SkinSlot = {
+  id: string;
+  label: string;
+  hint: string;
+  options: readonly SkinSlotOption[];
 };
 
-export const GAME_SKINS = {
-  queens: [
-    {
-      id: "studio",
-      name: "Royal",
-      description: "The original crown marker set.",
-      preview: {
-        sources: ["/games/queens/queen.png"],
-        presentation: "contain",
-      },
-      assets: {
-        marker: "/games/queens/queen.png",
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "garden",
-      name: "Rose garden",
-      description: "Place open-source rose sprites instead of queens.",
-      preview: {
-        sources: ["/games/queens/skins/garden/rose.svg"],
-        presentation: "contain",
-      },
-      assets: {
-        marker: "/games/queens/skins/garden/rose.svg",
-      },
-      unlock: { type: "starter" },
-    },
-  ],
-  tango: [
-    {
-      id: "classic",
-      name: "Classic",
-      description: "The original Lucide sun and moon pair.",
-      preview: {
-        sources: [
-          "/games/tango/skins/classic/sun.svg",
-          "/games/tango/skins/classic/moon.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        symbols: [
-          { src: "/games/tango/skins/classic/moon.svg", label: "Moon" },
-          { src: "/games/tango/skins/classic/sun.svg", label: "Sun" },
-        ],
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "emoji",
-      name: "Emoji orbit",
-      description: "The detailed Noto Emoji sun and moon pair.",
-      preview: {
-        sources: [
-          "/games/tango/skins/emoji/sun-face.svg",
-          "/games/tango/skins/emoji/crescent-moon.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        symbols: [
-          { src: "/games/tango/skins/emoji/crescent-moon.svg", label: "Moon" },
-          { src: "/games/tango/skins/emoji/sun-face.svg", label: "Sun" },
-        ],
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "elements",
-      name: "Elements",
-      description: "Balance water and fire with a complete symbol swap.",
-      preview: {
-        sources: [
-          "/games/tango/skins/elements/water.svg",
-          "/games/tango/skins/elements/fire.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        symbols: [
-          { src: "/games/tango/skins/elements/water.svg", label: "Water" },
-          { src: "/games/tango/skins/elements/fire.svg", label: "Fire" },
-        ],
-      },
-      unlock: { type: "starter" },
-    },
-  ],
-  lights: [
-    {
-      id: "warm-glow",
-      name: "Warm glow",
-      description: "The original light board.",
-      preview: {
-        sources: ["/games/lights/logo.png"],
-        presentation: "contain",
-      },
-      assets: {
-        bulbs: [
-          "/games/lights/skins/warm-glow/unlit.png",
-          "/games/lights/skins/warm-glow/lit.png",
-        ],
-      },
-      unlock: { type: "starter" },
-    },
-  ],
-  tracks: [
-    {
-      id: "transit",
-      name: "Transit",
-      description: "The original technical track set.",
-      preview: {
-        sources: ["/games/tracks/logo.png"],
-        presentation: "contain",
-      },
-      assets: {
-        node: "/games/tracks/skins/transit/node.png",
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "liquid",
-      name: "Liquid",
-      description: "Coolant and bubbles flow continuously through the pipe network.",
-      preview: {
-        sources: [
-          "/games/tracks/skins/liquid/node.png",
-          "/games/tracks/skins/liquid/particle.png",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        node: "/games/tracks/skins/liquid/node.png",
-        flowParticle: {
-          src: "/games/tracks/skins/liquid/particle.png",
-          material: "liquid",
-          size: 0.078,
-          spacing: 0.26,
-          speed: 0.44,
-          opacity: 0.62,
-          drift: 0.026,
-          flicker: 0.04,
-        },
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "electric",
-      name: "Electric",
-      description: "Live electrical discharges race through every connected pipe.",
-      preview: {
-        sources: [
-          "/games/tracks/skins/electric/node.png",
-          "/games/tracks/skins/electric/particle.png",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        node: "/games/tracks/skins/electric/node.png",
-        flowParticle: {
-          src: "/games/tracks/skins/electric/particle.png",
-          material: "energy",
-          size: 0.25,
-          spacing: 0.72,
-          speed: 1.05,
-          opacity: 0.94,
-          drift: 0.012,
-          flicker: 0.55,
-          rotateToPath: true,
-          additive: true,
-          pulseOpacity: 0.92,
-        },
-      },
-      unlock: { type: "starter" },
-    },
-  ],
-  zip: [
-    {
-      id: "current",
-      name: "Current",
-      description: "The original flowing route treatment.",
-      preview: {
-        sources: ["/games/zip/logo.png"],
-        presentation: "contain",
-      },
-      assets: {},
-      unlock: { type: "starter" },
-    },
-    {
-      id: "spain",
-      name: "Spanish Flag",
-      description: "A flat Spanish flag is revealed inside every route segment.",
-      preview: {
-        sources: ["/games/zip/skins/spain/flag.svg"],
-        presentation: "contain",
-      },
-      assets: {
-        revealImage: "/games/zip/skins/spain/flag.svg",
-      },
-      unlock: { type: "starter" },
-    },
-  ],
-  "mine-islands": [
-    {
-      id: "survey",
-      name: "Survey",
-      description: "The original minefield set.",
-      preview: {
-        sources: ["/games/mine-islands/logo.svg"],
-        presentation: "contain",
-      },
-      assets: {
-        hazard: "/games/mine-islands/skins/survey/bomb.svg",
-        flag: "/games/mine-islands/skins/survey/flag.svg",
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "xp-classic",
-      name: "XP Classic",
-      description: "Classic desktop Minesweeper tiles, counters, and status faces.",
-      preview: {
-        sources: [
-          "/games/mine-islands/skins/xp-classic/mine-ceil.png",
-          "/games/mine-islands/skins/xp-classic/smile.png",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        hazard: "/games/mine-islands/skins/xp-classic/mine-ceil.png",
-        flag: "/games/mine-islands/skins/xp-classic/flag.png",
-        death: "/games/mine-islands/skins/xp-classic/mine-death.png",
-        misflagged: "/games/mine-islands/skins/xp-classic/misflagged.png",
-        clueTiles: [
-          "/games/mine-islands/skins/xp-classic/open1.png",
-          "/games/mine-islands/skins/xp-classic/open2.png",
-          "/games/mine-islands/skins/xp-classic/open3.png",
-          "/games/mine-islands/skins/xp-classic/open4.png",
-          "/games/mine-islands/skins/xp-classic/open5.png",
-          "/games/mine-islands/skins/xp-classic/open6.png",
-          "/games/mine-islands/skins/xp-classic/open7.png",
-          "/games/mine-islands/skins/xp-classic/open8.png",
-        ],
-        hud: {
-          variant: "xp-classic",
-          faces: {
-            neutral: "/games/mine-islands/skins/xp-classic/smile.png",
-            won: "/games/mine-islands/skins/xp-classic/win.png",
-            lost: "/games/mine-islands/skins/xp-classic/dead.png",
-            pressed: "/games/mine-islands/skins/xp-classic/ohh.png",
-          },
-          digits: [
-            "/games/mine-islands/skins/xp-classic/digit0.png",
-            "/games/mine-islands/skins/xp-classic/digit1.png",
-            "/games/mine-islands/skins/xp-classic/digit2.png",
-            "/games/mine-islands/skins/xp-classic/digit3.png",
-            "/games/mine-islands/skins/xp-classic/digit4.png",
-            "/games/mine-islands/skins/xp-classic/digit5.png",
-            "/games/mine-islands/skins/xp-classic/digit6.png",
-            "/games/mine-islands/skins/xp-classic/digit7.png",
-            "/games/mine-islands/skins/xp-classic/digit8.png",
-            "/games/mine-islands/skins/xp-classic/digit9.png",
-          ],
-          minus: "/games/mine-islands/skins/xp-classic/digit-.png",
-        },
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "deep-sea",
-      name: "Deep Sea",
-      description: "Navigate a submerged field of blowfish, anchors, and lurking sharks.",
-      preview: {
-        sources: [
-          "/games/mine-islands/skins/deep-sea/hazard.svg",
-          "/games/mine-islands/skins/deep-sea/flag.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        hazard: "/games/mine-islands/skins/deep-sea/hazard.svg",
-        flag: "/games/mine-islands/skins/deep-sea/flag.svg",
-        death: "/games/mine-islands/skins/deep-sea/death.svg",
-        misflagged: "/games/mine-islands/skins/deep-sea/misflagged.svg",
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "cosmic",
-      name: "Cosmic",
-      description: "Chart a quiet orbit of saucers, satellites, and incoming comets.",
-      preview: {
-        sources: [
-          "/games/mine-islands/skins/cosmic/hazard.svg",
-          "/games/mine-islands/skins/cosmic/flag.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        hazard: "/games/mine-islands/skins/cosmic/hazard.svg",
-        flag: "/games/mine-islands/skins/cosmic/flag.svg",
-        death: "/games/mine-islands/skins/cosmic/death.svg",
-        misflagged: "/games/mine-islands/skins/cosmic/misflagged.svg",
-      },
-      unlock: { type: "starter" },
-    },
-  ],
-  "mini-chess": [
-    {
-      id: "club",
-      name: "Club",
-      description: "The original tournament piece set.",
-      preview: {
-        sources: [
-          "/games/mini-chess/skins/club/wn.svg",
-          "/games/mini-chess/skins/club/bn.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        pieceSetRoot: "/games/mini-chess/skins/club",
-        pieceExtension: "svg",
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "celtic",
-      name: "Celtic",
-      description: "Ornate dimensional pieces with a polished finish.",
-      preview: {
-        sources: [
-          "/games/mini-chess/skins/celtic/wn.svg",
-          "/games/mini-chess/skins/celtic/bn.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        pieceSetRoot: "/games/mini-chess/skins/celtic",
-        pieceExtension: "svg",
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "chessnut",
-      name: "Chessnut",
-      description: "A clean contemporary set with rounded silhouettes.",
-      preview: {
-        sources: [
-          "/games/mini-chess/skins/chessnut/wn.svg",
-          "/games/mini-chess/skins/chessnut/bn.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        pieceSetRoot: "/games/mini-chess/skins/chessnut",
-        pieceExtension: "svg",
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "fantasy",
-      name: "Fantasy",
-      description: "Expressive medieval pieces with dramatic profiles.",
-      preview: {
-        sources: [
-          "/games/mini-chess/skins/fantasy/wn.svg",
-          "/games/mini-chess/skins/fantasy/bn.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        pieceSetRoot: "/games/mini-chess/skins/fantasy",
-        pieceExtension: "svg",
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "firi",
-      name: "Firi",
-      description: "Bold compact pieces designed for instant recognition.",
-      preview: {
-        sources: [
-          "/games/mini-chess/skins/firi/wn.svg",
-          "/games/mini-chess/skins/firi/bn.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        pieceSetRoot: "/games/mini-chess/skins/firi",
-        pieceExtension: "svg",
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "kiwen-suwi",
-      name: "Kiwen Suwi",
-      description: "Minimal geometric pieces with strong graphic contrast.",
-      preview: {
-        sources: [
-          "/games/mini-chess/skins/kiwen-suwi/wn.svg",
-          "/games/mini-chess/skins/kiwen-suwi/bn.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        pieceSetRoot: "/games/mini-chess/skins/kiwen-suwi",
-        pieceExtension: "svg",
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "rhosgfx",
-      name: "RhosGFX",
-      description: "Friendly outlined pieces with a playful modern shape.",
-      preview: {
-        sources: [
-          "/games/mini-chess/skins/rhosgfx/wn.svg",
-          "/games/mini-chess/skins/rhosgfx/bn.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        pieceSetRoot: "/games/mini-chess/skins/rhosgfx",
-        pieceExtension: "svg",
-      },
-      unlock: { type: "starter" },
-    },
-    {
-      id: "spatial",
-      name: "Spatial",
-      description: "Sculptural asymmetric pieces with a distinctive stance.",
-      preview: {
-        sources: [
-          "/games/mini-chess/skins/spatial/wn.svg",
-          "/games/mini-chess/skins/spatial/bn.svg",
-        ],
-        presentation: "pair",
-      },
-      assets: {
-        pieceSetRoot: "/games/mini-chess/skins/spatial",
-        pieceExtension: "svg",
-      },
-      unlock: { type: "starter" },
-    },
-  ],
-} as const satisfies GameSkinCatalog;
-
-const gameSkinCatalog: GameSkinCatalog = GAME_SKINS;
-
-export type GameSkinSelections = Record<GameId, string>;
-
-export const DEFAULT_GAME_SKINS = Object.fromEntries(
-  (Object.keys(gameSkinCatalog) as GameId[]).map((gameId) => [
-    gameId,
-    gameSkinCatalog[gameId][0].id,
-  ]),
-) as GameSkinSelections;
-
-export function findGameSkin<G extends GameId>(
-  gameId: G,
-  skinId: string,
-): GameSkinDefinition<G> | undefined {
-  return gameSkinCatalog[gameId].find((skin) => skin.id === skinId);
+export function assetPartIds(gameId: GameId): readonly string[] {
+  return GAME_PART_ORDER[gameId] as readonly string[];
 }
 
-export function isGameSkinUnlocked(
-  skin: Pick<GameSkinDefinition, "unlock">,
+export function assetPart(gameId: GameId, partId: string): AssetPart<unknown> {
+  const definition = partDefinition(gameId, partId);
+  if (!definition) {
+    throw new Error(`Unknown ${gameId} part: ${partId}`);
+  }
+  return definition;
+}
+
+export function hasTint(gameId: GameId): boolean {
+  return gameTints(gameId).length > 0;
+}
+
+function colourSlots(gameId: GameId): SkinSlot[] {
+  const slots: SkinSlot[] = [
+    {
+      id: PALETTE_PART,
+      label: "Board",
+      hint: "Surface, colours, and the status bar that comes with them.",
+      options: GAME_PALETTES[gameId].map((palette) => ({
+        id: palette.id,
+        name: palette.name,
+        description: palette.description,
+        preview: { kind: "swatch", colors: palette.swatch },
+        unlock: palette.unlock,
+      })),
+    },
+  ];
+
+  const tints = gameTints(gameId);
+  if (tints.length > 0) {
+    slots.push({
+      id: TINT_PART,
+      label: gameId === "lights" ? "Bulb colour" : "Arrow colour",
+      hint: gameId === "lights" ? "The colour a lit cell glows." : "The colour of the route.",
+      options: tints.map((tint) => ({
+        id: tint.id,
+        name: tint.name,
+        description: tint.description,
+        preview: { kind: "swatch", colors: tint.swatch },
+        unlock: tint.unlock,
+      })),
+    });
+  }
+
+  return slots;
+}
+
+/** Every customisable column for a game, in display order. */
+export function gameSlots(gameId: GameId): readonly SkinSlot[] {
+  const assetSlots = assetPartIds(gameId).map((partId) => {
+    const part = assetPart(gameId, partId);
+    return {
+      id: partId,
+      label: part.label,
+      hint: part.hint,
+      options: part.options.map((option) => ({
+        id: option.id,
+        name: option.name,
+        description: option.description,
+        preview: {
+          kind: "images" as const,
+          sources: option.preview.sources,
+          presentation: option.preview.presentation,
+        },
+        unlock: option.unlock,
+      })),
+    };
+  });
+
+  return [...colourSlots(gameId), ...assetSlots];
+}
+
+export function allPartIds(gameId: GameId): readonly string[] {
+  return gameSlots(gameId).map((slot) => slot.id);
+}
+
+/* ----------------------------------------------------------------- unlocks -- */
+
+export function isUnlocked(
+  candidate: { unlock?: SkinUnlock },
   unlockedAchievementIds: ReadonlySet<string>,
 ): boolean {
-  return skin.unlock.type === "starter" || unlockedAchievementIds.has(skin.unlock.achievementId);
+  const unlock = candidate.unlock ?? { type: "starter" };
+  return unlock.type === "starter" || unlockedAchievementIds.has(unlock.achievementId);
+}
+
+export function isPartOptionUnlocked(
+  gameId: GameId,
+  partId: string,
+  optionId: string,
+  unlockedAchievementIds: ReadonlySet<string>,
+): boolean {
+  if (partId === PALETTE_PART) {
+    const palette = findPalette(gameId, optionId);
+    return Boolean(palette && isUnlocked(palette, unlockedAchievementIds));
+  }
+  if (partId === TINT_PART) {
+    const tint = findTint(gameId, optionId);
+    return Boolean(tint && isUnlocked(tint, unlockedAchievementIds));
+  }
+  const option = partOption(gameId, partId, optionId);
+  return Boolean(option && isUnlocked(option, unlockedAchievementIds));
+}
+
+/* --------------------------------------------------------------- defaults --- */
+
+function fallbackOptionId(gameId: GameId, partId: string): string {
+  if (partId === PALETTE_PART) {
+    return GAME_PALETTES[gameId][0].id;
+  }
+  if (partId === TINT_PART) {
+    return gameTints(gameId)[0]?.id ?? "";
+  }
+  return assetPart(gameId, partId).options[0].id;
+}
+
+function partsFromPreset(gameId: GameId, preset: SkinPreset): GameCustomization {
+  const parts: Record<string, string> = {};
+  for (const partId of allPartIds(gameId)) {
+    parts[partId] = preset.selections[partId] ?? fallbackOptionId(gameId, partId);
+  }
+  return parts;
+}
+
+export function defaultCustomization(gameId: GameId): GameCustomization {
+  return partsFromPreset(gameId, defaultPreset(gameId));
+}
+
+/** Used only by the v1 storage migration, which stored a single skin id. */
+export function customizationFromLegacySkinId(
+  gameId: GameId,
+  skinId: string,
+): GameCustomization | null {
+  const preset = findPreset(gameId, skinId);
+  return preset ? partsFromPreset(gameId, preset) : null;
+}
+
+export const DEFAULT_GAME_SKINS: GameSkinSelections = Object.fromEntries(
+  GAME_IDS.map((gameId) => [gameId, defaultCustomization(gameId)]),
+) as GameSkinSelections;
+
+/**
+ * Drops part ids the game no longer has and replaces unknown or still-locked
+ * option ids with the default, so revoking an achievement can never leave a
+ * board pointing at artwork the player cannot use.
+ */
+export function sanitizeCustomization(
+  gameId: GameId,
+  candidate: Readonly<Record<string, unknown>> | undefined,
+  unlockedAchievementIds: ReadonlySet<string>,
+): GameCustomization {
+  const parts: Record<string, string> = {};
+  for (const partId of allPartIds(gameId)) {
+    const requested = candidate?.[partId];
+    parts[partId] =
+      typeof requested === "string" &&
+      isPartOptionUnlocked(gameId, partId, requested, unlockedAchievementIds)
+        ? requested
+        : fallbackOptionId(gameId, partId);
+  }
+  return parts;
+}
+
+export function isDefaultCustomization(
+  gameId: GameId,
+  customization: GameCustomization,
+): boolean {
+  const defaults = DEFAULT_GAME_SKINS[gameId];
+  return allPartIds(gameId).every((partId) => customization[partId] === defaults[partId]);
+}
+
+/* ---------------------------------------------------------------- resolve --- */
+
+export function resolveGameSkin<G extends GameId>(
+  gameId: G,
+  customization: GameCustomization,
+): ResolvedGameSkin<G> {
+  const values: Record<string, unknown> = {};
+  let pixelated = false;
+
+  for (const partId of assetPartIds(gameId)) {
+    const part = assetPart(gameId, partId);
+    const chosen =
+      part.options.find((option) => option.id === customization[partId]) ?? part.options[0];
+    values[partId] = chosen.value;
+    pixelated = pixelated || chosen.pixelated === true;
+  }
+
+  const resolve = PART_RESOLVERS[gameId] as (input: unknown) => GameSkinAssetMap[G];
+  const palette = findPalette(gameId, customization[PALETTE_PART]) ?? GAME_PALETTES[gameId][0];
+  const tint = findTint(gameId, customization[TINT_PART] ?? "") ?? gameTints(gameId)[0] ?? null;
+  const extras = palette.extras;
+
+  // Chrome travels with the board, but renderers still read it off `assets`, so
+  // it is merged in here rather than being threaded through every game.
+  const assets = resolve(values);
+  if (extras && (extras.hud || extras.clueTiles)) {
+    Object.assign(assets, { hud: extras.hud, clueTiles: extras.clueTiles });
+  }
+  if (extras?.surface) {
+    Object.assign(assets, { surface: extras.surface });
+  }
+
+  return {
+    gameId,
+    assets,
+    palette,
+    tint,
+    pixelated: pixelated || extras?.pixelated === true,
+  };
 }

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img">
+  <title>Circuit frame</title>
+  <circle cx="50" cy="50" r="46" fill="none" stroke="#2f8f83" stroke-width="6"/>
+  <circle cx="50" cy="50" r="46" fill="none" stroke="#7fd2b8" stroke-width="2" stroke-dasharray="10 6"/>
+  <g fill="#d8b45a"><circle cx="50" cy="4" r="4"/><circle cx="96" cy="50" r="4"/><circle cx="50" cy="96" r="4"/><circle cx="4" cy="50" r="4"/></g>
+</svg>

@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { useWinSequence } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
 import { fetchPuzzle } from "./api";
@@ -381,6 +382,8 @@ export function TracksGame() {
   const connectedTracks = connectedFlow;
   const displayedBestTime = isNewBest ? elapsedSeconds : bestTime;
 
+  const win = useWinSequence({ solved, runKey: puzzle, skip: showSolution });
+
   useGameResultReporter({
     runKey: puzzle,
     completed: solved,
@@ -593,11 +596,13 @@ export function TracksGame() {
           ) : (
             <>
               <TracksCanvas
+                surface={skin.assets.surface}
                 board={displayedBoard}
                 puzzle={puzzle}
                 flow={connectedFlow}
                 crossingGaps={crossingGaps}
                 assets={skin.assets}
+                celebration={win.isCelebrating ? win.progress : null}
                 disabled={showSolution || solved}
                 solutionShown={showSolution}
                 hud={{
@@ -617,7 +622,7 @@ export function TracksGame() {
                 onWheelRotate={({ row, col }, direction) => rotate(row, col, direction)}
               />
 
-              {solved && (
+              {win.isRevealed && (
                 <div className="board-popup win-popup" role="dialog" aria-modal="true" aria-label="Puzzle solved">
                   <div className="confetti-field" aria-hidden="true">
                     {Array.from({ length: 18 }, (_, index) => (

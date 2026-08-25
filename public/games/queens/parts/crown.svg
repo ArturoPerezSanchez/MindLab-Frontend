@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Crown</title>
+  <path d="M8 22a4 4 0 1 1 4 4 4 4 0 0 1-4-4Zm44 0a4 4 0 1 1 4 4 4 4 0 0 1-4-4ZM28 14a4 4 0 1 1 4 4 4 4 0 0 1-4-4Z" fill="#c9a227"/>
+  <path d="M12 24 21 39l11-21 11 21 9-15 3 24a3 3 0 0 1-3 3H12a3 3 0 0 1-3-3Z" fill="#e5b93c"/>
+  <path d="M9 48h46l-.6 5A3 3 0 0 1 51.4 56H12.6A3 3 0 0 1 9.6 53Z" fill="#c9a227"/>
+  <circle cx="32" cy="45" r="3" fill="#b0463f"/>
+  <circle cx="20" cy="46" r="2.2" fill="#3f6fb0"/>
+  <circle cx="44" cy="46" r="2.2" fill="#3f8f6f"/>
+</svg>

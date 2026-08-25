@@ -1,4 +1,5 @@
 import { apiPath } from "@/shared/api";
+import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
 import type { CellValue, Constraint, Puzzle, SymbolValue, TangoResponse } from "./types";
 
 function isCell(value: unknown): value is CellValue {
@@ -74,6 +75,8 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
   ) {
     throw new Error("The API returned an invalid Tango puzzle.");
   }
+
+  rememberPuzzleHandleFrom("tango", squareDifficulty(size), payload);
 
   return {
     size,

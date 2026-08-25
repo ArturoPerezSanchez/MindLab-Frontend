@@ -1,4 +1,5 @@
 import { apiPath } from "@/shared/api";
+import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
 import type { BoardSize, MiniChessResponse, Puzzle, SolutionMove } from "./types";
 
 const API_PATH = apiPath("/mini-chess");
@@ -35,6 +36,8 @@ export async function fetchPuzzle(boardSize: BoardSize, signal?: AbortSignal): P
     payload.states.length,
     payload.states.at(-1)?.is_checkmate === true,
   );
+
+  rememberPuzzleHandleFrom("mini-chess", squareDifficulty(boardSize), payload);
 
   return {
     id: payload.id,

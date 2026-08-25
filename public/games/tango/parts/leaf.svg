@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Leaf</title>
+  <path d="M52 8C26 8 10 22 10 40a22 22 0 0 0 4 12C22 30 36 20 50 17 38 24 26 34 20 56h9C36 34 48 24 52 8Z" fill="#4f9c68"/>
+  <path d="M52 8C26 8 10 22 10 40a22 22 0 0 0 4 12C22 30 36 20 50 17Z" fill="#67b47f" opacity=".7"/>
+</svg>

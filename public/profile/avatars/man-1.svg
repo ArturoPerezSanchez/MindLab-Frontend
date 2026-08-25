@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Man 1</title>
+  <rect width="64" height="64" fill="#e3eaf4"/>
+  <path d="M12 64c0-9 8-14 20-14s20 5 20 14Z" fill="#3f6fb0"/>
+  <path d="M22 40h20v10a10 10 0 0 1-20 0Z" fill="#cf9268"/>
+  <circle cx="32" cy="30" r="15" fill="#e8b48c"/>
+  <path d="M32 20c-9 0-15 6-15 14 0 4 1 7 2 9l-3 4h32l-3-4c1-2 2-5 2-9 0-8-6-14-15-14Z" fill="#2f2a26"/>
+  <circle cx="32" cy="31" r="13" fill="#e8b48c"/>
+  <path d="M18 32c1-8 7-12 14-12s13 4 14 12c1-11-6-16-14-16s-15 5-14 16Z" fill="#2f2a26"/>
+  <circle cx="27" cy="30" r="1.8" fill="#2b2320"/>
+  <circle cx="37" cy="30" r="1.8" fill="#2b2320"/>
+  <path d="M28.5 36.5c2 1.6 5 1.6 7 0" fill="none" stroke="#2b2320" stroke-width="1.6" stroke-linecap="round" opacity=".75"/>
+</svg>

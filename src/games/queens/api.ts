@@ -1,4 +1,5 @@
 import { apiPath } from "@/shared/api";
+import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
 import type { Puzzle, QueensResponse } from "./types";
 
 const API_PATH = apiPath("/queens");
@@ -29,6 +30,7 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
 
   const payload = (await response.json()) as QueensResponse;
   assertBoard(payload.board, size);
+  rememberPuzzleHandleFrom("queens", squareDifficulty(size), payload);
 
   return {
     board: payload.board,

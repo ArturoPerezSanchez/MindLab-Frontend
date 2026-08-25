@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Unstable crystal</title>
+  <path d="M32 3 52 26 38 60H26L12 26Z" fill="#8f5aa8"/>
+  <path d="M32 3 12 26l14 34Z" fill="#b07fc9"/>
+  <path d="M12 26h40l-4 8H16Z" fill="#6c3f84" opacity=".5"/>
+  <path d="M32 3 24 26h16Z" fill="#d7b3e6" opacity=".7"/>
+</svg>

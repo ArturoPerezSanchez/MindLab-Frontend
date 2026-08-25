@@ -21,6 +21,7 @@ import {
   X as XIcon,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { useWinSequence } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
 import { fetchPuzzle } from "./api";
@@ -103,6 +104,12 @@ export function QueensGame() {
     return next;
   }, [forbiddenMarks, manualMarks, queens]);
   const bestTime = bestTimes[String(size)];
+
+  const win = useWinSequence({
+    solved: Boolean(gameStatus?.isSolved),
+    runKey: puzzle,
+    skip: solutionRevealed,
+  });
 
   useGameResultReporter({
     runKey: puzzle,
@@ -477,8 +484,10 @@ export function QueensGame() {
 
           {puzzle && loadState === "ready" && (
             <QueensCanvas
+              celebration={win.isCelebrating ? win.progress : null}
               board={puzzle.board}
               marker={skin.assets.marker}
+              surface={skin.assets.surface}
               queens={queens}
               marks={marks}
               conflicts={gameStatus?.conflicts ?? new Set()}
@@ -522,7 +531,7 @@ export function QueensGame() {
             />
           )}
 
-          {gameStatus?.isSolved && (
+          {win.isRevealed && (
             <div className="win-panel board-win-panel" role="status" aria-live="assertive">
               <div className="confetti-field" aria-hidden="true">
                 {Array.from({ length: 18 }, (_, index) => (

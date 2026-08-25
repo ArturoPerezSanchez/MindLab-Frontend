@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Incorrect pin</title>
+  <path d="M20 6h5v52h-5z" fill="#6b6459"/>
+  <path d="M25 8h30L44 20l11 12H25Z" fill="#8d9a97"/>
+  <path d="M12 56h30l3 6H9Z" fill="#4d4a44"/>
+  <g stroke="#cf3b34" stroke-width="7" stroke-linecap="round"><path d="M14 14 50 50M50 14 14 50"/></g>
+</svg>

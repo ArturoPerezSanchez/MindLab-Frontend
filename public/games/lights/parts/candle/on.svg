@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Candle lit</title>
+  <rect x="22" y="24" width="20" height="30" rx="3" fill="#e6e2d8"/>
+  <rect x="22" y="24" width="7" height="30" rx="3" fill="#f2efe7"/>
+  <ellipse cx="32" cy="24" rx="10" ry="3.4" fill="#f6f3ec"/>
+  <path d="M32 22c5-4 6-9 3-14 3 1 9 6 9 13a12 12 0 0 1-24 0c0-4 2-7 5-9-1 5 2 8 7 10Z" fill="#e8a83f"/>
+  <path d="M32 22c3-3 3.5-6 2-9 2 1 5 4 5 8a7 7 0 0 1-14 0c0-2 1-4 2-5 0 3 2 5 5 6Z" fill="#fbe9a8"/>
+  <path d="M16 54h32l3 6H13Z" fill="#a8853a"/>
+</svg>

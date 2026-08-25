@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img">
+  <title>Sunrise</title>
+  <defs>
+    <linearGradient id="dawn" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b2f63"/><stop offset=".4" stop-color="#c9557a"/>
+      <stop offset=".72" stop-color="#f0a45f"/><stop offset="1" stop-color="#f7d08a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#dawn)"/>
+  <circle cx="512" cy="640" r="200" fill="#ffd77a"/>
+  <circle cx="512" cy="640" r="200" fill="#fff0c2" opacity=".45"/>
+  <g fill="#2c2450">
+    <path d="M0 760 200 600l160 120 180-160 200 180 284-200v524H0Z"/>
+  </g>
+  <g fill="#1b1638">
+    <path d="M0 900 240 800l220 120 220-100 344 140v164H0Z"/>
+  </g>
+</svg>

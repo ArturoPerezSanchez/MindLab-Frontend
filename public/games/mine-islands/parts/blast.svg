@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Detonation</title>
+  <path d="M32 2 38 18l14-9-6 16 17 1-15 9 12 12-16-4 2 17-10-13-10 13 2-17-16 4 12-12-15-9 17-1-6-16 14 9Z" fill="#d9533f"/>
+  <path d="M32 14 36 25l11-6-5 11 11 1-10 6 7 8-10-3 1 11-9-9-9 9 1-11-10 3 7-8-10-6 11-1-5-11 11 6Z" fill="#efa03c"/>
+  <circle cx="32" cy="33" r="8" fill="#fbe3a3"/>
+</svg>

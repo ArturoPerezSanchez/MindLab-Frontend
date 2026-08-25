@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Star</title>
+  <path d="M32 4 40.6 22.2 60 25.2 45.8 39.4 49.3 59 32 49.7 14.7 59l3.5-19.6L4 25.2l19.4-3Z" fill="#d9a72e"/>
+  <path d="M32 12.5 38.4 26 53 28.3 42.3 39l2.6 14.6L32 46.6Z" fill="#f2cf62"/>
+  <path d="M32 12.5 25.6 26 11 28.3 21.7 39l-2.6 14.6L32 46.6Z" fill="#e8bb44"/>
+</svg>

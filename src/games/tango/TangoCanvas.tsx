@@ -1,16 +1,28 @@
 import { useCallback, useMemo } from "react";
 import { Graphics } from "pixi.js";
 import type { SkinSymbolAsset } from "@/features/skins/skins";
-import { CanvasBoard, type CanvasBoardHud, type CanvasCellPosition } from "@/shared/canvas/CanvasBoard";
+import {
+  CanvasBoard,
+  type CanvasBoardAnimationFrame,
+  type CanvasBoardHud,
+  type CanvasCellPosition,
+} from "@/shared/canvas/CanvasBoard";
+import { drawCellSurface, withSurfaceAssets } from "@/shared/canvas/surface";
+import type { BoardSurface } from "@/features/skins/skins";
 import { addLabel, addRect, addSprite, cssVar } from "@/shared/canvas/drawing";
+import { drawTangoCelebration, type CellRef } from "@/shared/canvas/winCelebration";
 import { positionKey } from "./game";
 import type { CellValue, Constraint, Puzzle } from "./types";
 
 type TangoCanvasProps = {
+  /** Material laid over the cell colours by the chosen board. */
+  surface?: BoardSurface;
   puzzle: Puzzle;
   entries: CellValue[][];
   symbols: readonly [SkinSymbolAsset, SkinSymbolAsset];
   conflicts: ReadonlySet<string>;
+  /** 0..1 while the solved board celebrates, null when idle. */
+  celebration: number | null;
   showSolution: boolean;
   hud: CanvasBoardHud;
   onActivate: (position: CanvasCellPosition) => void;
@@ -34,10 +46,12 @@ function relationPosition(constraint: Constraint, cellWidth: number, cellHeight:
 }
 
 export function TangoCanvas({
+  surface,
   puzzle,
   entries,
   symbols,
   conflicts,
+  celebration,
   showSolution,
   hud,
   onActivate,
@@ -78,6 +92,7 @@ export function TangoCanvas({
           const given = puzzle.board[row][col] !== null;
           const shown = showSolution ? puzzle.solution[row][col] : value;
           addRect(root, x, y, cellWidth, cellHeight, given ? givenCell : cell);
+          drawCellSurface(root, textures, surface, x, y, cellWidth, cellHeight);
 
           const key = positionKey(row, col);
           if (conflicts.has(key) && !showSolution) {
@@ -132,7 +147,31 @@ export function TangoCanvas({
 
       addRect(root, 2, 2, 996, 996, "transparent", { color: grid, width: 5 }, 4);
     },
-    [conflicts, entries, puzzle, showSolution, symbols],
+    [conflicts, entries, puzzle, showSolution, surface, symbols],
+  );
+
+  const animate = useCallback(
+    ({ context, host, cellWidth, cellHeight }: CanvasBoardAnimationFrame) => {
+      if (celebration === null) {
+        return;
+      }
+      const moons: CellRef[] = [];
+      const suns: CellRef[] = [];
+      entries.forEach((rowValues, row) => {
+        rowValues.forEach((value, col) => {
+          if (value === 0) {
+            moons.push({ row, col });
+          } else if (value === 1) {
+            suns.push({ row, col });
+          }
+        });
+      });
+      const frame = { context, cellWidth, cellHeight, progress: celebration };
+      // Moons take the first slice of the sequence; suns answer at 0.35.
+      drawTangoCelebration({ ...frame, color: cssVar(host, "--moon-glow", "#5b7fd4") }, moons, 0);
+      drawTangoCelebration({ ...frame, color: cssVar(host, "--sun-glow", "#e0a83c") }, suns, 0.35);
+    },
+    [celebration, entries],
   );
 
   return (
@@ -142,9 +181,10 @@ export function TangoCanvas({
       rows={puzzle.size}
       cols={puzzle.size}
       cells={cells}
-      assetUrls={symbols.map((symbol) => symbol.src)}
-      hud={hud}
+      assetUrls={withSurfaceAssets(symbols.map((symbol) => symbol.src), surface)}
+      hud={hud && surface?.hud ? { ...hud, style: surface.hud } : hud}
       draw={draw}
+      animate={celebration === null ? undefined : animate}
       onCellActivate={onActivate}
       onCellContextMenu={onContextMenu}
     />

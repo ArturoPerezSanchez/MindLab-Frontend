@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Lantern on</title>
+  <circle cx="32" cy="33" r="28" fill="#f6d98a" opacity=".32"/>
+  <path d="M28 4h8v5h-8z" fill="#8e7031"/>
+  <path d="M18 12h28l-3 6H21Z" fill="#a8853a"/>
+  <path d="M21 18h22v30H21Z" fill="#f4d67f"/>
+  <path d="M21 18h8v30h-8Z" fill="#fbeab4"/>
+  <path d="M18 48h28l3 6H15Z" fill="#a8853a"/>
+  <rect x="30" y="28" width="4" height="10" rx="2" fill="#fffbe8"/>
+</svg>

@@ -9,7 +9,10 @@ import {
   type CanvasCellPosition,
   type CanvasWheelDirection,
 } from "@/shared/canvas/CanvasBoard";
+import { drawCellSurface, withSurfaceAssets } from "@/shared/canvas/surface";
+import type { BoardSurface } from "@/features/skins/skins";
 import { addCircle, addRect, addSprite, cssVar, type CssColor } from "@/shared/canvas/drawing";
+import { drawTracksCelebration } from "@/shared/canvas/winCelebration";
 import {
   DIRECTIONS,
   DIRECTION_DELTAS,
@@ -50,11 +53,15 @@ type TrackGeometry = {
 };
 
 type TracksCanvasProps = {
+  /** Material laid over the cell colours by the chosen board. */
+  surface?: BoardSurface;
   board: Board;
   puzzle: Puzzle;
   flow: ReadonlyMap<string, FlowCell>;
   crossingGaps: ReadonlyMap<string, ReadonlySet<number>>;
   assets: GameSkinAssetMap["tracks"];
+  /** 0..1 while the solved board celebrates, null when idle. */
+  celebration: number | null;
   disabled: boolean;
   solutionShown: boolean;
   hud: CanvasBoardHud;
@@ -63,10 +70,19 @@ type TracksCanvasProps = {
 };
 
 const ARM_RADIUS_RATIO = 0.31;
-const PIPE_WIDTH_RATIO = 0.18;
-const CHANNEL_WIDTH_RATIO = 0.105;
-const FLUID_WIDTH_RATIO = 0.082;
-const PULSE_WIDTH_RATIO = 0.046;
+
+/*
+ * Pipe metrics are fractions of a cell and scale together: the casing sets the
+ * gauge, and the channel, fluid, and pulse widths are sized to sit inside it.
+ * Changing PIPE_WIDTH_RATIO alone would leave the fluid rattling around in an
+ * oversized bore, so keep the ratios between them roughly as they are.
+ */
+const PIPE_WIDTH_RATIO = 0.3;
+const CHANNEL_WIDTH_RATIO = 0.176;
+const FLUID_WIDTH_RATIO = 0.137;
+const PULSE_WIDTH_RATIO = 0.077;
+const NODE_WIDTH_RATIO = 0.38;
+const TERMINAL_RADIUS_RATIO = 0.125;
 const UNDERPASS_GAP_RATIO = 0.64;
 
 type FlowParticleDefinition = NonNullable<GameSkinAssetMap["tracks"]["flowParticle"]>;
@@ -300,6 +316,131 @@ function drawCanvasSegments(
   context.setLineDash([]);
 }
 
+/**
+ * Unit normal pointing toward the scene light, which sits at the upper left.
+ *
+ * Every shading pass offsets along this vector so highlights stay on the same
+ * side of every pipe regardless of which of the eight directions it runs in.
+ */
+function litNormal(segment: PipeSegment): Point {
+  const dx = segment.to.x - segment.from.x;
+  const dy = segment.to.y - segment.from.y;
+  const length = Math.hypot(dx, dy) || 1;
+  const normalX = -dy / length;
+  const normalY = dx / length;
+  const facesLight = normalX * -0.7071 + normalY * -0.7071 >= 0;
+  return facesLight ? { x: normalX, y: normalY } : { x: -normalX, y: -normalY };
+}
+
+function offsetSegments(segments: readonly PipeSegment[], distance: number): PipeSegment[] {
+  return segments.map((segment) => {
+    const normal = litNormal(segment);
+    const shiftX = normal.x * distance;
+    const shiftY = normal.y * distance;
+    return {
+      from: { x: segment.from.x + shiftX, y: segment.from.y + shiftY },
+      to: { x: segment.to.x + shiftX, y: segment.to.y + shiftY },
+      layer: segment.layer,
+    };
+  });
+}
+
+/**
+ * Draws a pipe as a lit cylinder rather than a flat band.
+ *
+ * Three stacked strokes do the work: the full-width casing, a narrower band
+ * shifted toward the light, and a thin specular line near the top edge. It is
+ * cheap, needs no gradients in the static PIXI layer, and survives any pipe
+ * direction because the offsets follow `litNormal`.
+ */
+function strokeCylinder(
+  root: Container,
+  segments: readonly PipeSegment[],
+  width: number,
+  colors: { casing: CssColor; body: CssColor; highlight: CssColor },
+  cap: CanvasLineCap = "round",
+): void {
+  if (segments.length === 0) {
+    return;
+  }
+
+  // Offsets are positive because `litNormal` already points at the light.
+  strokeSegments(root, segments, colors.casing, width, 1, cap);
+  strokeSegments(root, offsetSegments(segments, width * 0.1), colors.body, width * 0.66, 0.85, cap);
+  strokeSegments(
+    root,
+    offsetSegments(segments, width * 0.27),
+    colors.highlight,
+    width * 0.16,
+    0.5,
+    cap,
+  );
+}
+
+/**
+ * Walks the completed track from the start terminal to the end one.
+ *
+ * `geometry.flowSegments` cannot be used for this: it is a bag of per-cell
+ * arms in draw order, not a traversal, so chaining its endpoints produces a
+ * line that jumps around the board. This follows the actual mask connections
+ * instead, refusing to step back the way it came, and yields cell centres.
+ */
+function buildRoute(
+  board: Board,
+  puzzle: Puzzle,
+  cellWidth: number,
+  cellHeight: number,
+): Point[] {
+  const size = board.length;
+  const centre = (row: number, col: number): Point => ({
+    x: (col + 0.5) * cellWidth,
+    y: (row + 0.5) * cellHeight,
+  });
+
+  let [row, col] = puzzle.start;
+  let arrivedFrom: number | null = null;
+  const points: Point[] = [centre(row, col)];
+
+  // A finished route visits each cell at most once, so the cell count is a
+  // safe bound and guards against a malformed board looping forever.
+  for (let step = 0; step < size * size; step += 1) {
+    if (row === puzzle.end[0] && col === puzzle.end[1]) {
+      break;
+    }
+
+    const mask = board[row]?.[col] ?? 0;
+    let advanced = false;
+
+    for (const direction of DIRECTIONS) {
+      if ((mask & direction) === 0 || direction === arrivedFrom) {
+        continue;
+      }
+      const [deltaRow, deltaCol] = DIRECTION_DELTAS[direction];
+      const nextRow = row + deltaRow;
+      const nextCol = col + deltaCol;
+      if (nextRow < 0 || nextCol < 0 || nextRow >= size || nextCol >= size) {
+        continue;
+      }
+      // Only follow a link the neighbouring cell agrees to.
+      if ((board[nextRow][nextCol] & OPPOSITE_DIRECTIONS[direction]) === 0) {
+        continue;
+      }
+      row = nextRow;
+      col = nextCol;
+      arrivedFrom = OPPOSITE_DIRECTIONS[direction];
+      points.push(centre(row, col));
+      advanced = true;
+      break;
+    }
+
+    if (!advanced) {
+      break;
+    }
+  }
+
+  return points;
+}
+
 function flowTurnPoints(segments: readonly FlowSegment[]): Point[] {
   const junctions = new Map<string, { point: Point; vectors: Point[] }>();
   const addVector = (point: Point, other: Point) => {
@@ -471,6 +612,211 @@ function drawLiquidSegments(
   context.restore();
 }
 
+type OilColors = {
+  body: string;
+  shadow: string;
+  highlight: string;
+  glow: string;
+  sheen: readonly string[];
+};
+
+/**
+ * Heavy crude creeping through steel.
+ *
+ * The look is built from six passes, cheapest first, all clipped to the pipe
+ * run by stroke width alone:
+ *
+ * 1. a soft dark bloom that seats the fluid inside the channel
+ * 2. a cross-section gradient per segment, dark at the walls and warmer at the
+ *    centre, which is what sells the round volume
+ * 3. filled turn caps so corners stay continuous instead of showing a seam
+ * 4. a slow iridescent sheen in `overlay`, the oil-slick rainbow
+ * 5. a thin specular line offset toward the light, breathing slightly
+ * 6. sparse elongated globs drifting downstream to read as motion
+ *
+ * Oil is deliberately slower and lower-contrast than the coolant material -
+ * viscosity is most of the effect.
+ */
+function drawOilSegments(
+  context: CanvasRenderingContext2D,
+  segments: readonly FlowSegment[],
+  definition: FlowParticleDefinition,
+  elapsedMilliseconds: number,
+  cellWidth: number,
+  colors: OilColors,
+): void {
+  if (segments.length === 0) {
+    return;
+  }
+
+  const oilWidth = cellWidth * FLUID_WIDTH_RATIO * 1.32;
+  const flowSpeed = cellWidth * definition.speed;
+  const globSpacing = cellWidth * definition.spacing;
+  const strength = definition.opacity ?? 1;
+  const travelled = -(elapsedMilliseconds * flowSpeed) / 1000;
+  const turns = flowTurnPoints(segments);
+  const breathe = 0.82 + Math.sin(elapsedMilliseconds * 0.0011) * 0.18;
+
+  context.save();
+  context.lineCap = "round";
+  context.lineJoin = "round";
+
+  context.strokeStyle = colors.shadow;
+  context.globalAlpha = 0.5;
+  context.lineWidth = oilWidth * 1.5;
+  context.shadowColor = colors.glow;
+  context.shadowBlur = cellWidth * 0.05;
+  segments.forEach(({ from, to }) => {
+    context.beginPath();
+    context.moveTo(from.x, from.y);
+    context.lineTo(to.x, to.y);
+    context.stroke();
+  });
+  context.shadowBlur = 0;
+
+  context.globalAlpha = 1;
+  context.lineWidth = oilWidth;
+  segments.forEach((segment) => {
+    const { from, to } = segment;
+    const normal = litNormal(segment);
+    const midpointX = (from.x + to.x) / 2;
+    const midpointY = (from.y + to.y) / 2;
+    const reach = oilWidth * 0.62;
+    const gradient = context.createLinearGradient(
+      midpointX + normal.x * reach,
+      midpointY + normal.y * reach,
+      midpointX - normal.x * reach,
+      midpointY - normal.y * reach,
+    );
+    // Stop 0 is the lit edge, so the specular band sits left of centre and
+    // both walls fall away to shadow - a cylinder cross-section, not a tube.
+    gradient.addColorStop(0, colors.shadow);
+    gradient.addColorStop(0.18, colors.body);
+    gradient.addColorStop(0.33, colors.highlight);
+    gradient.addColorStop(0.55, colors.body);
+    gradient.addColorStop(1, colors.shadow);
+    context.strokeStyle = gradient;
+    context.beginPath();
+    context.moveTo(from.x, from.y);
+    context.lineTo(to.x, to.y);
+    context.stroke();
+  });
+
+  turns.forEach((point) => {
+    const gradient = context.createRadialGradient(
+      point.x - oilWidth * 0.2,
+      point.y - oilWidth * 0.22,
+      0,
+      point.x,
+      point.y,
+      oilWidth * 0.62,
+    );
+    gradient.addColorStop(0, colors.highlight);
+    gradient.addColorStop(0.34, colors.body);
+    gradient.addColorStop(1, colors.shadow);
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.arc(point.x, point.y, oilWidth * 0.56, 0, Math.PI * 2);
+    context.fill();
+  });
+
+  if (colors.sheen.length > 1) {
+    context.globalCompositeOperation = "overlay";
+    context.lineWidth = oilWidth * 0.82;
+    context.globalAlpha = 0.62;
+    const sheenSpan = cellWidth * 1.9;
+    const drift = ((elapsedMilliseconds * flowSpeed * 0.45) / 1000) % sheenSpan;
+    segments.forEach(({ from, to, phase }) => {
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const length = Math.hypot(dx, dy) || 1;
+      const unitX = dx / length;
+      const unitY = dy / length;
+      const originX = from.x - unitX * (drift + phase * 0.4);
+      const originY = from.y - unitY * (drift + phase * 0.4);
+      const gradient = context.createLinearGradient(
+        originX,
+        originY,
+        originX + unitX * sheenSpan,
+        originY + unitY * sheenSpan,
+      );
+      colors.sheen.forEach((color, index) => {
+        gradient.addColorStop(index / (colors.sheen.length - 1), color);
+      });
+      context.strokeStyle = gradient;
+      context.beginPath();
+      context.moveTo(from.x, from.y);
+      context.lineTo(to.x, to.y);
+      context.stroke();
+    });
+    context.globalCompositeOperation = "source-over";
+  }
+
+  context.strokeStyle = colors.highlight;
+  context.globalAlpha = 0.3 * breathe;
+  context.lineWidth = Math.max(1, oilWidth * 0.13);
+  segments.forEach((segment) => {
+    const normal = litNormal(segment);
+    const shiftX = normal.x * oilWidth * 0.26;
+    const shiftY = normal.y * oilWidth * 0.26;
+    context.beginPath();
+    context.moveTo(segment.from.x + shiftX, segment.from.y + shiftY);
+    context.lineTo(segment.to.x + shiftX, segment.to.y + shiftY);
+    context.stroke();
+  });
+
+  // Slugs of heavier oil riding downstream. This is the pass that actually
+  // communicates flow, so it is wide, bright, and unmistakably in motion.
+  const slugLength = globSpacing * 0.52;
+  const slugGap = globSpacing;
+  context.globalAlpha = 0.62 * strength;
+  context.lineWidth = oilWidth * 0.72;
+  context.strokeStyle = colors.highlight;
+  context.shadowColor = colors.glow;
+  context.shadowBlur = cellWidth * 0.03;
+  context.setLineDash([slugLength, slugGap]);
+  segments.forEach(({ from, to, phase }) => {
+    context.lineDashOffset = travelled - phase;
+    context.beginPath();
+    context.moveTo(from.x, from.y);
+    context.lineTo(to.x, to.y);
+    context.stroke();
+  });
+  context.shadowBlur = 0;
+
+  // A tighter glint sitting on the lit crown of each slug, running at the same
+  // speed so the two read as one moving body rather than two effects.
+  context.globalAlpha = 0.85 * strength * breathe;
+  context.lineWidth = Math.max(1.2, oilWidth * 0.2);
+  context.setLineDash([slugLength * 0.42, slugGap + slugLength * 0.58]);
+  segments.forEach((segment) => {
+    const normal = litNormal(segment);
+    const shiftX = normal.x * oilWidth * 0.24;
+    const shiftY = normal.y * oilWidth * 0.24;
+    context.lineDashOffset = travelled - segment.phase + slugLength * 0.2;
+    context.beginPath();
+    context.moveTo(segment.from.x + shiftX, segment.from.y + shiftY);
+    context.lineTo(segment.to.x + shiftX, segment.to.y + shiftY);
+    context.stroke();
+  });
+
+  // Trailing wake behind each slug, half speed and barely there, which gives
+  // the motion somewhere to come from.
+  context.globalAlpha = 0.22 * strength;
+  context.lineWidth = oilWidth * 0.34;
+  context.setLineDash([slugLength * 1.6, slugGap * 0.7]);
+  segments.forEach(({ from, to, phase }) => {
+    context.lineDashOffset = travelled * 0.55 - phase;
+    context.beginPath();
+    context.moveTo(from.x, from.y);
+    context.lineTo(to.x, to.y);
+    context.stroke();
+  });
+
+  context.setLineDash([]);
+  context.restore();
+}
+
 function drawFlowParticles(
   context: CanvasRenderingContext2D,
   segments: readonly FlowSegment[],
@@ -530,11 +876,13 @@ function drawFlowParticles(
 }
 
 export function TracksCanvas({
+  surface,
   board,
   puzzle,
   flow,
   crossingGaps,
   assets,
+  celebration,
   disabled,
   solutionShown,
   hud,
@@ -544,7 +892,9 @@ export function TracksCanvas({
   const [particleImage, setParticleImage] = useState<HTMLImageElement | null>(null);
   const particleDefinition = assets.flowParticle;
   const assetUrls = useMemo(
-    () => [assets.node, ...(particleDefinition ? [particleDefinition.src] : [])],
+    // Materials that draw their own flow (oil) carry no sprite, so the optional
+    // src must be filtered out rather than handed to the texture loader.
+    () => [assets.node, ...(particleDefinition?.src ? [particleDefinition.src] : [])],
     [assets.node, particleDefinition],
   );
   const cells = useMemo(
@@ -573,7 +923,8 @@ export function TracksCanvas({
   );
 
   useEffect(() => {
-    if (!particleDefinition) {
+    // Materials that render their own flow declare no sprite source.
+    if (!particleDefinition?.src) {
       setParticleImage(null);
       return;
     }
@@ -604,7 +955,7 @@ export function TracksCanvas({
       const fluid = solutionShown ? cssVar(host, "--gold", "#d3a44a") : cssVar(host, "--flow", "#15967f");
       const start = cssVar(host, "--start", "#3686ae");
       const end = cssVar(host, "--end", "#d85f50");
-      const surface = cssVar(host, "--game-surface", "#ffffff");
+      const surfaceColor = cssVar(host, "--game-surface", "#ffffff");
       const nodeTint = cssVar(host, "--track-node-asset", track);
       const pipeWidth = cellWidth * PIPE_WIDTH_RATIO;
       const channelWidth = cellWidth * CHANNEL_WIDTH_RATIO;
@@ -619,6 +970,7 @@ export function TracksCanvas({
           const isStart = puzzle.start[0] === row && puzzle.start[1] === col;
           const isEnd = puzzle.end[0] === row && puzzle.end[1] === col;
           addRect(root, x, y, cellWidth, cellHeight, mask === 0 ? empty : cell);
+          drawCellSurface(root, textures, surface, x, y, cellWidth, cellHeight);
           if (isStart || isEnd) {
             addCircle(root, centerX, centerY, cellWidth * 0.34, isStart ? start : end).alpha = 0.13;
           }
@@ -642,10 +994,20 @@ export function TracksCanvas({
         ...geometry.arms,
         ...geometry.bridges.filter((segment) => segment.layer !== "underpass"),
       ];
-      strokeSegments(root, underpassSegments, track, pipeWidth, 1, "butt");
-      strokeSegments(root, foregroundSegments, track, pipeWidth);
-      strokeSegments(root, underpassSegments, channel, channelWidth, 1, "butt");
-      strokeSegments(root, foregroundSegments, channel, channelWidth);
+      if (assets.pipeStyle === "cylindrical") {
+        const casing = cssVar(host, "--track-casing", track);
+        const sheen = cssVar(host, "--track-sheen", channel);
+        const cylinder = { casing: track, body: casing, highlight: sheen };
+        strokeCylinder(root, underpassSegments, pipeWidth, cylinder, "butt");
+        strokeCylinder(root, foregroundSegments, pipeWidth, cylinder);
+        strokeSegments(root, underpassSegments, channel, channelWidth * 0.8, 0.75, "butt");
+        strokeSegments(root, foregroundSegments, channel, channelWidth * 0.8, 0.75);
+      } else {
+        strokeSegments(root, underpassSegments, track, pipeWidth, 1, "butt");
+        strokeSegments(root, foregroundSegments, track, pipeWidth);
+        strokeSegments(root, underpassSegments, channel, channelWidth, 1, "butt");
+        strokeSegments(root, foregroundSegments, channel, channelWidth);
+      }
 
       board.forEach((rowValues, row) => {
         rowValues.forEach((mask, col) => {
@@ -654,12 +1016,18 @@ export function TracksCanvas({
           }
           const centerX = (col + 0.5) * cellWidth;
           const centerY = (row + 0.5) * cellHeight;
-          const node = addSprite(root, textures.get(assets.node), centerX, centerY, cellWidth * 0.23);
+          const node = addSprite(
+            root,
+            textures.get(assets.node),
+            centerX,
+            centerY,
+            cellWidth * NODE_WIDTH_RATIO,
+          );
           if (node) {
             node.tint = nodeTint;
           } else {
-            addCircle(root, centerX, centerY, cellWidth * 0.105, track);
-            addCircle(root, centerX, centerY, cellWidth * 0.058, channel);
+            addCircle(root, centerX, centerY, cellWidth * PIPE_WIDTH_RATIO * 0.58, track);
+            addCircle(root, centerX, centerY, cellWidth * PIPE_WIDTH_RATIO * 0.32, channel);
           }
         });
       });
@@ -670,22 +1038,38 @@ export function TracksCanvas({
       strokeSegments(root, lowerFlow, fluid, fluidWidth);
 
       const overpassBridges = geometry.bridges.filter((segment) => segment.layer === "overpass");
-      strokeSegments(root, overpassBridges, track, pipeWidth, 1, "butt");
-      strokeSegments(root, overpassBridges, channel, channelWidth, 1, "butt");
+      if (assets.pipeStyle === "cylindrical") {
+        strokeCylinder(
+          root,
+          overpassBridges,
+          pipeWidth,
+          {
+            casing: track,
+            body: cssVar(host, "--track-casing", track),
+            highlight: cssVar(host, "--track-sheen", channel),
+          },
+          "butt",
+        );
+        strokeSegments(root, overpassBridges, channel, channelWidth * 0.8, 0.75, "butt");
+      } else {
+        strokeSegments(root, overpassBridges, track, pipeWidth, 1, "butt");
+        strokeSegments(root, overpassBridges, channel, channelWidth, 1, "butt");
+      }
       strokeSegments(root, overpassFlow, fluid, fluidWidth * 1.7, 0.18);
       strokeSegments(root, overpassFlow, fluid, fluidWidth);
 
-      addCircle(root, geometry.startPoint.x, geometry.startPoint.y, cellWidth * 0.095, start, {
-        color: surface,
+      const terminalRadius = cellWidth * TERMINAL_RADIUS_RATIO;
+      addCircle(root, geometry.startPoint.x, geometry.startPoint.y, terminalRadius, start, {
+        color: surfaceColor,
         width: 4,
       });
-      addCircle(root, geometry.endPoint.x, geometry.endPoint.y, cellWidth * 0.095, end, {
-        color: surface,
+      addCircle(root, geometry.endPoint.x, geometry.endPoint.y, terminalRadius, end, {
+        color: surfaceColor,
         width: 4,
       });
       addRect(root, 2, 2, size - 4, size - 4, "transparent", { color: grid, width: 5 }, 4);
     },
-    [assets.node, board, geometry, puzzle.end, puzzle.start, solutionShown],
+    [assets.node, assets.pipeStyle, board, geometry, puzzle.end, puzzle.start, solutionShown, surface],
   );
 
   const animate = useCallback(
@@ -708,7 +1092,14 @@ export function TracksCanvas({
         : cssVar(host, "--flow-shadow", "#0b6658");
       const start = cssVar(host, "--start", "#3686ae");
       const end = cssVar(host, "--end", "#d85f50");
-      const surface = cssVar(host, "--game-surface", "#ffffff");
+      const surfaceColor = cssVar(host, "--game-surface", "#ffffff");
+      const sheenColors = [
+        cssVar(host, "--flow-sheen-1", "#6f56c8"),
+        cssVar(host, "--flow-sheen-2", "#2f8fbf"),
+        cssVar(host, "--flow-sheen-3", "#33a883"),
+        cssVar(host, "--flow-sheen-4", "#c7912f"),
+        cssVar(host, "--flow-sheen-5", "#b34a6b"),
+      ];
       const lowerFlow = geometry.flowSegments.filter((segment) => segment.layer !== "overpass");
       const overpassFlow = geometry.flowSegments.filter((segment) => segment.layer === "overpass");
       const overpassBridges = geometry.bridges.filter((segment) => segment.layer === "overpass");
@@ -718,7 +1109,17 @@ export function TracksCanvas({
           return;
         }
 
-        if (particleDefinition?.material === "liquid") {
+        if (particleDefinition?.material === "oil") {
+          drawOilSegments(context, segments, particleDefinition, elapsedMilliseconds, cellWidth, {
+            body: fluid,
+            glow,
+            highlight: pulse,
+            shadow: fluidShadow,
+            // The reveal state repaints everything gold, where a rainbow sheen
+            // would fight the signal, so iridescence is dropped there.
+            sheen: solutionShown ? [] : sheenColors,
+          });
+        } else if (particleDefinition?.material === "liquid") {
           drawLiquidSegments(context, segments, elapsedMilliseconds, cellWidth, {
             body: fluid,
             glow,
@@ -777,18 +1178,32 @@ export function TracksCanvas({
       const drawEndpoint = (point: Point, color: string) => {
         context.shadowBlur = 0;
         context.fillStyle = color;
-        context.strokeStyle = surface;
+        context.strokeStyle = surfaceColor;
         context.lineWidth = 4;
         context.beginPath();
-        context.arc(point.x, point.y, cellWidth * 0.095, 0, Math.PI * 2);
+        context.arc(point.x, point.y, cellWidth * TERMINAL_RADIUS_RATIO, 0, Math.PI * 2);
         context.fill();
         context.stroke();
       };
       drawEndpoint(geometry.startPoint, start);
       drawEndpoint(geometry.endPoint, end);
+
+      if (celebration !== null) {
+        drawTracksCelebration(
+          {
+            context,
+            cellWidth,
+            cellHeight: cellWidth,
+            progress: celebration,
+            color: cssVar(host, "--flow-bright", "#a68348"),
+          },
+          buildRoute(board, puzzle, cellWidth, cellWidth),
+        );
+      }
+
       context.restore();
     },
-    [geometry, particleDefinition, particleImage, solutionShown],
+    [board, celebration, geometry, particleDefinition, particleImage, puzzle, solutionShown],
   );
 
   return (
@@ -798,8 +1213,8 @@ export function TracksCanvas({
       rows={puzzle.size}
       cols={puzzle.size}
       cells={cells}
-      assetUrls={assetUrls}
-      hud={hud}
+      assetUrls={withSurfaceAssets(assetUrls, surface)}
+      hud={hud && surface?.hud ? { ...hud, style: surface.hud } : hud}
       draw={draw}
       animate={animate}
       animationFps={30}

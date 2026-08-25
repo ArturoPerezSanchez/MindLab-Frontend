@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Cratered moon</title>
+  <circle cx="32" cy="32" r="26" fill="#7ea6d4"/>
+  <circle cx="32" cy="32" r="26" fill="none" stroke="#4f7cae" stroke-width="2"/>
+  <circle cx="22" cy="24" r="6" fill="#5d87b8" opacity=".8"/>
+  <circle cx="41" cy="38" r="7.5" fill="#5d87b8" opacity=".8"/>
+  <circle cx="24" cy="43" r="3.5" fill="#5d87b8" opacity=".8"/>
+  <circle cx="43" cy="20" r="3" fill="#5d87b8" opacity=".8"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Shattered crystal</title>
+  <g stroke="#d9c2e8" stroke-width="3" stroke-linecap="round">
+    <path d="M32 30 6 12M32 30 58 10M32 30 4 46M32 30l28 18M32 30v-28"/>
+  </g>
+  <path d="M32 16 44 30 36 52 30 34Z" fill="#b04ccf"/>
+  <path d="M32 16 20 32l10 20Z" fill="#d68fe8"/>
+  <path d="M18 34 8 56l16-10Z" fill="#8f5aa8"/>
+  <path d="M46 34 58 54 42 46Z" fill="#8f5aa8"/>
+</svg>

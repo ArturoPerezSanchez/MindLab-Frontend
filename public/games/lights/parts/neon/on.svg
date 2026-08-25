@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Neon on</title>
+  <rect x="6" y="24" width="52" height="16" rx="8" fill="none" stroke="#f6d98a" stroke-width="12" opacity=".45"/>
+  <rect x="6" y="24" width="52" height="16" rx="8" fill="none" stroke="#efc85f" stroke-width="6"/>
+  <rect x="6" y="24" width="52" height="16" rx="8" fill="none" stroke="#fffbe8" stroke-width="2.4"/>
+  <rect x="4" y="26" width="6" height="12" rx="2" fill="#8e7031"/>
+  <rect x="54" y="26" width="6" height="12" rx="2" fill="#8e7031"/>
+</svg>

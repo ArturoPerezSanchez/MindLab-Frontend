@@ -23,6 +23,7 @@ import {
   X,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { useWinSequence } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
 import type { CanvasCellPosition } from "@/shared/canvas/CanvasBoard";
@@ -92,6 +93,8 @@ export function TangoGame() {
     status.isSolved && !assisted && (bestTime === null || elapsedSeconds < bestTime);
   const displayedBestTime = isNewBest ? elapsedSeconds : bestTime;
   const visibleConflicts = conflictFeedback?.conflicts ?? EMPTY_CONFLICTS;
+
+  const win = useWinSequence({ solved: status.isSolved, runKey: puzzle, skip: showSolution });
 
   useGameResultReporter({
     runKey: puzzle,
@@ -334,10 +337,12 @@ export function TangoGame() {
           ) : (
             <>
               <TangoCanvas
+                surface={skin.assets.surface}
                 puzzle={puzzle}
                 entries={entries}
                 symbols={skin.assets.symbols}
                 conflicts={visibleConflicts}
+                celebration={win.isCelebrating ? win.progress : null}
                 showSolution={showSolution}
                 hud={{
                   metrics: [
@@ -408,7 +413,7 @@ export function TangoGame() {
                 </>
               )}
 
-              {status.isSolved && (
+              {win.isRevealed && (
                 <div className="board-popup win-popup" role="dialog" aria-modal="true" aria-label="Puzzle solved">
                   <div className="confetti-field" aria-hidden="true">
                     {Array.from({ length: 18 }, (_, index) => (

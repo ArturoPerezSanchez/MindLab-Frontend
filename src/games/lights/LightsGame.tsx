@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { pickLightsSweep, useWinSequence, type LightsSweep } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
 import { fetchPuzzle } from "./api";
@@ -67,6 +68,14 @@ export function LightsGame() {
     [currentSolution, showSolution],
   );
   const displayedBestTime = isNewBest ? elapsedSeconds : bestTime;
+
+  // Chosen once per puzzle so a repaint cannot swap patterns mid-sweep.
+  const [sweep, setSweep] = useState<LightsSweep>(pickLightsSweep);
+  useEffect(() => {
+    setSweep(pickLightsSweep());
+  }, [puzzle]);
+
+  const win = useWinSequence({ solved, runKey: puzzle, skip: showSolution });
 
   useGameResultReporter({
     runKey: puzzle,
@@ -279,9 +288,12 @@ export function LightsGame() {
           ) : (
             <>
               <LightsCanvas
+                surface={skin.assets.surface}
                 board={board}
                 bulbs={skin.assets.bulbs}
                 solutionPresses={highlightedSolution}
+                celebration={win.isCelebrating ? win.progress : null}
+                sweep={sweep}
                 disabled={showSolution || solved}
                 hud={{
                   metrics: [
@@ -299,7 +311,7 @@ export function LightsGame() {
                 onActivate={({ row, col }) => press(row, col)}
               />
 
-              {solved && (
+              {win.isRevealed && (
                 <div className="board-popup win-popup" role="dialog" aria-modal="true" aria-label="Puzzle solved">
                   <div className="confetti-field" aria-hidden="true">
                     {Array.from({ length: 18 }, (_, index) => (

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img">
+  <title>Marker buoy</title>
+  <path d="M30 6h4v14h-4z" fill="#8b959c"/>
+  <path d="M34 7h16l-5 6 5 6H34Z" fill="#cf5147"/>
+  <path d="M18 22h28l6 20a22 22 0 0 1-40 0Z" fill="#e0932f"/>
+  <path d="M14.6 34h34.8l2.6 8H12Z" fill="#f1f2f3" opacity=".7"/>
+  <ellipse cx="32" cy="22" rx="14" ry="4" fill="#f0a648"/>
+</svg>

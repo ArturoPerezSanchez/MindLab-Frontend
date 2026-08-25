@@ -23,6 +23,7 @@ import {
   X,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { useWinSequence } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
 import type { CanvasBoardPointer } from "@/shared/canvas/CanvasBoard";
@@ -101,6 +102,19 @@ export function ZipGame() {
   const totalCells = selectedSize * selectedSize;
   const displayedBestTime = isNewBest ? elapsedSeconds : bestTime;
   const progress = totalCells === 0 ? 0 : (path.length / totalCells) * 100;
+
+  // Zip needs no board animation - the pause alone gives the skin's reveal
+  // image a moment to be seen. It composes with the existing reveal gate
+  // rather than replacing it, so image skins still wait for their own
+  // completion signal on top of this.
+  const win = useWinSequence({
+    solved,
+    runKey: puzzle,
+    skip: showSolution,
+    // Longer than the other games: there is no animation to watch, so the
+    // whole point of the pause is time to look at the completed route.
+    durationMs: 2200,
+  });
 
   useGameResultReporter({
     runKey: puzzle,
@@ -405,6 +419,7 @@ export function ZipGame() {
           ) : (
             <>
               <ZipCanvas
+                surface={skin.assets.surface}
                 puzzle={puzzle}
                 path={showSolution ? puzzle.solution : path}
                 revealImage={revealImage}
@@ -482,7 +497,7 @@ export function ZipGame() {
                 </>
               )}
 
-              {solved && showWinSummary && (!revealImage || completionRevealComplete) && (
+              {win.isRevealed && showWinSummary && (!revealImage || completionRevealComplete) && (
                 <div className="board-popup win-popup" role="dialog" aria-modal="true" aria-label="Puzzle solved">
                   <div className="confetti-field" aria-hidden="true">
                     {Array.from({ length: 18 }, (_, index) => (
@@ -531,7 +546,7 @@ export function ZipGame() {
                 </div>
               )}
 
-              {solved && !showWinSummary && (!revealImage || completionRevealComplete) && (
+              {win.isRevealed && !showWinSummary && (!revealImage || completionRevealComplete) && (
                 <button
                   className="win-reopen"
                   type="button"

@@ -11,6 +11,16 @@ export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    // Build-time helpers run under Node, not in a browser, so they legitimately
+    // reach for `process`, `console`, and Node's `fetch`.
+    files: ["scripts/**/*.{js,mjs}", "*.config.{js,ts}"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: globals.node,
+      parserOptions: { ecmaVersion: "latest", sourceType: "module" },
+    },
+  },
+  {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: 2022,

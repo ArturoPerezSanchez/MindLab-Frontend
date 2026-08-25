@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { BarChart3, ExternalLink, Link, LogIn, LogOut, UserRound } from "lucide-react";
+import { BarChart3, ExternalLink, Link, LogOut, UserRound } from "lucide-react";
 import { type GameStat, type ProfileGender, useAuth } from "@/features/auth/AuthProvider";
 import { GAME_LABELS } from "@/shared/gameOptions";
+import { FacebookIcon, GoogleIcon } from "@/shared/icons/SocialIcons";
 
 function formatTime(seconds: number | null): string {
   if (seconds === null) {
@@ -47,7 +48,9 @@ export function AccountView() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [stats, setStats] = useState<GameStat[]>([]);
-  const enabledProviders = socialProviders.filter((provider) => provider.enabled);
+  // Every known provider is rendered; unconfigured ones appear disabled rather
+  // than vanishing, so the sign-in option stays visible during setup.
+  const providerIcons = { google: GoogleIcon, facebook: FacebookIcon } as const;
 
   useEffect(() => {
     if (user) {
@@ -223,20 +226,29 @@ export function AccountView() {
               <button type="button" aria-pressed={mode === "login"} onClick={() => setMode("login")}>Sign in</button>
               <button type="button" aria-pressed={mode === "register"} onClick={() => setMode("register")}>Register</button>
             </div>
-            {enabledProviders.length > 0 && (
+            {socialProviders.length > 0 && (
               <>
                 <div className="social-login-row">
-                  {enabledProviders.map((provider) => (
-                    <button
-                      className="secondary-action"
-                      type="button"
-                      key={provider.id}
-                      onClick={() => startSocialLogin(provider.id)}
-                    >
-                      <LogIn aria-hidden="true" size={17} />
-                      Continue with {provider.label}
-                    </button>
-                  ))}
+                  {socialProviders.map((provider) => {
+                    const ProviderIcon = providerIcons[provider.id];
+                    return (
+                      <button
+                        className="secondary-action"
+                        type="button"
+                        key={provider.id}
+                        disabled={!provider.enabled}
+                        title={
+                          provider.enabled
+                            ? undefined
+                            : `${provider.label} sign-in is not configured on this server yet.`
+                        }
+                        onClick={() => startSocialLogin(provider.id)}
+                      >
+                        <ProviderIcon aria-hidden="true" size={17} />
+                        Continue with {provider.label}
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="account-divider"><span>or</span></div>
               </>

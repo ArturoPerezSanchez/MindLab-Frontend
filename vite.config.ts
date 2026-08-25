@@ -21,6 +21,10 @@ export default defineConfig(({ mode }) => {
         "/api/v1": {
           target: gamesApiOrigin,
           changeOrigin: true,
+          // Multiplayer rooms are a WebSocket at /api/v1/multiplayer/ws. Without
+          // this the proxy answers the upgrade with a plain 200 and the socket
+          // never opens.
+          ws: true,
         },
       },
     },

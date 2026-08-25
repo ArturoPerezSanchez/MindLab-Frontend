@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="256" height="256" shape-rendering="crispEdges">
+  <!--
+    Retro bevelled cell. Pure black and white at low alpha so it shades whatever
+    region colour sits underneath rather than fighting it, in the manner of the
+    Mine Islands XP Classic tiles.
+  -->
+  <g fill="#ffffff" opacity="0.38">
+    <rect x="0" y="0" width="32" height="3"/>
+    <rect x="0" y="0" width="3" height="32"/>
+  </g>
+  <g fill="#000000" opacity="0.30">
+    <rect x="0" y="29" width="32" height="3"/>
+    <rect x="29" y="0" width="3" height="32"/>
+  </g>
+  <!-- Ordered dither, the cheapest way to read as 8-bit at any zoom. -->
+  <g fill="#000000" opacity="0.10">
+    <rect x="5" y="5" width="2" height="2"/>
+    <rect x="11" y="5" width="2" height="2"/>
+    <rect x="17" y="5" width="2" height="2"/>
+    <rect x="23" y="5" width="2" height="2"/>
+    <rect x="8" y="11" width="2" height="2"/>
+    <rect x="14" y="11" width="2" height="2"/>
+    <rect x="20" y="11" width="2" height="2"/>
+    <rect x="26" y="11" width="2" height="2"/>
+    <rect x="5" y="17" width="2" height="2"/>
+    <rect x="11" y="17" width="2" height="2"/>
+    <rect x="17" y="17" width="2" height="2"/>
+    <rect x="23" y="17" width="2" height="2"/>
+    <rect x="8" y="23" width="2" height="2"/>
+    <rect x="14" y="23" width="2" height="2"/>
+    <rect x="20" y="23" width="2" height="2"/>
+    <rect x="26" y="23" width="2" height="2"/>
+  </g>
+</svg>

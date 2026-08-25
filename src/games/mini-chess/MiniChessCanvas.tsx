@@ -6,8 +6,11 @@ import {
   type CanvasBoardPointer,
   type CanvasCellPosition,
 } from "@/shared/canvas/CanvasBoard";
+import { drawCellSurface, withSurfaceAssets } from "@/shared/canvas/surface";
+import type { BoardSurface } from "@/features/skins/skins";
 import { addCircle, addLabel, addRect, addSprite, cssVar } from "@/shared/canvas/drawing";
 import { isBottomRank, isDarkSquare, isLeftFile, pieceLabel } from "./game";
+import { pieceUrl, type ChessPieceSources } from "./pieceSources";
 import type { BoardPiece, LastMove, SideName, SquareId } from "./types";
 
 export type CanvasDragPreview = {
@@ -17,13 +20,15 @@ export type CanvasDragPreview = {
 };
 
 type MiniChessCanvasProps = {
+  /** Material laid over the cell colours by the chosen board. */
+  surface?: BoardSurface;
   width: number;
   height: number;
   orientation: SideName;
   squares: readonly SquareId[];
   pieces: ReadonlyMap<SquareId, BoardPiece>;
-  pieceSetRoot: string;
-  pieceExtension: "svg" | "png" | "webp";
+  /** One source per piece type, so sets can be mixed piece by piece. */
+  pieceSources: ChessPieceSources;
   selectedSquare: SquareId | null;
   targets: ReadonlySet<SquareId>;
   lastMove: LastMove | null;
@@ -41,18 +46,14 @@ type MiniChessCanvasProps = {
   onPointerCancel: () => void;
 };
 
-function pieceUrl(root: string, extension: string, piece: BoardPiece): string {
-  return `${root}/${piece.color}${piece.type}.${extension}`;
-}
-
 export function MiniChessCanvas({
+  surface,
   width,
   height,
   orientation,
   squares,
   pieces,
-  pieceSetRoot,
-  pieceExtension,
+  pieceSources,
   selectedSquare,
   targets,
   lastMove,
@@ -84,10 +85,10 @@ export function MiniChessCanvas({
   const assets = useMemo(
     () =>
       [...new Set([
-        ...[...pieces.values()].map((piece) => pieceUrl(pieceSetRoot, pieceExtension, piece)),
-        ...(dragPreview ? [pieceUrl(pieceSetRoot, pieceExtension, dragPreview.piece)] : []),
+        ...[...pieces.values()].map((piece) => pieceUrl(pieceSources, piece)),
+        ...(dragPreview ? [pieceUrl(pieceSources, dragPreview.piece)] : []),
       ])],
-    [dragPreview, pieceExtension, pieceSetRoot, pieces],
+    [dragPreview, pieceSources, pieces],
   );
 
   const draw = useCallback(
@@ -106,6 +107,7 @@ export function MiniChessCanvas({
         const y = row * cellHeight;
         const piece = pieces.get(square);
         addRect(root, x, y, cellWidth, cellHeight, isDarkSquare(square) ? dark : light);
+        drawCellSurface(root, textures, surface, x, y, cellWidth, cellHeight);
 
         if (lastMove?.from === square || lastMove?.to === square) {
           addRect(root, x, y, cellWidth, cellHeight, accent).alpha = 0.22;
@@ -130,7 +132,7 @@ export function MiniChessCanvas({
         if (piece && draggingSquare !== square) {
           addSprite(
             root,
-            textures.get(pieceUrl(pieceSetRoot, pieceExtension, piece)),
+            textures.get(pieceUrl(pieceSources, piece)),
             x + cellWidth / 2,
             y + cellHeight / 2,
             cellWidth * 0.78,
@@ -159,7 +161,7 @@ export function MiniChessCanvas({
       if (dragPreview) {
         const preview = addSprite(
           root,
-          textures.get(pieceUrl(pieceSetRoot, pieceExtension, dragPreview.piece)),
+          textures.get(pieceUrl(pieceSources, dragPreview.piece)),
           dragPreview.x,
           dragPreview.y,
           cellWidth * 0.86,
@@ -188,11 +190,11 @@ export function MiniChessCanvas({
       height,
       lastMove,
       orientation,
-      pieceExtension,
-      pieceSetRoot,
+      pieceSources,
       pieces,
       selectedSquare,
       squares,
+      surface,
       targets,
       width,
       wrongSquare,
@@ -206,8 +208,8 @@ export function MiniChessCanvas({
       rows={height}
       cols={width}
       cells={cells}
-      assetUrls={assets}
-      hud={hud}
+      assetUrls={withSurfaceAssets(assets, surface)}
+      hud={hud && surface?.hud ? { ...hud, style: surface.hud } : hud}
       draw={draw}
       activateOnPointer={false}
       onCellActivate={onActivate}

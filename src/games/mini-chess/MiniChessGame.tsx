@@ -14,6 +14,7 @@ import {
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
+import { pieceSymbolUrl } from "./pieceSources";
 import type { CanvasBoardPointer } from "@/shared/canvas/CanvasBoard";
 import { fetchPuzzle } from "./api";
 import {
@@ -456,7 +457,7 @@ export function MiniChessGame() {
           <div className="brand-lockup">
             <span className="brand-mark chess-brand-mark" aria-hidden="true">
               <img
-                src={`${skin.assets.pieceSetRoot}/bn.${skin.assets.pieceExtension}`}
+                src={pieceSymbolUrl(skin.assets.pieces, "b", "n")}
                 alt=""
               />
             </span>
@@ -531,13 +532,13 @@ export function MiniChessGame() {
               </div>
 
               <MiniChessCanvas
+                surface={skin.assets.surface}
                 width={puzzle.boardWidth}
                 height={puzzle.boardHeight}
                 orientation={orientation}
                 squares={squares}
                 pieces={pieces}
-                pieceSetRoot={skin.assets.pieceSetRoot}
-                pieceExtension={skin.assets.pieceExtension}
+                pieceSources={skin.assets.pieces}
                 selectedSquare={selectedSquare}
                 targets={targets}
                 lastMove={lastMove}
@@ -650,10 +651,10 @@ export function MiniChessGame() {
             </div>
 
             <div className="piece-lineup" aria-hidden="true">
-              {["wk", "wq", "wr", "wb", "wn", "wp"].map((piece) => (
+              {(["k", "q", "r", "b", "n", "p"] as const).map((piece) => (
                 <img
                   key={piece}
-                  src={`${skin.assets.pieceSetRoot}/${piece}.${skin.assets.pieceExtension}`}
+                  src={pieceSymbolUrl(skin.assets.pieces, "w", piece)}
                   alt=""
                 />
               ))}
