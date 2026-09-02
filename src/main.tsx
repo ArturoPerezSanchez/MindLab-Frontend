@@ -1,3 +1,6 @@
+// Pixi's strict-CSP adapter replaces eval-based renderer code generation with
+// static implementations. Keep this loaded before React can mount a game.
+import "pixi.js/unsafe-eval";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "@/app/App";
