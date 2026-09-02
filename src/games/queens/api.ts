@@ -13,14 +13,12 @@ function assertBoard(board: number[][], size: number): void {
 /**
  * Loads a uniquely solvable Queens puzzle from the backend.
  *
- * The app asks for the solution so it can offer an optional reveal button.
- * Normal solve detection is still based on the visible game rules.
+ * The answer stays on the server so a recorded result can be checked against
+ * it. Solve detection has always been based on the visible game rules, so it is
+ * unaffected; the reveal button asks for the answer separately.
  */
 export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<Puzzle> {
-  const params = new URLSearchParams({
-    board_size: String(size),
-    solution: "true",
-  });
+  const params = new URLSearchParams({ board_size: String(size) });
 
   const response = await fetch(`${API_PATH}?${params}`, { signal });
 
@@ -34,7 +32,6 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
 
   return {
     board: payload.board,
-    solution: payload.solution,
     size,
   };
 }

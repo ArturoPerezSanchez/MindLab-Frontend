@@ -18,6 +18,8 @@ import {
   X,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { revealMineIslandsCell, type RevealedCell } from "@/shared/gamesApi";
+import { useRevealedSolution } from "@/shared/useRevealedSolution";
 import { useWinSequence } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
@@ -29,18 +31,33 @@ import {
   flagCount,
   formatTime,
   hintCell,
-  isSolved,
   positionKey,
-  revealCell,
   revealAll,
-  revealedSafeCount,
-  safeCount,
   toggleFlag,
 } from "./game";
 import { MineIslandsCanvas } from "./MineIslandsCanvas";
-import type { Position, Puzzle, VisibilityBoard } from "./types";
+import type { Board, CellValue, Position, Puzzle, VisibilityBoard } from "./types";
 
 const CONFETTI_COLORS = ["#2e6fce", "#e6b65c", "#2f8a63", "#e05d5d", "#242b34"];
+
+function withRevealedValues(puzzle: Puzzle, cells: RevealedCell[]): Puzzle {
+  const values = puzzle.values.map((row) => [...row]);
+  for (const cell of cells) {
+    values[cell.row][cell.col] = cell.value as CellValue;
+  }
+  return { ...puzzle, values };
+}
+
+function withRevealedVisibility(
+  visibility: VisibilityBoard,
+  cells: RevealedCell[],
+): VisibilityBoard {
+  const next = visibility.map((row) => [...row]);
+  for (const cell of cells) {
+    next[cell.row][cell.col] = "revealed";
+  }
+  return next;
+}
 
 export function MineIslandsGame() {
   const skin = useGameSkin("mine-islands");
@@ -53,23 +70,33 @@ export function MineIslandsGame() {
   const [error, setError] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
-  const [solutionRevealed, setSolutionRevealed] = useState(false);
   const [usedHint, setUsedHint] = useState(false);
   const [madeMistake, setMadeMistake] = useState(false);
   const [lost, setLost] = useState(false);
+  const [solved, setSolved] = useState(false);
+  const [revealedSafe, setRevealedSafe] = useState(0);
+  const [isRevealingCell, setIsRevealingCell] = useState(false);
+  const [interactionError, setInteractionError] = useState<string | null>(null);
   const [pressedMine, setPressedMine] = useState<Position | null>(null);
   const [isBoardPressed, setIsBoardPressed] = useState(false);
-  const [attemptKey, setAttemptKey] = useState<object>(() => ({}));
-
   const requestSequenceRef = useRef(0);
   const longPressTimerRef = useRef<number | null>(null);
   const skipClickRef = useRef<Set<string>>(new Set());
 
-  const solved = Boolean(puzzle && isSolved(puzzle.solution, visibility));
+  const {
+    solution: revealedSolution,
+    reveal: revealStoredSolution,
+    isRevealing: isRevealingSolution,
+    error: revealError,
+  } = useRevealedSolution<Board>(
+    "mine-islands",
+    `${selectedSize}x${selectedSize}`,
+    puzzle,
+  );
+  const solutionRevealed = revealedSolution !== null;
   const assisted = solutionRevealed || usedHint || madeMistake;
   const isNewBest = solved && !assisted && (bestTime === null || elapsedSeconds < bestTime);
-  const safeTotal = puzzle ? safeCount(puzzle.solution) : selectedSize * selectedSize;
-  const revealedSafe = puzzle ? revealedSafeCount(puzzle.solution, visibility) : 0;
+  const safeTotal = puzzle ? puzzle.size * puzzle.size - puzzle.mineCount : selectedSize * selectedSize;
   const flags = flagCount(visibility);
   const displayedBestTime = isNewBest ? elapsedSeconds : bestTime;
   const progress = safeTotal === 0 ? 0 : (revealedSafe / safeTotal) * 100;
@@ -78,16 +105,14 @@ export function MineIslandsGame() {
     [puzzle, showSolution, visibility],
   );
 
-  const win = useWinSequence({ solved, runKey: attemptKey, skip: showSolution });
+  const win = useWinSequence({ solved, runKey: puzzle, skip: showSolution });
 
   useGameResultReporter({
-    runKey: attemptKey,
+    runKey: puzzle,
     completed: solved || lost,
     game: "mine-islands",
     difficulty: `${selectedSize}x${selectedSize}`,
-    won: solved,
     time_seconds: elapsedSeconds,
-    assisted,
   });
 
   const initializePuzzle = useCallback((nextPuzzle: Puzzle, size: number) => {
@@ -96,13 +121,15 @@ export function MineIslandsGame() {
     setVisibility(createHiddenBoard(size));
     setElapsedSeconds(0);
     setShowSolution(false);
-    setSolutionRevealed(false);
     setUsedHint(false);
     setMadeMistake(false);
     setLost(false);
+    setSolved(false);
+    setRevealedSafe(0);
+    setIsRevealingCell(false);
+    setInteractionError(null);
     setPressedMine(null);
     setIsBoardPressed(false);
-    setAttemptKey({});
     const stored = window.localStorage.getItem(`mine-islands-best-${size}`);
     setBestTime(stored ? Number(stored) : null);
   }, []);
@@ -164,32 +191,51 @@ export function MineIslandsGame() {
   }, [elapsedSeconds, isNewBest, selectedSize]);
 
   const toggleFlagAt = (row: number, col: number) => {
-    if (!puzzle || showSolution || solved || lost) {
+    if (!puzzle || showSolution || solved || lost || isRevealingCell) {
       return;
     }
     setVisibility((current) => toggleFlag(current, row, col));
   };
 
-  const revealAt = (row: number, col: number) => {
-    if (!puzzle || showSolution || solved || lost) {
+  const revealAt = async (row: number, col: number) => {
+    if (
+      !puzzle ||
+      showSolution ||
+      solved ||
+      lost ||
+      isRevealingCell ||
+      visibility[row]?.[col] !== "hidden"
+    ) {
       return;
     }
 
-    const result = revealCell(puzzle.solution, visibility, row, col);
-    if (!result.changed) {
-      return;
-    }
+    setIsRevealingCell(true);
+    setInteractionError(null);
+    try {
+      const result = await revealMineIslandsCell(puzzle.puzzleHandle, row, col);
+      setPuzzle((current) => (current ? withRevealedValues(current, result.cells) : current));
+      setVisibility((current) => withRevealedVisibility(current, result.cells));
+      setRevealedSafe(result.revealed_count);
+      setSolved(result.solved);
 
-    setVisibility(result.visibility);
-    if (result.hitMine) {
-      setLost(true);
-      setMadeMistake(true);
-      setPressedMine([row, col]);
+      if (result.hit_mine) {
+        setLost(true);
+        setMadeMistake(true);
+        setPressedMine([row, col]);
+        const answer = await revealStoredSolution();
+        if (answer) {
+          setPuzzle((current) => (current ? { ...current, values: answer } : current));
+        }
+      }
+    } catch (cause) {
+      setInteractionError(cause instanceof Error ? cause.message : "Could not reveal that tile.");
+    } finally {
+      setIsRevealingCell(false);
     }
   };
 
   const beginPress = ({ event, row, col }: CanvasBoardPointer) => {
-    if (!puzzle || showSolution || solved || lost) {
+    if (!puzzle || showSolution || solved || lost || isRevealingCell) {
       return;
     }
     setIsBoardPressed(true);
@@ -211,47 +257,41 @@ export function MineIslandsGame() {
   };
 
   const retry = () => {
-    if (lost) {
-      void loadPuzzle(selectedSize);
-      return;
-    }
-
-    if (!puzzle) {
-      return;
-    }
-    setVisibility(createHiddenBoard(puzzle.size));
-    setShowSolution(false);
-    setLost(false);
-    setPressedMine(null);
-    setIsBoardPressed(false);
-    setAttemptKey({});
+    // The server owns reveal progress, so retrying requires a fresh handle.
+    void loadPuzzle(selectedSize);
   };
 
-  const revealHint = () => {
-    if (!puzzle || showSolution || solved || lost) {
+  const revealHint = async () => {
+    if (!puzzle || showSolution || solved || lost || isRevealingCell) {
       return;
     }
 
-    const hint = hintCell(puzzle.solution, visibility);
+    const answer = await revealStoredSolution();
+    const hint = answer ? hintCell(answer, visibility) : null;
     if (!hint) {
       return;
     }
 
-    const result = revealCell(puzzle.solution, visibility, hint[0], hint[1]);
-    setVisibility(result.visibility);
     setUsedHint(true);
+    await revealAt(hint[0], hint[1]);
   };
 
-  const toggleSolution = () => {
+  const toggleSolution = async () => {
     if (!puzzle || solved) {
       return;
     }
-    if (!showSolution) {
-      setSolutionRevealed(true);
+    if (showSolution) {
+      setShowSolution(false);
+      return;
+    }
+
+    const answer = await revealStoredSolution();
+    if (answer) {
+      setPuzzle((current) => (current ? { ...current, values: answer } : current));
       setLost(false);
       setPressedMine(null);
+      setShowSolution(true);
     }
-    setShowSolution((current) => !current);
   };
 
   const changeSize = (size: number) => {
@@ -378,7 +418,7 @@ export function MineIslandsGame() {
                     skipClickRef.current.delete(key);
                     return;
                   }
-                  revealAt(row, col);
+                  void revealAt(row, col);
                 }}
                 onContextMenu={({ row, col }) => toggleFlagAt(row, col)}
                 onPointerDown={beginPress}
@@ -446,15 +486,28 @@ export function MineIslandsGame() {
         </div>
 
         <div className="action-row" aria-label="Game controls">
-          <button className="secondary-action" type="button" onClick={revealHint} disabled={!puzzle || isLoading || showSolution || solved || lost}>
+          <button
+            className="secondary-action"
+            type="button"
+            onClick={() => void revealHint()}
+            disabled={
+              !puzzle ||
+              isLoading ||
+              isRevealingCell ||
+              isRevealingSolution ||
+              showSolution ||
+              solved ||
+              lost
+            }
+          >
             <ShieldCheck aria-hidden="true" size={18} />
             Hint
           </button>
           <button
             className="secondary-action"
             type="button"
-            onClick={toggleSolution}
-            disabled={!puzzle || isLoading || solved}
+            onClick={() => void toggleSolution()}
+            disabled={!puzzle || isLoading || isRevealingCell || isRevealingSolution || solved}
             aria-pressed={showSolution}
           >
             {showSolution ? <EyeOff aria-hidden="true" size={18} /> : <Eye aria-hidden="true" size={18} />}
@@ -467,9 +520,11 @@ export function MineIslandsGame() {
         </div>
 
         <p className="sr-only" aria-live="polite">
-          {solved
-            ? `Puzzle solved in ${formatTime(elapsedSeconds)}`
-            : `${revealedSafe} safe tiles revealed, ${flags} flags placed`}
+          {interactionError ||
+            revealError ||
+            (solved
+              ? `Puzzle solved in ${formatTime(elapsedSeconds)}`
+              : `${revealedSafe} safe tiles revealed, ${flags} flags placed`)}
         </p>
       </section>
 

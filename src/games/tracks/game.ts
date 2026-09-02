@@ -167,7 +167,7 @@ export function connectedTrackKeys(board: Board, start: Position): Set<string> {
 }
 
 export function isSolved(board: Board, puzzle: Puzzle): boolean {
-  return alignedCount(board, puzzle.solution) === trackCount(puzzle.solution);
+  return isConnectedSolution(board, puzzle.start, puzzle.end);
 }
 
 export function solutionPath(solution: Board, start: Position, end: Position): Position[] {
@@ -218,17 +218,15 @@ export function solutionPath(solution: Board, start: Position, end: Position): P
 }
 
 export function boardWithStartAligned(puzzle: Puzzle): Board {
-  const next = cloneBoard(puzzle.board);
-  next[puzzle.start[0]][puzzle.start[1]] = puzzle.solution[puzzle.start[0]][puzzle.start[1]];
-  return next;
+  return cloneBoard(puzzle.board);
 }
 
-export function correctFlowLength(board: Board, puzzle: Puzzle): number {
-  const path = solutionPath(puzzle.solution, puzzle.start, puzzle.end);
+export function correctFlowLength(board: Board, puzzle: Puzzle, solution: Board): number {
+  const path = solutionPath(solution, puzzle.start, puzzle.end);
   let length = 0;
 
   for (const [row, col] of path) {
-    if (board[row][col] !== puzzle.solution[row][col]) {
+    if (board[row][col] !== solution[row][col]) {
       break;
     }
     length += 1;
@@ -237,24 +235,24 @@ export function correctFlowLength(board: Board, puzzle: Puzzle): number {
   return length;
 }
 
-export function nextFlowHintCell(board: Board, puzzle: Puzzle): Position | null {
-  const path = solutionPath(puzzle.solution, puzzle.start, puzzle.end);
-  const index = correctFlowLength(board, puzzle);
+export function nextFlowHintCell(board: Board, puzzle: Puzzle, solution: Board): Position | null {
+  const path = solutionPath(solution, puzzle.start, puzzle.end);
+  const index = correctFlowLength(board, puzzle, solution);
   return path[index] ?? null;
 }
 
-export function applyFlowHint(board: Board, puzzle: Puzzle): Board {
+export function applyFlowHint(board: Board, puzzle: Puzzle, solution: Board): Board {
   const connected = connectedTrackKeys(board, puzzle.start);
-  const path = solutionPath(puzzle.solution, puzzle.start, puzzle.end);
+  const path = solutionPath(solution, puzzle.start, puzzle.end);
   const connectedWrongCell =
-    path.find(([row, col]) => connected.has(positionKey([row, col])) && board[row][col] !== puzzle.solution[row][col]) ??
+    path.find(([row, col]) => connected.has(positionKey([row, col])) && board[row][col] !== solution[row][col]) ??
     null;
-  const hint = connectedWrongCell ?? nextFlowHintCell(board, puzzle);
+  const hint = connectedWrongCell ?? nextFlowHintCell(board, puzzle, solution);
   if (!hint) {
     return board;
   }
   const next = cloneBoard(board);
-  next[hint[0]][hint[1]] = puzzle.solution[hint[0]][hint[1]];
+  next[hint[0]][hint[1]] = solution[hint[0]][hint[1]];
   return next;
 }
 

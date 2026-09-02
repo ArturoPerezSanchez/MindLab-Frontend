@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { useRevealedSolution } from "@/shared/useRevealedSolution";
 import { useWinSequence } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
@@ -364,16 +365,21 @@ export function TracksGame() {
   const [error, setError] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
-  const [solutionRevealed, setSolutionRevealed] = useState(false);
   const [usedHint, setUsedHint] = useState(false);
 
   const requestSequenceRef = useRef(0);
 
   const solved = Boolean(puzzle && isSolved(board, puzzle));
+  const {
+    solution: revealedSolution,
+    reveal,
+    isRevealing,
+  } = useRevealedSolution<Board>("tracks", `${selectedSize}x${selectedSize}`, puzzle);
+  const solutionRevealed = revealedSolution !== null;
   const assisted = solutionRevealed || usedHint;
   const isNewBest = solved && !assisted && (bestTime === null || elapsedSeconds < bestTime);
-  const totalTracks = puzzle ? trackCount(puzzle.solution) : 0;
-  const displayedBoard = showSolution && puzzle ? puzzle.solution : board;
+  const totalTracks = puzzle ? trackCount(puzzle.board) : 0;
+  const displayedBoard = showSolution && revealedSolution ? revealedSolution : board;
   const connectedFlow = useMemo(
     () => (puzzle ? connectedFlowMap(displayedBoard, puzzle.start) : new Map<string, FlowCell>()),
     [displayedBoard, puzzle],
@@ -389,9 +395,8 @@ export function TracksGame() {
     completed: solved,
     game: "tracks",
     difficulty: `${selectedSize}x${selectedSize}`,
-    won: true,
     time_seconds: elapsedSeconds,
-    assisted,
+    submission: board,
   });
 
   const initializePuzzle = useCallback((nextPuzzle: Puzzle, size: number) => {
@@ -401,7 +406,6 @@ export function TracksGame() {
     setHistory([]);
     setElapsedSeconds(0);
     setShowSolution(false);
-    setSolutionRevealed(false);
     setUsedHint(false);
     const stored = window.localStorage.getItem(`tracks-best-${size}`);
     setBestTime(stored ? Number(stored) : null);
@@ -469,8 +473,7 @@ export function TracksGame() {
       !puzzle ||
       showSolution ||
       solved ||
-      board[row][col] === 0 ||
-      (puzzle.start[0] === row && puzzle.start[1] === col)
+      board[row][col] === 0
     ) {
       return;
     }
@@ -497,24 +500,32 @@ export function TracksGame() {
     setShowSolution(false);
   };
 
-  const revealHint = () => {
+  const revealHint = async () => {
     if (!puzzle || showSolution || solved) {
       return;
     }
 
+    const answer = await reveal();
+    if (!answer) {
+      return;
+    }
+
     setHistory((current) => [...current, cloneBoard(board)]);
-    setBoard((current) => applyFlowHint(current, puzzle));
+    setBoard((current) => applyFlowHint(current, puzzle, answer));
     setUsedHint(true);
   };
 
-  const toggleSolution = () => {
+  const toggleSolution = async () => {
     if (!puzzle || solved) {
       return;
     }
-    if (!showSolution) {
-      setSolutionRevealed(true);
+    if (showSolution) {
+      setShowSolution(false);
+      return;
     }
-    setShowSolution((current) => !current);
+    if (await reveal()) {
+      setShowSolution(true);
+    }
   };
 
   const changeSize = (size: number) => {
@@ -677,15 +688,15 @@ export function TracksGame() {
             <RotateCcw aria-hidden="true" size={18} />
             Retry
           </button>
-          <button className="secondary-action" type="button" onClick={revealHint} disabled={!puzzle || isLoading || showSolution || solved}>
+          <button className="secondary-action" type="button" onClick={() => void revealHint()} disabled={!puzzle || isLoading || isRevealing || showSolution || solved}>
             <Lightbulb aria-hidden="true" size={18} />
             Hint
           </button>
           <button
             className="secondary-action"
             type="button"
-            onClick={toggleSolution}
-            disabled={!puzzle || isLoading || solved}
+            onClick={() => void toggleSolution()}
+            disabled={!puzzle || isLoading || isRevealing || solved}
             aria-pressed={showSolution}
           >
             {showSolution ? <EyeOff aria-hidden="true" size={18} /> : <Eye aria-hidden="true" size={18} />}

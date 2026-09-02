@@ -1,6 +1,6 @@
 import { apiPath } from "@/shared/api";
 import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
-import type { CellValue, Constraint, Puzzle, SymbolValue, TangoResponse } from "./types";
+import type { CellValue, Constraint, Puzzle, TangoResponse } from "./types";
 
 function isCell(value: unknown): value is CellValue {
   return value === null || value === 0 || value === 1;
@@ -12,19 +12,6 @@ function isBoard(value: unknown, size: number): value is CellValue[][] {
     value.length === size &&
     value.every(
       (row) => Array.isArray(row) && row.length === size && row.every((cell) => isCell(cell)),
-    )
-  );
-}
-
-function isSolution(value: unknown, size: number): value is SymbolValue[][] {
-  return (
-    Array.isArray(value) &&
-    value.length === size &&
-    value.every(
-      (row) =>
-        Array.isArray(row) &&
-        row.length === size &&
-        row.every((cell) => cell === 0 || cell === 1),
     )
   );
 }
@@ -51,14 +38,11 @@ function isConstraint(value: unknown, size: number): value is Constraint {
 }
 
 /**
- * Fetches a puzzle and its solution. The solution stays hidden in the UI until
- * the player explicitly asks for it.
+ * Fetches a puzzle. The answer stays on the server so a recorded result can be
+ * checked against it; the hint and reveal buttons request it separately.
  */
 export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<Puzzle> {
-  const params = new URLSearchParams({
-    board_size: String(size),
-    solution: "true",
-  });
+  const params = new URLSearchParams({ board_size: String(size) });
   const response = await fetch(`${apiPath("/tango")}?${params}`, { signal });
 
   if (!response.ok) {
@@ -69,7 +53,6 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
   if (
     payload.board_size !== size ||
     !isBoard(payload.board, size) ||
-    !isSolution(payload.solution, size) ||
     !Array.isArray(payload.constraints) ||
     !payload.constraints.every((constraint) => isConstraint(constraint, size))
   ) {
@@ -82,6 +65,5 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
     size,
     board: payload.board,
     constraints: payload.constraints,
-    solution: payload.solution,
   };
 }

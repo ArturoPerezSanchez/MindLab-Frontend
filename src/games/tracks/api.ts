@@ -1,7 +1,7 @@
 import { apiPath } from "@/shared/api";
 import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
-import { isConnectedSolution, isValidMask, trackCount } from "./game";
-import type { Board, Position, Puzzle, TracksResponse } from "./types";
+import { isValidMask } from "./game";
+import type { Board, Puzzle, TracksResponse } from "./types";
 
 function isBoard(value: unknown, size: number): value is Board {
   return (
@@ -32,7 +32,6 @@ function isPosition(value: unknown, size: number): value is [number, number] {
 export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<Puzzle> {
   const params = new URLSearchParams({
     board_size: String(size),
-    solution: "true",
   });
   const response = await fetch(`${apiPath("/tracks")}?${params}`, { signal });
 
@@ -45,10 +44,7 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
     payload.board_size !== size ||
     !isBoard(payload.board, size) ||
     !isPosition(payload.start, size) ||
-    !isPosition(payload.end, size) ||
-    !isBoard(payload.solution, size) ||
-    trackCount(payload.solution) < size ||
-    !isConnectedSolution(payload.solution, payload.start as Position, payload.end as Position)
+    !isPosition(payload.end, size)
   ) {
     throw new Error("The API returned an invalid Tracks puzzle.");
   }
@@ -60,6 +56,5 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
     board: payload.board,
     start: payload.start,
     end: payload.end,
-    solution: payload.solution,
   };
 }

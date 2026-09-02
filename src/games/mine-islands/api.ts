@@ -1,28 +1,21 @@
 import { apiPath } from "@/shared/api";
 import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
-import { mineCount, validateClues } from "./game";
 import type { Board, MineIslandsResponse, Puzzle } from "./types";
 
-function isSolutionBoard(value: unknown, size: number, mineTotal: number): value is Board {
+function isBlankBoard(value: unknown, size: number): value is null[][] {
   return (
     Array.isArray(value) &&
     value.length === size &&
-    value.every(
-      (row) =>
-        Array.isArray(row) &&
-        row.length === size &&
-        row.every((cell) => Number.isInteger(cell) && cell >= -1 && cell <= 8),
-    ) &&
-    mineCount(value as Board) === mineTotal &&
-    validateClues(value as Board, mineTotal)
+    value.every((row) => Array.isArray(row) && row.length === size && row.every((cell) => cell === null))
   );
 }
 
+function unknownValues(size: number): Board {
+  return Array.from({ length: size }, () => Array.from({ length: size }, () => 0));
+}
+
 export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<Puzzle> {
-  const params = new URLSearchParams({
-    board_size: String(size),
-    solution: "true",
-  });
+  const params = new URLSearchParams({ board_size: String(size) });
   const response = await fetch(`${apiPath("/mine-islands")}?${params}`, { signal });
 
   if (!response.ok) {
@@ -34,7 +27,9 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
     payload.board_size !== size ||
     !Number.isInteger(payload.mine_count) ||
     payload.mine_count <= 0 ||
-    !isSolutionBoard(payload.solution, size, payload.mine_count)
+    payload.mine_count >= size * size ||
+    typeof payload.puzzle_handle !== "string" ||
+    !isBlankBoard(payload.board, size)
   ) {
     throw new Error("The API returned an invalid Mine Islands puzzle.");
   }
@@ -44,6 +39,7 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
   return {
     size,
     mineCount: payload.mine_count,
-    solution: payload.solution,
+    puzzleHandle: payload.puzzle_handle,
+    values: unknownValues(size),
   };
 }

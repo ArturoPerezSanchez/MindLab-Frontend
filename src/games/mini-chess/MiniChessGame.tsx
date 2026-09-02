@@ -14,20 +14,29 @@ import {
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
+import { useRevealedSolution } from "@/shared/useRevealedSolution";
+import { useWinSequence } from "@/shared/useWinSequence";
 import { pieceSymbolUrl } from "./pieceSources";
 import type { CanvasBoardPointer } from "@/shared/canvas/CanvasBoard";
-import { fetchPuzzle } from "./api";
+import { fetchPuzzle, submitMove } from "./api";
 import {
   boardSquares,
   completedSolverMoves,
   formatTime,
-  isExpectedMove,
   legalTargets,
   parseFen,
   sideLabel,
 } from "./game";
 import { MiniChessCanvas, type CanvasDragPreview } from "./MiniChessCanvas";
-import type { BoardPiece, BoardSize, LastMove, Puzzle, SquareId } from "./types";
+import type {
+  BoardPiece,
+  BoardSize,
+  LastMove,
+  Puzzle,
+  PuzzleState,
+  SolutionMove,
+  SquareId,
+} from "./types";
 
 const CONFETTI_COLORS = ["#c6943b", "#47796d", "#cf5b4c", "#385b73", "#efe1c4"];
 
@@ -71,7 +80,9 @@ export function MiniChessGame() {
   const skin = useGameSkin("mini-chess");
   const [selectedSize, setSelectedSize] = useState<BoardSize>(8);
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
-  const [ply, setPly] = useState(0);
+  const [states, setStates] = useState<PuzzleState[]>([]);
+  const [movesPlayed, setMovesPlayed] = useState(0);
+  const [solved, setSolved] = useState(false);
   const [selectedSquare, setSelectedSquare] = useState<SquareId | null>(null);
   const [draggingSquare, setDraggingSquare] = useState<SquareId | null>(null);
   const [dragPreview, setDragPreview] = useState<CanvasDragPreview | null>(null);
@@ -94,16 +105,15 @@ export function MiniChessGame() {
   const pointerDragRef = useRef<PointerDrag | null>(null);
   const pointerPressRef = useRef<PointerPress | null>(null);
 
-  const currentState = puzzle?.states[ply] ?? null;
+  const currentState = states.at(-1) ?? null;
   const pieces = useMemo(
     () => (currentState && puzzle ? parseFen(currentState.fen, puzzle.boardHeight) : new Map()),
     [currentState, puzzle],
   );
-  const solved = Boolean(currentState?.isCheckmate && puzzle && ply === puzzle.solution.length);
   const assisted = usedHint || madeMistake;
   const isNewBest = solved && !assisted && (bestTime === null || elapsedSeconds < bestTime);
   const displayedBestTime = isNewBest ? elapsedSeconds : bestTime;
-  const completedMoves = completedSolverMoves(ply);
+  const completedMoves = completedSolverMoves(movesPlayed);
   const progress = puzzle ? Math.min(100, (completedMoves / puzzle.mateIn) * 100) : 0;
   const orientation = puzzle?.sideToMove ?? "white";
   const squares = useMemo(
@@ -115,15 +125,24 @@ export function MiniChessGame() {
     [currentState, selectedSquare],
   );
   const checkSquare = currentState?.checkSquare ?? null;
+  const {
+    solution: revealedLine,
+    reveal: revealLine,
+    isRevealing: isRevealingLine,
+    error: revealError,
+  } = useRevealedSolution<SolutionMove[]>(
+    "mini-chess",
+    puzzle ? `${puzzle.boardWidth}x${puzzle.boardHeight}` : `${selectedSize}x${selectedSize}`,
+    puzzle,
+  );
+  const win = useWinSequence({ solved, runKey: puzzle });
 
   useGameResultReporter({
     runKey: puzzle,
     completed: solved,
     game: "mini-chess",
     difficulty: puzzle ? `${puzzle.boardWidth}x${puzzle.boardHeight}` : `${selectedSize}x${selectedSize}`,
-    won: true,
     time_seconds: elapsedSeconds,
-    assisted,
   });
 
   const stopPendingActions = useCallback(() => {
@@ -139,7 +158,9 @@ export function MiniChessGame() {
       stopPendingActions();
       setSelectedSize(nextPuzzle.boardWidth as BoardSize);
       setPuzzle(nextPuzzle);
-      setPly(0);
+      setStates(nextPuzzle.states);
+      setMovesPlayed(0);
+      setSolved(false);
       setSelectedSquare(null);
       setDraggingSquare(null);
       setDragPreview(null);
@@ -226,56 +247,71 @@ export function MiniChessGame() {
     }, 1100);
   };
 
-  const scheduleReply = (nextPly: number) => {
-    if (!puzzle || nextPly >= puzzle.solution.length) {
+  const playSolverMove = async (from: SquareId, to: SquareId, fromHint = false) => {
+    if (!puzzle || !currentState || solved || isResponding) {
       return;
     }
-
-    const sequence = ++replySequenceRef.current;
-    const reply = puzzle.solution[nextPly];
-    setIsResponding(true);
-    setFeedback(`${sideLabel(puzzle.states[nextPly].turn)} is replying`);
-    replyTimerRef.current = window.setTimeout(() => {
-      if (sequence !== replySequenceRef.current) {
-        return;
-      }
-
-      setPly(nextPly + 1);
-      setLastMove({ from: reply.from, to: reply.to });
-      setIsResponding(false);
-      setFeedback(null);
-    }, 520);
-  };
-
-  const playSolverMove = (from: SquareId, to: SquareId, fromHint = false) => {
-    if (!puzzle || !currentState || solved || isResponding || ply % 2 !== 0) {
-      return;
-    }
-
-    const expected = puzzle.solution[ply];
-    if (!isExpectedMove(from, to, expected)) {
-      setSelectedSquare(null);
-      showWrongMove(to, "That move does not force the mate.", true);
-      return;
-    }
-
-    const nextPly = ply + 1;
 
     if (fromHint) {
       setUsedHint(true);
     }
-    setPly(nextPly);
     setSelectedSquare(null);
-    setLastMove({ from: expected.from, to: expected.to });
     setFeedback(null);
+    setIsResponding(true);
 
-    if (!puzzle.states[nextPly].isCheckmate) {
-      scheduleReply(nextPly);
+    const sequence = ++replySequenceRef.current;
+    try {
+      const result = await submitMove(puzzle.puzzleHandle, {
+        from,
+        to,
+        promotion: null,
+      });
+      if (sequence !== replySequenceRef.current) {
+        return;
+      }
+
+      if (!result.accepted) {
+        setIsResponding(false);
+        showWrongMove(to, "That move does not force the mate.", true);
+        return;
+      }
+
+      const [afterPlayer, afterReply] = result.states;
+      setStates((current) => [...current, afterPlayer]);
+      setLastMove({ from, to });
+
+      const finish = () => {
+        if (sequence !== replySequenceRef.current) {
+          return;
+        }
+        if (afterReply) {
+          setStates((current) => [...current, afterReply]);
+        }
+        if (result.reply) {
+          setLastMove({ from: result.reply.from, to: result.reply.to });
+        }
+        setMovesPlayed(result.movesPlayed);
+        setSolved(result.solved);
+        setIsResponding(false);
+        setFeedback(null);
+      };
+
+      if (afterReply && result.reply) {
+        setFeedback(`${sideLabel(afterPlayer.turn)} is replying`);
+        replyTimerRef.current = window.setTimeout(finish, 520);
+      } else {
+        finish();
+      }
+    } catch (cause) {
+      if (sequence === replySequenceRef.current) {
+        setIsResponding(false);
+        setFeedback(cause instanceof Error ? cause.message : "Could not validate that move.");
+      }
     }
   };
 
   const selectOrMove = (square: SquareId) => {
-    if (!currentState || !puzzle || solved || isResponding || ply % 2 !== 0) {
+    if (!currentState || !puzzle || solved || isResponding) {
       return;
     }
 
@@ -298,7 +334,7 @@ export function MiniChessGame() {
     }
 
     if (targets.has(square)) {
-      playSolverMove(selectedSquare, square);
+      void playSolverMove(selectedSquare, square);
       return;
     }
 
@@ -313,7 +349,7 @@ export function MiniChessGame() {
 
   const beginPointerDrag = ({ event, row, col }: CanvasBoardPointer) => {
     const square = squares[row * (puzzle?.boardWidth ?? selectedSize) + col];
-    if (event.button !== 0 || !currentState || !puzzle || solved || isResponding || ply % 2 !== 0) {
+    if (event.button !== 0 || !currentState || !puzzle || solved || isResponding) {
       return;
     }
 
@@ -404,7 +440,7 @@ export function MiniChessGame() {
       return;
     }
 
-    playSolverMove(drag.square, square);
+    void playSolverMove(drag.square, square);
   };
 
   const cancelPointerDrag = () => {
@@ -415,26 +451,19 @@ export function MiniChessGame() {
   };
 
   const retry = () => {
-    if (!puzzle) {
-      return;
-    }
-    stopPendingActions();
-    setPly(0);
-    setSelectedSquare(null);
-    setDraggingSquare(null);
-    setDragPreview(null);
-    setLastMove(null);
-    setWrongSquare(null);
-    setIsResponding(false);
-    setFeedback(null);
+    // The server has already advanced the line, so retrying needs a new handle.
+    void loadPuzzle(selectedSize);
   };
 
-  const hint = () => {
-    if (!puzzle || solved || isResponding || ply % 2 !== 0) {
+  const hint = async () => {
+    if (!puzzle || solved || isResponding || isRevealingLine) {
       return;
     }
-    const expected = puzzle.solution[ply];
-    playSolverMove(expected.from, expected.to, true);
+    const line = revealedLine ?? (await revealLine());
+    const expected = line?.[movesPlayed];
+    if (expected) {
+      await playSolverMove(expected.from, expected.to, true);
+    }
   };
 
   const changeSize = (size: BoardSize) => {
@@ -444,8 +473,8 @@ export function MiniChessGame() {
 
   const statusMessage = solved
     ? "Checkmate"
-    : feedback
-      ? feedback
+    : feedback || revealError
+      ? feedback || revealError
       : puzzle
         ? `${sideLabel(puzzle.sideToMove)} to move`
         : "";
@@ -565,7 +594,7 @@ export function MiniChessGame() {
                 onPointerCancel={cancelPointerDrag}
               />
 
-              {solved && (
+              {win.isRevealed && (
                 <div className="board-popup win-popup" role="dialog" aria-modal="true" aria-label="Puzzle solved">
                   <div className="confetti-field" aria-hidden="true">
                     {Array.from({ length: 18 }, (_, index) => (
@@ -619,8 +648,8 @@ export function MiniChessGame() {
           <button
             className="secondary-action"
             type="button"
-            onClick={hint}
-            disabled={!puzzle || isLoading || solved || isResponding}
+            onClick={() => void hint()}
+            disabled={!puzzle || isLoading || solved || isResponding || isRevealingLine}
           >
             <Lightbulb aria-hidden="true" size={18} />
             Hint

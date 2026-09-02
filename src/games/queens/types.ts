@@ -2,12 +2,11 @@ export type Position = readonly [row: number, col: number];
 
 export type QueensResponse = {
   board: number[][];
-  solution: Position[] | null;
 };
 
+/** The answer is not here: it stays on the server until the player asks. */
 export type Puzzle = {
   board: number[][];
-  solution: Position[] | null;
   size: number;
 };
 

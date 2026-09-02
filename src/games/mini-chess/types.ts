@@ -34,7 +34,7 @@ export type MiniChessResponse = {
   side_to_move: SideName;
   piece_count: number;
   rating: number | null;
-  solution: SolutionMove[] | null;
+  puzzle_handle: string;
   states: Array<{
     fen: string;
     turn: SideName;
@@ -54,7 +54,7 @@ export type Puzzle = {
   sideToMove: SideName;
   pieceCount: number;
   rating: number | null;
-  solution: SolutionMove[];
+  puzzleHandle: string;
   states: PuzzleState[];
 };
 

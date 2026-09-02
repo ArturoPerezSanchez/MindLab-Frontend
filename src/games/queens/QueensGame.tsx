@@ -21,15 +21,24 @@ import {
   X as XIcon,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { useRevealedSolution } from "@/shared/useRevealedSolution";
 import { useWinSequence } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
 import { fetchPuzzle } from "./api";
 import { useQueensPatternsSetting } from "@/features/settings/useConfig";
 import type { CanvasBoardPointer, CanvasCellPosition } from "@/shared/canvas/CanvasBoard";
-import { BOARD_SIZES, evaluateGame, formatTime, getForbiddenMarks, positionKey, toPositionSet } from "./game";
+import {
+  BOARD_SIZES,
+  evaluateGame,
+  formatTime,
+  getForbiddenMarks,
+  parsePositionKey,
+  positionKey,
+  toPositionSet,
+} from "./game";
 import { QueensCanvas } from "./QueensCanvas";
-import type { Puzzle, ViolationKind } from "./types";
+import type { Position, Puzzle, ViolationKind } from "./types";
 
 type LoadState = "idle" | "loading" | "ready" | "error";
 
@@ -69,7 +78,6 @@ export function QueensGame() {
   const [loadState, setLoadState] = useState<LoadState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [showSolution, setShowSolution] = useState(false);
-  const [solutionRevealed, setSolutionRevealed] = useState(false);
   const [showPatterns] = useQueensPatternsSetting();
   const [autoMarkForbidden, setAutoMarkForbidden] = useState(() => getStoredAutoMarkPreference());
   const [showRules, setShowRules] = useState(false);
@@ -89,7 +97,15 @@ export function QueensGame() {
   const activeViolations = gameStatus
     ? (Object.keys(gameStatus.violations) as ViolationKind[]).filter((kind) => gameStatus.violations[kind] > 0)
     : [];
-  const solutionCells = useMemo(() => toPositionSet(puzzle?.solution ?? null), [puzzle?.solution]);
+  // Asking for the answer is a server-recorded act, so the flag that ends up on
+  // the leaderboard comes from there rather than from this component.
+  const {
+    solution: revealedSolution,
+    reveal,
+    isRevealing,
+  } = useRevealedSolution<Position[]>("queens", `${size}x${size}`, puzzle);
+  const solutionRevealed = revealedSolution !== null;
+  const solutionCells = useMemo(() => toPositionSet(revealedSolution), [revealedSolution]);
   const forbiddenMarks = useMemo(
     () => (puzzle && autoMarkForbidden ? getForbiddenMarks(puzzle.board, queens) : new Set<string>()),
     [autoMarkForbidden, puzzle, queens],
@@ -116,16 +132,14 @@ export function QueensGame() {
     completed: Boolean(gameStatus?.isSolved),
     game: "queens",
     difficulty: `${size}x${size}`,
-    won: true,
     time_seconds: elapsedSeconds,
-    assisted: solutionRevealed,
+    submission: [...queens].map(parsePositionKey),
   });
 
   const loadPuzzle = useCallback(async (nextSize: number, signal?: AbortSignal) => {
     setLoadState("loading");
     setError(null);
     setShowSolution(false);
-    setSolutionRevealed(false);
     setShowConflictPanel(false);
 
     try {
@@ -391,14 +405,15 @@ export function QueensGame() {
     void loadPuzzle(size);
   }
 
-  function toggleSolution(): void {
-    setShowSolution((current) => {
-      if (!current) {
-        setSolutionRevealed(true);
-      }
-
-      return !current;
-    });
+  async function toggleSolution(): Promise<void> {
+    if (showSolution) {
+      setShowSolution(false);
+      return;
+    }
+    const answer = await reveal();
+    if (answer) {
+      setShowSolution(true);
+    }
   }
 
   const progress = puzzle && gameStatus ? Math.min(100, Math.round((gameStatus.queenCount / puzzle.size) * 100)) : 0;
@@ -630,11 +645,11 @@ export function QueensGame() {
           <button
             className="secondary-action"
             type="button"
-            onClick={toggleSolution}
-            disabled={!puzzle?.solution}
+            onClick={() => void toggleSolution()}
+            disabled={!puzzle || isRevealing}
           >
             {showSolution ? <EyeOff size={18} /> : <Eye size={18} />}
-            {showSolution ? "Hide" : "Solution"}
+            {showSolution ? "Hide" : isRevealing ? "Loading" : "Solution"}
           </button>
           <button
             className="secondary-action"

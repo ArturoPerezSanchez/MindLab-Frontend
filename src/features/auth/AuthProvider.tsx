@@ -13,6 +13,15 @@ import { takePuzzleHandle } from "@/shared/puzzleHandles";
 
 const TOKEN_KEY = "mindlab-auth-token";
 
+/**
+ * Where a finished game is handed to the signed-in session.
+ *
+ * This used to be a `window` CustomEvent, which meant anything running on the
+ * page could dispatch a fully formed result. A module-local reference keeps the
+ * hand-off inside the app.
+ */
+let activeResultSink: ((result: GameResult) => void) | null = null;
+
 export type ProfileGender = "woman" | "man" | "non_binary" | "other";
 
 export type ProfileLinks = {
@@ -115,9 +124,16 @@ export type GameResult = {
   puzzle_handle: string;
   game: string;
   difficulty: string;
-  won: boolean;
   time_seconds?: number;
-  assisted?: boolean;
+  /**
+   * The finished board, in whatever shape this game uses. The server checks it
+   * against the puzzle it generated and decides whether it was solved, so there
+   * is no `won` field to send - and no `assisted` field either, because the
+   * server already knows whether the answer was revealed.
+   *
+   * Left out for an abandoned game, which is how a loss is reported now.
+   */
+  submission?: unknown;
 };
 
 export type OAuthProvider = {
@@ -147,6 +163,8 @@ type AuthContextValue = {
   login: (input: { email: string; password: string }) => Promise<void>;
   startSocialLogin: (provider: OAuthProvider["id"]) => void;
   logout: () => void;
+  exportAccount: () => Promise<unknown>;
+  deleteAccount: () => Promise<void>;
   updateProfile: (input: ProfileUpdateInput) => Promise<void>;
   loadPlayerProfile: (userId: number) => Promise<PlayerProfile>;
   loadStats: () => Promise<GameStat[]>;
@@ -163,6 +181,16 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 async function requestJson<T>(path: string, options: RequestInit = {}, token?: string | null): Promise<T> {
   const headers = new Headers(options.headers);
   if (options.body) {
@@ -175,7 +203,9 @@ async function requestJson<T>(path: string, options: RequestInit = {}, token?: s
   const response = await fetch(apiPath(path), { ...options, headers });
   const payload = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error(payload?.detail ?? "Request failed.");
+    const message =
+      typeof payload?.detail === "string" ? payload.detail : `Request failed (${response.status}).`;
+    throw new ApiError(message, response.status);
   }
   return payload as T;
 }
@@ -218,8 +248,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(initialSession.token);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(token));
+  const [sessionRetry, setSessionRetry] = useState(0);
   const [authError, setAuthError] = useState<string | null>(initialSession.error);
   const [socialProviders, setSocialProviders] = useState<OAuthProvider[]>(KNOWN_PROVIDERS);
+
+  useEffect(() => {
+    const retrySession = () => setSessionRetry((current) => current + 1);
+    window.addEventListener("mindlab:api-online", retrySession);
+    return () => window.removeEventListener("mindlab:api-online", retrySession);
+  }, []);
 
   useEffect(() => {
     requestJson<OAuthProvider[]>("/auth/providers")
@@ -245,9 +282,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .catch((error) => {
         if (!cancelled) {
-          window.localStorage.removeItem(TOKEN_KEY);
-          setToken(null);
           setUser(null);
+          if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+            window.localStorage.removeItem(TOKEN_KEY);
+            setToken(null);
+          }
           setAuthError(error instanceof Error ? error.message : "Could not restore session.");
         }
       })
@@ -260,7 +299,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, [sessionRetry, token]);
 
   const applySession = useCallback((session: AuthResponse) => {
     storeSession(session);
@@ -297,6 +336,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setAuthError(null);
   }, []);
+
+  const exportAccount = useCallback(
+    () => requestJson<unknown>("/me/export", { method: "GET" }, token),
+    [token],
+  );
+
+  const deleteAccount = useCallback(async () => {
+    await requestJson<null>("/me", { method: "DELETE" }, token);
+    logout();
+  }, [logout, token]);
 
   const startSocialLogin = useCallback(
     (provider: OAuthProvider["id"]) => {
@@ -364,16 +413,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const handleResult = (event: Event) => {
-      const detail = (event as CustomEvent<GameResult>).detail;
-      if (!detail?.game || !detail.difficulty) {
+    const handleResult = (result: GameResult) => {
+      if (!result?.game || !result.difficulty) {
         return;
       }
       void requestJson<GameStat>(
         "/stats/results",
         {
           method: "POST",
-          body: JSON.stringify(detail),
+          body: JSON.stringify(result),
         },
         token,
       ).catch(() => {
@@ -381,8 +429,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     };
 
-    window.addEventListener("mindlab:game-result", handleResult);
-    return () => window.removeEventListener("mindlab:game-result", handleResult);
+    activeResultSink = handleResult;
+    return () => {
+      if (activeResultSink === handleResult) {
+        activeResultSink = null;
+      }
+    };
   }, [token, user]);
 
   const value = useMemo<AuthContextValue>(
@@ -396,6 +448,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       startSocialLogin,
       logout,
+      exportAccount,
+      deleteAccount,
       updateProfile,
       loadPlayerProfile,
       loadStats,
@@ -403,6 +457,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }),
     [
       authError,
+      deleteAccount,
+      exportAccount,
       isLoading,
       loadLeaderboard,
       loadPlayerProfile,
@@ -436,7 +492,7 @@ export function reportGameResult(result: Omit<GameResult, "result_id" | "puzzle_
   // has no way to tell a real solve from a fabricated one, so drop the report
   // rather than send something that will be rejected.
   const puzzleHandle = takePuzzleHandle(result.game, result.difficulty);
-  if (!puzzleHandle) {
+  if (!puzzleHandle || !activeResultSink) {
     return;
   }
 
@@ -444,11 +500,7 @@ export function reportGameResult(result: Omit<GameResult, "result_id" | "puzzle_
     typeof window.crypto?.randomUUID === "function"
       ? window.crypto.randomUUID()
       : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-  window.dispatchEvent(
-    new CustomEvent<GameResult>("mindlab:game-result", {
-      detail: { ...result, result_id: resultId, puzzle_handle: puzzleHandle },
-    }),
-  );
+  activeResultSink({ ...result, result_id: resultId, puzzle_handle: puzzleHandle });
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -457,14 +509,19 @@ export function useGameResultReporter({
   completed,
   game,
   difficulty,
-  won,
   time_seconds,
-  assisted,
+  submission,
 }: {
   runKey: object | null;
   completed: boolean;
 } & Omit<GameResult, "result_id" | "puzzle_handle">): void {
   const reportedRunRef = useRef<object | null>(null);
+
+  // The submission is read through a ref so that a board changing shape between
+  // renders cannot re-fire the report, while the value sent is still whatever
+  // was on screen at the moment the puzzle was finished.
+  const submissionRef = useRef(submission);
+  submissionRef.current = submission;
 
   useEffect(() => {
     if (!runKey || !completed || reportedRunRef.current === runKey) {
@@ -474,9 +531,8 @@ export function useGameResultReporter({
     reportGameResult({
       game,
       difficulty,
-      won,
       time_seconds,
-      assisted,
+      submission: submissionRef.current,
     });
-  }, [assisted, completed, difficulty, game, runKey, time_seconds, won]);
+  }, [completed, difficulty, game, runKey, time_seconds]);
 }

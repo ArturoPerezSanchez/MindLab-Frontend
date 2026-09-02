@@ -12,7 +12,7 @@ import type { BoardSurface } from "@/features/skins/skins";
 import { addLabel, addRect, addSprite, cssVar } from "@/shared/canvas/drawing";
 import { drawTangoCelebration, type CellRef } from "@/shared/canvas/winCelebration";
 import { positionKey } from "./game";
-import type { CellValue, Constraint, Puzzle } from "./types";
+import type { CellValue, Constraint, Puzzle, SymbolValue } from "./types";
 
 type TangoCanvasProps = {
   /** Material laid over the cell colours by the chosen board. */
@@ -24,6 +24,8 @@ type TangoCanvasProps = {
   /** 0..1 while the solved board celebrates, null when idle. */
   celebration: number | null;
   showSolution: boolean;
+  /** Fetched on demand, so it is null until the player asks to see it. */
+  solution: SymbolValue[][] | null;
   hud: CanvasBoardHud;
   onActivate: (position: CanvasCellPosition) => void;
   onContextMenu: (position: CanvasCellPosition) => void;
@@ -53,6 +55,7 @@ export function TangoCanvas({
   conflicts,
   celebration,
   showSolution,
+  solution,
   hud,
   onActivate,
   onContextMenu,
@@ -61,7 +64,7 @@ export function TangoCanvas({
     () =>
       entries.flatMap((rowValues, row) =>
         rowValues.map((value, col) => {
-          const shown = showSolution ? puzzle.solution[row][col] : value;
+          const shown = showSolution && solution ? solution[row][col] : value;
           const given = puzzle.board[row][col] !== null;
           return {
             key: positionKey(row, col),
@@ -74,7 +77,7 @@ export function TangoCanvas({
           };
         }),
       ),
-    [entries, puzzle.board, puzzle.solution, showSolution, symbols],
+    [entries, puzzle.board, showSolution, solution, symbols],
   );
 
   const draw = useCallback(
@@ -90,7 +93,7 @@ export function TangoCanvas({
           const x = col * cellWidth;
           const y = row * cellHeight;
           const given = puzzle.board[row][col] !== null;
-          const shown = showSolution ? puzzle.solution[row][col] : value;
+          const shown = showSolution && solution ? solution[row][col] : value;
           addRect(root, x, y, cellWidth, cellHeight, given ? givenCell : cell);
           drawCellSurface(root, textures, surface, x, y, cellWidth, cellHeight);
 
@@ -147,7 +150,7 @@ export function TangoCanvas({
 
       addRect(root, 2, 2, 996, 996, "transparent", { color: grid, width: 5 }, 4);
     },
-    [conflicts, entries, puzzle, showSolution, surface, symbols],
+    [conflicts, entries, puzzle, showSolution, solution, surface, symbols],
   );
 
   const animate = useCallback(

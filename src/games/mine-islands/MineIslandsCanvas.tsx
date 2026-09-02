@@ -53,7 +53,7 @@ export function MineIslandsCanvas({
   const classic = Boolean(assets.clueTiles?.length);
   const cells = useMemo(
     () =>
-      puzzle.solution.flatMap((rowValues, row) =>
+      puzzle.values.flatMap((rowValues, row) =>
         rowValues.map((value, col) => {
           const status = visibility[row][col];
           const incorrectlyFlagged = lost && status === "flagged" && value !== MINE;
@@ -80,7 +80,7 @@ export function MineIslandsCanvas({
           };
         }),
       ),
-    [classic, disabled, lost, puzzle.solution, visibility],
+    [classic, disabled, lost, puzzle.values, visibility],
   );
 
   const draw = useCallback(
@@ -101,7 +101,7 @@ export function MineIslandsCanvas({
         return sprite;
       };
 
-      puzzle.solution.forEach((rowValues, row) => {
+      puzzle.values.forEach((rowValues, row) => {
         rowValues.forEach((value, col) => {
           const x = col * cellWidth;
           const y = row * cellHeight;
@@ -196,7 +196,7 @@ export function MineIslandsCanvas({
         return;
       }
       const mines: CellRef[] = [];
-      puzzle.solution.forEach((rowValues, row) => {
+      puzzle.values.forEach((rowValues, row) => {
         rowValues.forEach((value, col) => {
           if (value === MINE) {
             mines.push({ row, col });

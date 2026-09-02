@@ -1,0 +1,33 @@
+name: mindlab-local
+
+services:
+  backend:
+    build:
+      context: ../backend
+    environment:
+      MINDLAB_ENV: development
+      MINDLAB_TOKEN_SECRET: mindlab-compose-development-secret-change-for-production
+      MINDLAB_USERS_DB: /app/data/mindlab_users.sqlite3
+      MINDLAB_FRONTEND_ORIGINS: http://127.0.0.1:8080,http://localhost:8080
+      MINDLAB_ALLOWED_HOSTS: 127.0.0.1,localhost
+      MINDLAB_ENABLE_LEGACY_ROUTES: "0"
+      # The API is reachable only through the trusted frontend container.
+      MINDLAB_TRUST_PROXY: "1"
+    volumes:
+      # /app/data is owned by the non-root image user and contains the checked
+      # MiniChess catalog; Docker initializes the volume from that directory.
+      - mindlab-data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:80"
+    restart: unless-stopped
+
+volumes:
+  mindlab-data:

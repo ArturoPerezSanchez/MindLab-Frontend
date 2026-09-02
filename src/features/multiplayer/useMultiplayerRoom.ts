@@ -5,7 +5,7 @@ import { guestId } from "./guest";
 import type { ClientMessage, EditableSettings, Placement } from "./protocol";
 import { initialRoomView, parseServerMessage, roomReducer, type RoomView } from "./roomState";
 
-export type ConnectionStatus = "idle" | "connecting" | "open" | "closed";
+export type ConnectionStatus = "idle" | "connecting" | "reconnecting" | "open" | "closed";
 
 export type JoinIdentity = {
   token: string | null;
@@ -17,10 +17,12 @@ export type JoinIdentity = {
 
 /** Live placements are rebroadcast to spectators; this caps the send rate. */
 const PROGRESS_INTERVAL_MS = 250;
+const MAX_RECONNECT_ATTEMPTS = 5;
 
 function socketUrl(): string {
-  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${window.location.host}${apiPath("/multiplayer/ws")}`;
+  const url = new URL(apiPath("/multiplayer/ws"), window.location.href);
+  url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  return url.toString();
 }
 
 /**
@@ -37,10 +39,21 @@ export function useMultiplayerRoom(identity: JoinIdentity) {
   const [status, setStatus] = useState<ConnectionStatus>("idle");
   const socketRef = useRef<WebSocket | null>(null);
   const identityRef = useRef(identity);
+  const reconnectCodeRef = useRef<string | null>(null);
+  const reconnectAttempts = useRef(0);
+  const reconnectTimer = useRef<number | null>(null);
+  const intentionalClose = useRef(false);
+  const openSocketRef = useRef<(code: string | null, reconnecting: boolean) => void>(() => undefined);
   const lastProgressAt = useRef(0);
   const pendingProgress = useRef<number | null>(null);
 
   identityRef.current = identity;
+
+  useEffect(() => {
+    if (view.state?.code) {
+      reconnectCodeRef.current = view.state.code;
+    }
+  }, [view.state?.code]);
 
   const send = useCallback((message: ClientMessage) => {
     const socket = socketRef.current;
@@ -50,6 +63,13 @@ export function useMultiplayerRoom(identity: JoinIdentity) {
   }, []);
 
   const disconnect = useCallback(() => {
+    intentionalClose.current = true;
+    reconnectCodeRef.current = null;
+    reconnectAttempts.current = 0;
+    if (reconnectTimer.current !== null) {
+      window.clearTimeout(reconnectTimer.current);
+      reconnectTimer.current = null;
+    }
     const socket = socketRef.current;
     socketRef.current = null;
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -61,15 +81,15 @@ export function useMultiplayerRoom(identity: JoinIdentity) {
     setStatus("idle");
   }, []);
 
-  const connect = useCallback((code: string | null) => {
+  openSocketRef.current = (code: string | null, reconnecting: boolean) => {
     socketRef.current?.close();
-    setStatus("connecting");
+    intentionalClose.current = false;
+    setStatus(reconnecting ? "reconnecting" : "connecting");
 
     const socket = new WebSocket(socketUrl());
     socketRef.current = socket;
 
     socket.onopen = () => {
-      setStatus("open");
       const current = identityRef.current;
       socket.send(
         JSON.stringify({
@@ -94,6 +114,10 @@ export function useMultiplayerRoom(identity: JoinIdentity) {
       }
       const message = parseServerMessage(payload);
       if (message) {
+        if (message.type === "joined") {
+          reconnectAttempts.current = 0;
+          setStatus("open");
+        }
         dispatch(message);
       }
     };
@@ -101,7 +125,18 @@ export function useMultiplayerRoom(identity: JoinIdentity) {
     socket.onclose = () => {
       if (socketRef.current === socket) {
         socketRef.current = null;
-        setStatus("closed");
+        const reconnectCode = reconnectCodeRef.current;
+        if (!intentionalClose.current && reconnectCode && reconnectAttempts.current < MAX_RECONNECT_ATTEMPTS) {
+          reconnectAttempts.current += 1;
+          setStatus("reconnecting");
+          const delay = Math.min(1_000 * 2 ** (reconnectAttempts.current - 1), 8_000);
+          reconnectTimer.current = window.setTimeout(() => {
+            reconnectTimer.current = null;
+            openSocketRef.current(reconnectCode, true);
+          }, delay);
+        } else {
+          setStatus("closed");
+        }
       }
     };
 
@@ -109,10 +144,26 @@ export function useMultiplayerRoom(identity: JoinIdentity) {
       // `onclose` always follows, and carries the state change. Swallowing here
       // keeps a failed connect from also logging an unhandled error event.
     };
+  };
+
+  const connect = useCallback((code: string | null) => {
+    if (reconnectTimer.current !== null) {
+      window.clearTimeout(reconnectTimer.current);
+      reconnectTimer.current = null;
+    }
+    reconnectAttempts.current = 0;
+    intentionalClose.current = false;
+    const normalizedCode = code ? code.trim().toUpperCase() : null;
+    reconnectCodeRef.current = normalizedCode;
+    openSocketRef.current(normalizedCode, false);
   }, []);
 
   useEffect(() => {
     return () => {
+      intentionalClose.current = true;
+      if (reconnectTimer.current !== null) {
+        window.clearTimeout(reconnectTimer.current);
+      }
       if (pendingProgress.current !== null) {
         window.clearTimeout(pendingProgress.current);
       }

@@ -1,7 +1,10 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Gamepad2, Moon, Palette, Settings, Sun, Swords, Trophy, UserRound } from "lucide-react";
 import { AccountView } from "@/features/account/AccountView";
+import { AdSlot } from "@/features/ads/AdSlot";
 import { LeaderboardView } from "@/features/leaderboard/LeaderboardView";
+import { PrivacyView, TermsView } from "@/features/legal/LegalViews";
+import { useConsent } from "@/features/privacy/ConsentProvider";
 import { PlayerProfileView } from "@/features/profiles/PlayerProfileView";
 import { useQueensPatternsSetting } from "@/features/settings/useConfig";
 import { useTheme } from "@/features/settings/useTheme";
@@ -9,6 +12,8 @@ import { AppearanceView } from "@/features/skins/AppearanceView";
 import { paletteToken, resolveGameSkin } from "@/features/skins/skins";
 import { useSkins } from "@/features/skins/useSkins";
 import { GAME_ICONS } from "@/shared/icons/gameIcons";
+import { ConnectivityBanner } from "@/shared/ConnectivityBanner";
+import { AppErrorBoundary } from "@/shared/ErrorBoundary";
 import "@/games/lights/styles.css";
 import "@/games/mine-islands/styles.css";
 import "@/games/mini-chess/styles.css";
@@ -137,6 +142,8 @@ type RouteState =
   | "account"
   | "leaderboard"
   | "player"
+  | "privacy"
+  | "terms"
   /** The list of multiplayer modes. */
   | "multiplayer"
   /** The elimination race itself. */
@@ -225,6 +232,12 @@ function routeFromLocation(): RouteState {
   if (firstSegment === "leaderboard") {
     return "leaderboard";
   }
+  if (firstSegment === "privacy") {
+    return "privacy";
+  }
+  if (firstSegment === "terms") {
+    return "terms";
+  }
   if (firstSegment === "players" && playerIdFromLocation() !== null) {
     return "player";
   }
@@ -283,6 +296,8 @@ export default function App() {
       account: "Account",
       leaderboard: "Leaderboard",
       player: "Player Profile",
+      privacy: "Privacy",
+      terms: "Terms of Use",
       multiplayer: "Multiplayer",
       knockout: "Knockout",
     };
@@ -297,7 +312,9 @@ export default function App() {
             route === "appearance" ||
             route === "account" ||
             route === "leaderboard" ||
-            route === "player" ? "game-config" : "game-menu"}`}
+            route === "player" ||
+            route === "privacy" ||
+            route === "terms" ? "game-config" : "game-menu"}`}
       data-game={framedGame ?? undefined}
       data-palette={
         framedGame && activeSkin ? paletteToken(framedGame, activeSkin.palette.id) : undefined
@@ -377,7 +394,9 @@ export default function App() {
           {theme === "dark" ? <Sun aria-hidden="true" size={18} /> : <Moon aria-hidden="true" size={18} />}
         </button>
       </nav>
-      {GameComponent ? (
+      <ConnectivityBanner />
+      <AppErrorBoundary resetKey={`${route}:${playerId ?? ""}`}>
+        {GameComponent ? (
         <Suspense
           fallback={(
             <main className="game-route-loading" role="status">
@@ -397,6 +416,10 @@ export default function App() {
         <LeaderboardView />
       ) : route === "player" && playerId !== null ? (
         <PlayerProfileView playerId={playerId} />
+      ) : route === "privacy" ? (
+        <PrivacyView />
+      ) : route === "terms" ? (
+        <TermsView />
       ) : route === "multiplayer" ? (
         <MultiplayerModes />
       ) : route === "knockout" ? (
@@ -411,8 +434,24 @@ export default function App() {
         </Suspense>
       ) : (
         <MainMenu navItems={navItems} />
-      )}
+        )}
+      </AppErrorBoundary>
+      <AppFooter />
     </div>
+  );
+}
+
+function AppFooter() {
+  const { openPreferences } = useConsent();
+  return (
+    <footer className="suite-footer">
+      <span>MindLab</span>
+      <nav aria-label="Legal and privacy">
+        <a href="#/privacy">Privacy</a>
+        <a href="#/terms">Terms</a>
+        <button type="button" onClick={openPreferences}>Privacy choices</button>
+      </nav>
+    </footer>
   );
 }
 
@@ -496,6 +535,7 @@ function MultiplayerModes() {
           ),
         )}
       </section>
+      <AdSlot placement="menu-footer" />
     </main>
   );
 }
@@ -532,6 +572,7 @@ function MainMenu({
           );
         })}
       </section>
+      <AdSlot placement="menu-footer" />
     </main>
   );
 }

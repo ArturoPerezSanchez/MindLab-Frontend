@@ -49,9 +49,9 @@ describe("pressCell", () => {
 });
 
 describe("isSolved", () => {
-  it("is true only when every light is off", () => {
-    expect(isSolved(board(["0000", "0000", "0000", "0000"]))).toBe(true);
-    expect(isSolved(board(["0000", "0#00", "0000", "0000"]))).toBe(false);
+  it("is true only when every light is on", () => {
+    expect(isSolved(board(["####", "####", "####", "####"]))).toBe(true);
+    expect(isSolved(board(["####", "##0#", "####", "####"]))).toBe(false);
   });
 });
 
@@ -64,7 +64,7 @@ describe("solveBoard", () => {
     expect(solvesBoard(puzzle, presses!)).toBe(true);
   });
 
-  it("solves an already-cleared board with no presses", () => {
-    expect(solveBoard(board(["0000", "0000", "0000", "0000"]))).toEqual([]);
+  it("solves an already-lit board with no presses", () => {
+    expect(solveBoard(board(["####", "####", "####", "####"]))).toEqual([]);
   });
 });

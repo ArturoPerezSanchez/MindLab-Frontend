@@ -1,13 +1,6 @@
 import { apiPath } from "@/shared/api";
 import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
-import {
-  areAdjacent,
-  createWallSet,
-  edgeKey,
-  highestClue,
-  positionKey,
-} from "./game";
-import type { Position, Puzzle, Wall, ZipResponse } from "./types";
+import type { Puzzle, Wall, ZipResponse } from "./types";
 
 function isBoard(value: unknown, size: number): value is Puzzle["board"] {
   if (
@@ -46,63 +39,8 @@ function isWall(value: unknown, size: number): value is Wall {
   );
 }
 
-function isSolution(
-  value: unknown,
-  size: number,
-  board: Puzzle["board"],
-  walls: Wall[],
-): value is Array<[number, number]> {
-  if (!Array.isArray(value) || value.length !== size * size) {
-    return false;
-  }
-
-  const positions: Position[] = [];
-  for (const position of value) {
-    if (
-      !Array.isArray(position) ||
-      position.length !== 2 ||
-      !Number.isInteger(position[0]) ||
-      !Number.isInteger(position[1]) ||
-      position[0] < 0 ||
-      position[1] < 0 ||
-      position[0] >= size ||
-      position[1] >= size
-    ) {
-      return false;
-    }
-    positions.push([position[0], position[1]]);
-  }
-
-  if (new Set(positions.map(positionKey)).size !== positions.length) {
-    return false;
-  }
-
-  const wallSet = createWallSet(walls);
-  for (let index = 1; index < positions.length; index += 1) {
-    if (
-      !areAdjacent(positions[index - 1], positions[index]) ||
-      wallSet.has(edgeKey(positions[index - 1], positions[index]))
-    ) {
-      return false;
-    }
-  }
-
-  const encounteredClues = positions
-    .map(([row, col]) => board[row][col])
-    .filter((cell): cell is number => cell !== null);
-
-  return (
-    board[positions[0][0]][positions[0][1]] === 1 &&
-    board[positions.at(-1)![0]][positions.at(-1)![1]] === highestClue(board) &&
-    encounteredClues.every((clue, index) => clue === index + 1)
-  );
-}
-
 export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<Puzzle> {
-  const params = new URLSearchParams({
-    board_size: String(size),
-    solution: "true",
-  });
+  const params = new URLSearchParams({ board_size: String(size) });
   const response = await fetch(`${apiPath("/zip")}?${params}`, { signal });
 
   if (!response.ok) {
@@ -114,8 +52,7 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
     payload.board_size !== size ||
     !isBoard(payload.board, size) ||
     !Array.isArray(payload.walls) ||
-    !payload.walls.every((wall) => isWall(wall, size)) ||
-    !isSolution(payload.solution, size, payload.board, payload.walls)
+    !payload.walls.every((wall) => isWall(wall, size))
   ) {
     throw new Error("The API returned an invalid Zip puzzle.");
   }
@@ -126,6 +63,5 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
     size,
     board: payload.board,
     walls: payload.walls,
-    solution: payload.solution,
   };
 }

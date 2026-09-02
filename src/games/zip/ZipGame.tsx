@@ -23,6 +23,7 @@ import {
   X,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { useRevealedSolution } from "@/shared/useRevealedSolution";
 import { useWinSequence } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
@@ -86,7 +87,6 @@ export function ZipGame() {
   const [invalidMove, setInvalidMove] = useState<InvalidMove | null>(null);
   const [showConflict, setShowConflict] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
-  const [solutionRevealed, setSolutionRevealed] = useState(false);
   const [usedHint, setUsedHint] = useState(false);
   const [isNewBest, setIsNewBest] = useState(false);
   const [showWinSummary, setShowWinSummary] = useState(true);
@@ -98,6 +98,14 @@ export function ZipGame() {
   const requestSequenceRef = useRef(0);
 
   const solved = Boolean(puzzle && isSolved(path, puzzle));
+  // The hint and the reveal both fetch the answer, and the server records that
+  // they did - so the assisted flag on the leaderboard is not this one.
+  const {
+    solution: revealedSolution,
+    reveal,
+    isRevealing,
+  } = useRevealedSolution<Position[]>("zip", `${selectedSize}x${selectedSize}`, puzzle);
+  const solutionRevealed = revealedSolution !== null;
   const assisted = solutionRevealed || usedHint;
   const totalCells = selectedSize * selectedSize;
   const displayedBestTime = isNewBest ? elapsedSeconds : bestTime;
@@ -121,9 +129,8 @@ export function ZipGame() {
     completed: solved,
     game: "zip",
     difficulty: `${selectedSize}x${selectedSize}`,
-    won: true,
     time_seconds: elapsedSeconds,
-    assisted,
+    submission: path,
   });
 
   const setCurrentPath = useCallback((nextPath: Position[]) => {
@@ -142,7 +149,6 @@ export function ZipGame() {
       setCurrentPath(initialPath);
       setElapsedSeconds(0);
       setShowSolution(false);
-      setSolutionRevealed(false);
       setUsedHint(false);
       setIsNewBest(false);
       setShowWinSummary(true);
@@ -166,7 +172,6 @@ export function ZipGame() {
       setElapsedSeconds(0);
       setBestTime(null);
       setShowSolution(false);
-      setSolutionRevealed(false);
       setUsedHint(false);
       setIsNewBest(false);
       setShowWinSummary(true);
@@ -317,27 +322,35 @@ export function ZipGame() {
     completedRef.current = false;
   };
 
-  const revealHint = () => {
+  const revealHint = async () => {
     if (!puzzle || showSolution || solved) {
       return;
     }
 
-    setCurrentPath(solutionPrefixWithHint(pathRef.current, puzzle.solution));
+    const answer = await reveal();
+    if (!answer) {
+      return;
+    }
+
+    setCurrentPath(solutionPrefixWithHint(pathRef.current, answer));
     setUsedHint(true);
     setInvalidMove(null);
     setShowConflict(false);
   };
 
-  const toggleSolution = () => {
+  const toggleSolution = async () => {
     if (!puzzle || solved) {
       return;
     }
-    if (!showSolution) {
-      setSolutionRevealed(true);
+    if (showSolution) {
+      setShowSolution(false);
+      return;
     }
-    setShowSolution((current) => !current);
-    setInvalidMove(null);
-    setShowConflict(false);
+    if (await reveal()) {
+      setShowSolution(true);
+      setInvalidMove(null);
+      setShowConflict(false);
+    }
   };
 
   const changeSize = (size: number) => {
@@ -421,7 +434,7 @@ export function ZipGame() {
               <ZipCanvas
                 surface={skin.assets.surface}
                 puzzle={puzzle}
-                path={showSolution ? puzzle.solution : path}
+                path={showSolution && revealedSolution ? revealedSolution : path}
                 revealImage={revealImage}
                 invalidMove={invalidMove}
                 showSolution={showSolution}
@@ -582,8 +595,8 @@ export function ZipGame() {
           <button
             className="secondary-action"
             type="button"
-            onClick={revealHint}
-            disabled={!puzzle || isLoading || showSolution || solved}
+            onClick={() => void revealHint()}
+            disabled={!puzzle || isLoading || isRevealing || showSolution || solved}
           >
             <Lightbulb aria-hidden="true" size={18} />
             Hint
@@ -591,8 +604,8 @@ export function ZipGame() {
           <button
             className="secondary-action"
             type="button"
-            onClick={toggleSolution}
-            disabled={!puzzle || isLoading || solved}
+            onClick={() => void toggleSolution()}
+            disabled={!puzzle || isLoading || isRevealing || solved}
             aria-pressed={showSolution}
           >
             {showSolution ? <EyeOff aria-hidden="true" size={18} /> : <Eye aria-hidden="true" size={18} />}

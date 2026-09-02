@@ -92,12 +92,14 @@ export function MultiplayerView({ initialCode }: { initialCode?: string | null }
     );
   }
 
-  if (status === "connecting" || (status === "open" && !view.state)) {
+  if (status === "connecting" || status === "reconnecting" || (status === "open" && !view.state)) {
     return (
       <main className="mp-shell mp-shell-centered" aria-label="Multiplayer Queens">
         <p className="mp-connecting" role="status">
           <Loader2 className="spin" size={26} aria-hidden="true" />
-          Connecting...
+          {status === "reconnecting"
+            ? `Reconnecting${view.state?.code ? ` to room ${view.state.code}` : ""}…`
+            : "Connecting…"}
         </p>
       </main>
     );

@@ -17,12 +17,18 @@ npm run dev
 The application is available at <http://127.0.0.1:5173>. Set
 `VITE_GAMES_API_ORIGIN=http://127.0.0.1:8010` in `.env.local` when the API is
 running locally. Vite proxies the versioned `/api/v1` contract to that origin.
+For a bundled APK build, `VITE_API_BASE_URL` selects the public HTTPS API.
+
+To run both repositories as the complete local product, follow
+[Local stack](docs/local-stack.md).
 
 ## Validation
 
 ```powershell
 npm run lint
+npm test -- --run
 npm run build
+npm audit --audit-level=high
 ```
 
 The same commands run in GitHub Actions for every push and pull request.
@@ -46,4 +52,5 @@ forms, profiles, and leaderboards remain semantic DOM interfaces.
 
 See [Architecture](docs/architecture.md),
 [Development](docs/development.md), [Skins](docs/skins.md), and
-[Third-party assets](docs/assets.md).
+[Third-party assets](docs/assets.md). The remaining delivery work begins in
+[Android and ads](docs/android-and-ads.md) and [Web deployment](docs/deployment.md).

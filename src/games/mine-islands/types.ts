@@ -8,13 +8,15 @@ export type MineIslandsResponse = {
   board_size: number;
   mine_count: number;
   board: null[][];
-  solution: Board | null;
+  puzzle_handle: string;
 };
 
 export type Puzzle = {
   size: number;
   mineCount: number;
-  solution: Board;
+  puzzleHandle: string;
+  /** Values learned through server-authoritative reveals; hidden cells are 0. */
+  values: Board;
 };
 
 export type RevealResult = {

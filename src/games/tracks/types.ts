@@ -6,7 +6,6 @@ export type TracksResponse = {
   board: Board;
   start: [number, number];
   end: [number, number];
-  solution: Board | null;
 };
 
 export type Puzzle = {
@@ -14,5 +13,4 @@ export type Puzzle = {
   board: Board;
   start: Position;
   end: Position;
-  solution: Board;
 };

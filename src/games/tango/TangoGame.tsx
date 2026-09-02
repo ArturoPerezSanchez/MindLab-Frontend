@@ -23,6 +23,7 @@ import {
   X,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { useRevealedSolution } from "@/shared/useRevealedSolution";
 import { useWinSequence } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
@@ -36,7 +37,7 @@ import {
   nextCellValue,
 } from "./game";
 import { TangoCanvas } from "./TangoCanvas";
-import type { CellValue, Puzzle, ViolationKind } from "./types";
+import type { CellValue, Puzzle, ViolationKind, SymbolValue } from "./types";
 
 const CONFLICT_LABELS: Record<ViolationKind, string> = {
   balance: "Too many of one symbol",
@@ -70,7 +71,6 @@ export function TangoGame() {
   const [showRules, setShowRules] = useState(false);
   const [showConflicts, setShowConflicts] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
-  const [solutionRevealed, setSolutionRevealed] = useState(false);
   const [usedHint, setUsedHint] = useState(false);
   const [conflictFeedback, setConflictFeedback] = useState<ConflictFeedback | null>(null);
 
@@ -87,6 +87,14 @@ export function TangoGame() {
     [entries, puzzle],
   );
 
+  // Both the hint and the reveal fetch the answer, and fetching it is recorded
+  // server-side - so the flag that reaches the leaderboard is not this one.
+  const {
+    solution: revealedSolution,
+    reveal,
+    isRevealing,
+  } = useRevealedSolution<SymbolValue[][]>("tango", `${selectedSize}x${selectedSize}`, puzzle);
+  const solutionRevealed = revealedSolution !== null;
   const assisted = solutionRevealed || usedHint;
   const totalCells = selectedSize * selectedSize;
   const isNewBest =
@@ -101,9 +109,8 @@ export function TangoGame() {
     completed: status.isSolved,
     game: "tango",
     difficulty: `${selectedSize}x${selectedSize}`,
-    won: true,
     time_seconds: elapsedSeconds,
-    assisted,
+    submission: entries,
   });
 
   const loadPuzzle = useCallback(async (size: number) => {
@@ -118,7 +125,6 @@ export function TangoGame() {
       setHistory([]);
       setElapsedSeconds(0);
       setShowSolution(false);
-      setSolutionRevealed(false);
       setUsedHint(false);
       const stored = window.localStorage.getItem(`tango-best-${size}`);
       setBestTime(stored ? Number(stored) : null);
@@ -222,18 +228,23 @@ export function TangoGame() {
     setShowConflicts(false);
   };
 
-  const revealHint = () => {
+  const revealHint = async () => {
     if (!puzzle || showSolution || status.isSolved) {
+      return;
+    }
+
+    const answer = await reveal();
+    if (!answer) {
       return;
     }
 
     for (let row = 0; row < puzzle.size; row += 1) {
       for (let col = 0; col < puzzle.size; col += 1) {
-        if (puzzle.board[row][col] === null && entries[row][col] !== puzzle.solution[row][col]) {
+        if (puzzle.board[row][col] === null && entries[row][col] !== answer[row][col]) {
           setHistory((current) => [...current, cloneBoard(entries)]);
           setEntries((current) => {
             const next = cloneBoard(current);
-            next[row][col] = puzzle.solution[row][col];
+            next[row][col] = answer[row][col];
             return next;
           });
           setUsedHint(true);
@@ -243,15 +254,18 @@ export function TangoGame() {
     }
   };
 
-  const toggleSolution = () => {
+  const toggleSolution = async () => {
     if (!puzzle) {
       return;
     }
-    if (!showSolution) {
-      setSolutionRevealed(true);
+    if (showSolution) {
+      setShowSolution(false);
+      return;
     }
-    setShowSolution((current) => !current);
-    setShowConflicts(false);
+    if (await reveal()) {
+      setShowSolution(true);
+      setShowConflicts(false);
+    }
   };
 
   const changeSize = (size: number) => {
@@ -344,6 +358,7 @@ export function TangoGame() {
                 conflicts={visibleConflicts}
                 celebration={win.isCelebrating ? win.progress : null}
                 showSolution={showSolution}
+                solution={revealedSolution}
                 hud={{
                   metrics: [
                     { label: "Timer", value: formatTime(elapsedSeconds) },
@@ -468,14 +483,15 @@ export function TangoGame() {
             <RotateCcw aria-hidden="true" size={18} />
             Retry
           </button>
-          <button className="secondary-action" type="button" onClick={revealHint} disabled={!puzzle || isLoading || showSolution || status.isSolved}>
+          <button className="secondary-action" type="button" onClick={() => void revealHint()}
+            disabled={!puzzle || isLoading || isRevealing || showSolution || status.isSolved}>
             <Lightbulb aria-hidden="true" size={18} />
             Hint
           </button>
           <button
             className="secondary-action"
             type="button"
-            onClick={toggleSolution}
+            onClick={() => void toggleSolution()}
             disabled={!puzzle || isLoading || status.isSolved}
             aria-pressed={showSolution}
           >

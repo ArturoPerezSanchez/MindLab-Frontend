@@ -14,14 +14,13 @@ export type TangoResponse = {
   board_size: number;
   board: CellValue[][];
   constraints: Constraint[];
-  solution: SymbolValue[][] | null;
 };
 
+/** The answer is not here: it stays on the server until the player asks. */
 export type Puzzle = {
   size: number;
   board: CellValue[][];
   constraints: Constraint[];
-  solution: SymbolValue[][];
 };
 
 export type ViolationKind = "balance" | "triple" | "relation";

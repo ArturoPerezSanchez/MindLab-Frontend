@@ -12,23 +12,26 @@ import {
 import type { Position, Puzzle } from "./types";
 
 /**
- * A 2x2 board where the clues run 1 -> 2 diagonally, so the only complete
- * path is (0,0) -> (0,1) -> (1,1) -> (1,0) or its mirror.
+ * A 2x2 board where the clues sit at the two ends of a complete path.
+ *
+ * The expected path is a fixture here rather than a field on the puzzle: the
+ * API no longer sends the answer, so `Puzzle` has no `solution`.
  */
+const EXPECTED_PATH: Position[] = [
+  [0, 0],
+  [0, 1],
+  [1, 1],
+  [1, 0],
+];
+
 function puzzle(overrides: Partial<Puzzle> = {}): Puzzle {
   return {
     size: 2,
     board: [
       [1, null],
-      [null, 2],
+      [2, null],
     ],
     walls: [],
-    solution: [
-      [0, 0],
-      [0, 1],
-      [1, 1],
-      [1, 0],
-    ],
     ...overrides,
   };
 }
@@ -91,7 +94,7 @@ describe("tryStep", () => {
 
 describe("isSolved", () => {
   it("requires every cell to be visited in clue order", () => {
-    expect(isSolved(puzzle().solution as Position[], puzzle())).toBe(true);
+    expect(isSolved(EXPECTED_PATH, puzzle())).toBe(true);
     expect(isSolved([[0, 0]], puzzle())).toBe(false);
   });
 });

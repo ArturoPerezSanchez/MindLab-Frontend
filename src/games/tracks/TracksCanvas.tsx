@@ -907,7 +907,7 @@ export function TracksCanvas({
             key: positionKey([row, col]),
             row,
             col,
-            disabled: disabled || mask === 0 || isStart,
+            disabled: disabled || mask === 0,
             label: `Row ${row + 1}, column ${col + 1}${
               mask === 0 ? ", empty" : isStart ? ", start track" : isEnd ? ", end track" : ", track piece"
             }`,

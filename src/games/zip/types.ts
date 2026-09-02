@@ -11,14 +11,13 @@ export type ZipResponse = {
   board_size: number;
   board: Array<Array<number | null>>;
   walls: Wall[];
-  solution: Array<[number, number]> | null;
 };
 
+/** The answer is not here: it stays on the server until the player asks. */
 export type Puzzle = {
   size: number;
   board: Array<Array<number | null>>;
   walls: Wall[];
-  solution: Position[];
 };
 
 export type InvalidMoveKind =

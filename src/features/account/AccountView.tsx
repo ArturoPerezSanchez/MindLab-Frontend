@@ -1,5 +1,14 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { BarChart3, ExternalLink, Link, LogOut, UserRound } from "lucide-react";
+import {
+  BarChart3,
+  Download,
+  ExternalLink,
+  Link,
+  LogOut,
+  ShieldAlert,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 import { type GameStat, type ProfileGender, useAuth } from "@/features/auth/AuthProvider";
 import { GAME_LABELS } from "@/shared/gameOptions";
 import { FacebookIcon, GoogleIcon } from "@/shared/icons/SocialIcons";
@@ -28,6 +37,8 @@ export function AccountView() {
     login,
     startSocialLogin,
     logout,
+    exportAccount,
+    deleteAccount,
     updateProfile,
     loadStats,
   } = useAuth();
@@ -47,6 +58,7 @@ export function AccountView() {
   const [xUrl, setXUrl] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmDeletion, setConfirmDeletion] = useState(false);
   const [stats, setStats] = useState<GameStat[]>([]);
   // Every known provider is rendered; unconfigured ones appear disabled rather
   // than vanishing, so the sign-in option stays visible during setup.
@@ -112,6 +124,40 @@ export function AccountView() {
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "Could not update profile.");
     } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleExport = async () => {
+    setFormError(null);
+    setIsSubmitting(true);
+    try {
+      const data = await exportAccount();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `mindlab-account-${new Date().toISOString().slice(0, 10)}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Could not export account data.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirmDeletion) {
+      return;
+    }
+    setFormError(null);
+    setIsSubmitting(true);
+    try {
+      await deleteAccount();
+      window.location.hash = "#/";
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Could not delete the account.");
       setIsSubmitting(false);
     }
   };
@@ -205,6 +251,45 @@ export function AccountView() {
                 Sign out
               </button>
             </div>
+
+            <section className="account-data-tools" aria-labelledby="account-data-title">
+              <div>
+                <h3 id="account-data-title">Your data</h3>
+                <p>Download a portable JSON copy, or permanently erase the account and results.</p>
+              </div>
+              <button
+                className="secondary-action"
+                type="button"
+                onClick={() => void handleExport()}
+                disabled={isSubmitting}
+              >
+                <Download aria-hidden="true" size={17} />
+                Export my data
+              </button>
+              <div className="account-danger-zone">
+                <div className="account-danger-heading">
+                  <ShieldAlert aria-hidden="true" size={18} />
+                  <strong>Delete account</strong>
+                </div>
+                <label className="account-delete-confirm">
+                  <input
+                    type="checkbox"
+                    checked={confirmDeletion}
+                    onChange={(event) => setConfirmDeletion(event.target.checked)}
+                  />
+                  <span>I understand this permanently deletes my profile and game history.</span>
+                </label>
+                <button
+                  className="danger-action"
+                  type="button"
+                  disabled={!confirmDeletion || isSubmitting}
+                  onClick={() => void handleDelete()}
+                >
+                  <Trash2 aria-hidden="true" size={17} />
+                  Delete account permanently
+                </button>
+              </div>
+            </section>
           </form>
 
           <section className="account-panel">

@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { useGameResultReporter } from "@/features/auth/AuthProvider";
+import { useRevealedSolution } from "@/shared/useRevealedSolution";
 import { pickLightsSweep, useWinSequence, type LightsSweep } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
@@ -46,18 +47,29 @@ export function LightsGame() {
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [board, setBoard] = useState<Board>([]);
   const [history, setHistory] = useState<Board[]>([]);
+  // The server replays these against the original board to check the win, so
+  // the list has to track undo exactly as the board snapshots do.
+  const [presses, setPresses] = useState<Position[]>([]);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
-  const [solutionRevealed, setSolutionRevealed] = useState(false);
   const [usedHint, setUsedHint] = useState(false);
 
   const requestSequenceRef = useRef(0);
 
   const solved = board.length > 0 && isSolved(board);
+  // Lights can be solved in the browser, so the answer is computed locally - but
+  // the reveal still calls the server, because that is the only way assistance
+  // gets recorded against this puzzle.
+  const {
+    reveal,
+    solution: revealedSolution,
+    isRevealing,
+  } = useRevealedSolution<Position[]>("lights", `${selectedSize}x${selectedSize}`, puzzle);
+  const solutionRevealed = revealedSolution !== null;
   const assisted = solutionRevealed || usedHint;
   const isNewBest = solved && !assisted && (bestTime === null || elapsedSeconds < bestTime);
   const lightsOn = litCount(board);
@@ -82,9 +94,8 @@ export function LightsGame() {
     completed: solved,
     game: "lights",
     difficulty: `${selectedSize}x${selectedSize}`,
-    won: true,
     time_seconds: elapsedSeconds,
-    assisted,
+    submission: presses,
   });
 
   const initializePuzzle = useCallback((nextPuzzle: Puzzle, size: number) => {
@@ -92,9 +103,9 @@ export function LightsGame() {
     setPuzzle(nextPuzzle);
     setBoard(cloneBoard(nextPuzzle.board));
     setHistory([]);
+    setPresses([]);
     setElapsedSeconds(0);
     setShowSolution(false);
-    setSolutionRevealed(false);
     setUsedHint(false);
     const stored = window.localStorage.getItem(`lights-best-${size}`);
     setBestTime(stored ? Number(stored) : null);
@@ -108,6 +119,7 @@ export function LightsGame() {
       setPuzzle(null);
       setBoard([]);
       setHistory([]);
+      setPresses([]);
 
       try {
         const nextPuzzle = await fetchPuzzle(size, signal);
@@ -163,6 +175,7 @@ export function LightsGame() {
     }
 
     setHistory((current) => [...current, cloneBoard(board)]);
+    setPresses((current) => [...current, [row, col] as Position]);
     setBoard((current) => pressCell(current, row, col));
   };
 
@@ -173,6 +186,7 @@ export function LightsGame() {
     }
     setBoard(previous);
     setHistory((current) => current.slice(0, -1));
+    setPresses((current) => current.slice(0, -1));
   };
 
   const retry = () => {
@@ -181,10 +195,11 @@ export function LightsGame() {
     }
     setBoard(cloneBoard(puzzle.board));
     setHistory([]);
+    setPresses([]);
     setShowSolution(false);
   };
 
-  const revealHint = () => {
+  const revealHint = async () => {
     if (!puzzle || showSolution || solved) {
       return;
     }
@@ -194,19 +209,28 @@ export function LightsGame() {
       return;
     }
 
+    // The press is applied locally, but the server is told the answer was
+    // consulted so this cannot be reported as an unaided win.
+    if (!(await reveal())) {
+      return;
+    }
     setHistory((current) => [...current, cloneBoard(board)]);
+    setPresses((current) => [...current, [hint[0], hint[1]] as Position]);
     setBoard((current) => pressCell(current, hint[0], hint[1]));
     setUsedHint(true);
   };
 
-  const toggleSolution = () => {
+  const toggleSolution = async () => {
     if (!puzzle || solved) {
       return;
     }
-    if (!showSolution) {
-      setSolutionRevealed(true);
+    if (showSolution) {
+      setShowSolution(false);
+      return;
     }
-    setShowSolution((current) => !current);
+    if (await reveal()) {
+      setShowSolution(true);
+    }
   };
 
   const changeSize = (size: number) => {
@@ -366,14 +390,15 @@ export function LightsGame() {
             <RotateCcw aria-hidden="true" size={18} />
             Retry
           </button>
-          <button className="secondary-action" type="button" onClick={revealHint} disabled={!puzzle || isLoading || showSolution || solved}>
+          <button className="secondary-action" type="button" onClick={() => void revealHint()}
+            disabled={!puzzle || isLoading || isRevealing || showSolution || solved}>
             <Lightbulb aria-hidden="true" size={18} />
             Hint
           </button>
           <button
             className="secondary-action"
             type="button"
-            onClick={toggleSolution}
+            onClick={() => void toggleSolution()}
             disabled={!puzzle || isLoading || solved || currentSolution === null}
             aria-pressed={showSolution}
           >

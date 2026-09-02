@@ -1,7 +1,6 @@
 import { apiPath } from "@/shared/api";
 import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
-import { solvesBoard } from "./game";
-import type { Board, LightsResponse, Position, Puzzle } from "./types";
+import type { Board, LightsResponse, Puzzle } from "./types";
 
 function isBoard(value: unknown, size: number): value is Board {
   return (
@@ -16,24 +15,8 @@ function isBoard(value: unknown, size: number): value is Board {
   );
 }
 
-function isPosition(value: unknown, size: number): value is [number, number] {
-  return (
-    Array.isArray(value) &&
-    value.length === 2 &&
-    Number.isInteger(value[0]) &&
-    Number.isInteger(value[1]) &&
-    value[0] >= 0 &&
-    value[1] >= 0 &&
-    value[0] < size &&
-    value[1] < size
-  );
-}
-
 export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<Puzzle> {
-  const params = new URLSearchParams({
-    board_size: String(size),
-    solution: "true",
-  });
+  const params = new URLSearchParams({ board_size: String(size) });
   const response = await fetch(`${apiPath("/lights")}?${params}`, { signal });
 
   if (!response.ok) {
@@ -43,10 +26,7 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
   const payload = (await response.json()) as LightsResponse;
   if (
     payload.board_size !== size ||
-    !isBoard(payload.board, size) ||
-    !Array.isArray(payload.solution) ||
-    !payload.solution.every((position) => isPosition(position, size)) ||
-    !solvesBoard(payload.board, payload.solution as Position[])
+    !isBoard(payload.board, size)
   ) {
     throw new Error("The API returned an invalid Lights puzzle.");
   }
@@ -56,6 +36,5 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
   return {
     size,
     board: payload.board,
-    solution: payload.solution,
   };
 }
