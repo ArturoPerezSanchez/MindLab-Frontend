@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GAME_PRESETS } from "./presets";
+import { DEFAULT_GAME_SKINS, resolveGameSkin } from "./skins";
 
 describe("game skin catalog", () => {
   it("keeps multiple named, uniquely keyed presets for every game", () => {
@@ -8,5 +9,11 @@ describe("game skin catalog", () => {
       expect(new Set(presets.map((preset) => preset.id)).size).toBe(presets.length);
       expect(presets.every((preset) => preset.name.trim() && preset.description.trim())).toBe(true);
     }
+  });
+
+  it("keeps the default Queens marker on the production-safe vector asset", () => {
+    const skin = resolveGameSkin("queens", DEFAULT_GAME_SKINS.queens);
+
+    expect(skin.assets.marker).toBe("/games/queens/queen.svg");
   });
 });

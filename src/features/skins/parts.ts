@@ -103,9 +103,9 @@ const QUEENS_PARTS: AssetParts<"queens"> = {
       id: "royal",
       name: "Royal",
       description: "The original crown marker.",
-      preview: { sources: ["/games/queens/queen.png"], presentation: "contain" },
+      preview: { sources: ["/games/queens/queen.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { marker: "/games/queens/queen.png" },
+      value: { marker: "/games/queens/queen.svg" },
     },
     {
       id: "rose",

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img">
+  <title>Royal crown</title>
+  <path
+    d="M16 52 64 106 96 31l32 75 48-54-20 76H36Z"
+    fill="#ffca16"
+    stroke="#374151"
+    stroke-linejoin="miter"
+    stroke-width="5"
+  />
+  <path d="M38 139h116v22H38Z" fill="#ffca16" stroke="#374151" stroke-width="5" />
+</svg>
