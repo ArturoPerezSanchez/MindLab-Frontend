@@ -1,6 +1,6 @@
 export type Position = readonly [row: number, col: number];
 
-export type QueensResponse = {
+export type ThronesResponse = {
   board: number[][];
 };
 

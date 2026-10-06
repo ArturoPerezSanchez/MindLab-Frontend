@@ -6,7 +6,7 @@ import type { PartSelections, SkinUnlock } from "./types";
  * config screen exposes the parts directly. Presets survive for two reasons —
  * the first entry per game supplies the defaults, and preset ids deliberately
  * match the pre-part skin ids, which makes migrating stored
- * `mindlab-game-skins-v1` values a straight lookup.
+ * `mindora-game-skins-v1` values a straight lookup.
  */
 export type SkinPreset = {
   id: string;
@@ -19,7 +19,7 @@ export type SkinPreset = {
 const STARTER = { type: "starter" } as const;
 
 export const GAME_PRESETS = {
-  queens: [
+  thrones: [
     {
       id: "studio",
       name: "Royal",
@@ -80,7 +80,7 @@ export const GAME_PRESETS = {
       selections: { palette: "citrus", marker: "star" },
     },
   ],
-  tango: [
+  eclipse: [
     {
       id: "classic",
       name: "Classic",
@@ -184,7 +184,7 @@ export const GAME_PRESETS = {
       selections: { palette: "refinery", pipe: "brass", liquid: "coolant" },
     },
   ],
-  zip: [
+  dash: [
     {
       id: "current",
       name: "Current",

@@ -26,7 +26,7 @@ import { useWinSequence } from "@/shared/useWinSequence";
 import { LeaderboardLink } from "@/features/leaderboard/LeaderboardLink";
 import { useGameSkin } from "@/features/skins/useSkins";
 import { fetchPuzzle } from "./api";
-import { useQueensPatternsSetting } from "@/features/settings/useConfig";
+import { useThronesPatternsSetting } from "@/features/settings/useConfig";
 import type { CanvasBoardPointer, CanvasCellPosition } from "@/shared/canvas/CanvasBoard";
 import {
   BOARD_SIZES,
@@ -37,7 +37,7 @@ import {
   positionKey,
   toPositionSet,
 } from "./game";
-import { QueensCanvas } from "./QueensCanvas";
+import { ThronesCanvas } from "./ThronesCanvas";
 import type { Position, Puzzle, ViolationKind } from "./types";
 
 type LoadState = "idle" | "loading" | "ready" | "error";
@@ -46,14 +46,14 @@ type BestTimes = Record<string, number>;
 
 function getStoredBestTimes(): BestTimes {
   try {
-    return JSON.parse(localStorage.getItem("queens-best-times") ?? "{}") as BestTimes;
+    return JSON.parse(localStorage.getItem("thrones-best-times") ?? "{}") as BestTimes;
   } catch {
     return {};
   }
 }
 
 function getStoredAutoMarkPreference(): boolean {
-  return localStorage.getItem("queens-auto-mark") === "true";
+  return localStorage.getItem("thrones-auto-mark") === "true";
 }
 
 function violationLabel(kind: ViolationKind): string {
@@ -67,18 +67,18 @@ function violationLabel(kind: ViolationKind): string {
   return labels[kind];
 }
 
-export function QueensGame() {
-  const skin = useGameSkin("queens");
+export function ThronesGame() {
+  const skin = useGameSkin("thrones");
   const [size, setSize] = useState(8);
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
-  const [queens, setQueens] = useState<Set<string>>(() => new Set());
+  const [thrones, setThrones] = useState<Set<string>>(() => new Set());
   const [manualMarks, setManualMarks] = useState<Set<string>>(() => new Set());
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [bestTimes, setBestTimes] = useState<BestTimes>(() => getStoredBestTimes());
   const [loadState, setLoadState] = useState<LoadState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [showSolution, setShowSolution] = useState(false);
-  const [showPatterns] = useQueensPatternsSetting();
+  const [showPatterns] = useThronesPatternsSetting();
   const [autoMarkForbidden, setAutoMarkForbidden] = useState(() => getStoredAutoMarkPreference());
   const [showRules, setShowRules] = useState(false);
   const [showConflictPanel, setShowConflictPanel] = useState(false);
@@ -90,8 +90,8 @@ export function QueensGame() {
   const suppressNextContextMenu = useRef(false);
 
   const gameStatus = useMemo(
-    () => (puzzle ? evaluateGame(puzzle.board, queens) : null),
-    [puzzle, queens],
+    () => (puzzle ? evaluateGame(puzzle.board, thrones) : null),
+    [puzzle, thrones],
   );
   const hasConflicts = Boolean(gameStatus && gameStatus.conflicts.size > 0);
   const activeViolations = gameStatus
@@ -103,22 +103,22 @@ export function QueensGame() {
     solution: revealedSolution,
     reveal,
     isRevealing,
-  } = useRevealedSolution<Position[]>("queens", `${size}x${size}`, puzzle);
+  } = useRevealedSolution<Position[]>("thrones", `${size}x${size}`, puzzle);
   const solutionRevealed = revealedSolution !== null;
   const solutionCells = useMemo(() => toPositionSet(revealedSolution), [revealedSolution]);
   const forbiddenMarks = useMemo(
-    () => (puzzle && autoMarkForbidden ? getForbiddenMarks(puzzle.board, queens) : new Set<string>()),
-    [autoMarkForbidden, puzzle, queens],
+    () => (puzzle && autoMarkForbidden ? getForbiddenMarks(puzzle.board, thrones) : new Set<string>()),
+    [autoMarkForbidden, puzzle, thrones],
   );
   const marks = useMemo(() => {
     const next = new Set([...manualMarks, ...forbiddenMarks]);
 
-    for (const queen of queens) {
+    for (const queen of thrones) {
       next.delete(queen);
     }
 
     return next;
-  }, [forbiddenMarks, manualMarks, queens]);
+  }, [forbiddenMarks, manualMarks, thrones]);
   const bestTime = bestTimes[String(size)];
 
   const win = useWinSequence({
@@ -130,10 +130,10 @@ export function QueensGame() {
   useGameResultReporter({
     runKey: puzzle,
     completed: Boolean(gameStatus?.isSolved),
-    game: "queens",
+    game: "thrones",
     difficulty: `${size}x${size}`,
     time_seconds: elapsedSeconds,
-    submission: [...queens].map(parsePositionKey),
+    submission: [...thrones].map(parsePositionKey),
   });
 
   const loadPuzzle = useCallback(async (nextSize: number, signal?: AbortSignal) => {
@@ -145,7 +145,7 @@ export function QueensGame() {
     try {
       const nextPuzzle = await fetchPuzzle(nextSize, signal);
       setPuzzle(nextPuzzle);
-      setQueens(new Set());
+      setThrones(new Set());
       setManualMarks(new Set());
       setElapsedSeconds(0);
       setLoadState("ready");
@@ -193,13 +193,13 @@ export function QueensGame() {
         ...current,
         [storageKey]: elapsedSeconds,
       };
-      localStorage.setItem("queens-best-times", JSON.stringify(next));
+      localStorage.setItem("thrones-best-times", JSON.stringify(next));
       return next;
     });
   }, [elapsedSeconds, gameStatus?.isSolved, size, solutionRevealed]);
 
   useEffect(() => {
-    localStorage.setItem("queens-auto-mark", String(autoMarkForbidden));
+    localStorage.setItem("thrones-auto-mark", String(autoMarkForbidden));
   }, [autoMarkForbidden]);
 
   useEffect(() => {
@@ -230,7 +230,7 @@ export function QueensGame() {
     }
 
     const key = positionKey(row, col);
-    setQueens((current) => {
+    setThrones((current) => {
       const next = new Set(current);
 
       if (next.has(key)) {
@@ -254,10 +254,10 @@ export function QueensGame() {
     }
 
     const key = positionKey(row, col);
-    setQueens((currentQueens) => {
-      const nextQueens = new Set(currentQueens);
-      nextQueens.delete(key);
-      return nextQueens;
+    setThrones((currentThrones) => {
+      const nextThrones = new Set(currentThrones);
+      nextThrones.delete(key);
+      return nextThrones;
     });
     setManualMarks((currentMarks) => {
       const nextMarks = new Set(currentMarks);
@@ -278,14 +278,14 @@ export function QueensGame() {
     }
 
     const key = positionKey(row, col);
-    setQueens((currentQueens) => {
-      if (!currentQueens.has(key)) {
-        return currentQueens;
+    setThrones((currentThrones) => {
+      if (!currentThrones.has(key)) {
+        return currentThrones;
       }
 
-      const nextQueens = new Set(currentQueens);
-      nextQueens.delete(key);
-      return nextQueens;
+      const nextThrones = new Set(currentThrones);
+      nextThrones.delete(key);
+      return nextThrones;
     });
     setManualMarks((currentMarks) => {
       if (shouldMark === currentMarks.has(key)) {
@@ -395,7 +395,7 @@ export function QueensGame() {
   }
 
   function retryPuzzle(): void {
-    setQueens(new Set());
+    setThrones(new Set());
     setManualMarks(new Set());
     setShowSolution(false);
     setShowConflictPanel(false);
@@ -420,14 +420,14 @@ export function QueensGame() {
 
   return (
     <main className={`app-shell ${showRules ? "rules-open" : ""}`}>
-      <section className="game-surface" aria-label="Queens game">
+      <section className="game-surface" aria-label="Thrones game">
         <div className="top-bar">
           <div className="brand-lockup">
             <span className="brand-mark" aria-hidden="true">
-              <img src="/games/queens/logo.png" alt="" />
+              <img src="/games/thrones/logo.png" alt="" />
             </span>
             <div>
-              <h1>Queens</h1>
+              <h1>Thrones</h1>
             </div>
           </div>
 
@@ -471,7 +471,7 @@ export function QueensGame() {
             <strong>{bestTime === undefined ? "--:--" : formatTime(bestTime)}</strong>
           </div>
           <div className="stat-tile">
-            <span>Queens</span>
+            <span>Thrones</span>
             <strong>
               {gameStatus?.queenCount ?? 0}/{puzzle?.size ?? size}
             </strong>
@@ -498,12 +498,12 @@ export function QueensGame() {
           )}
 
           {puzzle && loadState === "ready" && (
-            <QueensCanvas
+            <ThronesCanvas
               celebration={win.isCelebrating ? win.progress : null}
               board={puzzle.board}
               marker={skin.assets.marker}
               surface={skin.assets.surface}
-              queens={queens}
+              thrones={thrones}
               marks={marks}
               conflicts={gameStatus?.conflicts ?? new Set()}
               conflictHints={
@@ -529,7 +529,7 @@ export function QueensGame() {
                     value: bestTime === undefined ? "--:--" : formatTime(bestTime),
                   },
                   {
-                    label: "Queens",
+                    label: "Thrones",
                     value: `${gameStatus?.queenCount ?? 0}/${puzzle?.size ?? size}`,
                   },
                 ],
@@ -568,7 +568,7 @@ export function QueensGame() {
                   New best
                 </span>
               )}
-              <LeaderboardLink game="queens" difficulty={`${size}x${size}`} />
+              <LeaderboardLink game="thrones" difficulty={`${size}x${size}`} />
               <button className="win-action" type="button" onClick={requestNewPuzzle}>
                 <RefreshCcw size={17} />
                 Play again
@@ -700,7 +700,7 @@ export function QueensGame() {
           </div>
           <div className="rule-item">
             <strong>No touching</strong>
-            <span>Queens cannot touch, including diagonally adjacent cells.</span>
+            <span>Thrones cannot touch, including diagonally adjacent cells.</span>
           </div>
           <div className="rule-item">
             <strong>Marking X</strong>

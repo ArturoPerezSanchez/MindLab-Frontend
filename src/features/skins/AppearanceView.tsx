@@ -132,7 +132,7 @@ function SlotColumn({ gameId, slot }: { gameId: GameId; slot: SkinSlot }) {
 }
 
 export function AppearanceView() {
-  const [gameId, setGameId] = useState<GameId>("queens");
+  const [gameId, setGameId] = useState<GameId>("thrones");
   const { selectedSkins, resetGame } = useSkins();
   const customization = selectedSkins[gameId];
   const slots = gameSlots(gameId);

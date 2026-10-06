@@ -11,9 +11,9 @@ describe("game skin catalog", () => {
     }
   });
 
-  it("keeps the default Queens marker on the production-safe vector asset", () => {
-    const skin = resolveGameSkin("queens", DEFAULT_GAME_SKINS.queens);
+  it("keeps the default Thrones marker on the production-safe vector asset", () => {
+    const skin = resolveGameSkin("thrones", DEFAULT_GAME_SKINS.thrones);
 
-    expect(skin.assets.marker).toBe("/games/queens/queen.svg");
+    expect(skin.assets.marker).toBe("/games/thrones/queen.svg");
   });
 });

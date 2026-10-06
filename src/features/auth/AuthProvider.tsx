@@ -11,7 +11,7 @@ import {
 import { apiPath } from "@/shared/api";
 import { takePuzzleHandle } from "@/shared/puzzleHandles";
 
-const TOKEN_KEY = "mindlab-auth-token";
+const TOKEN_KEY = "mindora-auth-token";
 
 /**
  * Where a finished game is handed to the signed-in session.
@@ -254,8 +254,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const retrySession = () => setSessionRetry((current) => current + 1);
-    window.addEventListener("mindlab:api-online", retrySession);
-    return () => window.removeEventListener("mindlab:api-online", retrySession);
+    window.addEventListener("mindora:api-online", retrySession);
+    return () => window.removeEventListener("mindora:api-online", retrySession);
   }, []);
 
   useEffect(() => {

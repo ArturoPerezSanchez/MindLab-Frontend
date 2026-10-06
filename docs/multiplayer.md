@@ -1,6 +1,6 @@
 # Multiplayer
 
-Elimination races on a shared board. Queens first; the game id is a field rather
+Elimination races on a shared board. Thrones first; the game id is a field rather
 than an assumption so adding a second game is data plus a validator.
 
 This document is the shared design record for the feature and is kept
@@ -14,7 +14,7 @@ This is the product owner's original request. Everything below "Decisions" and
 "Design notes" resolves how it is built; this section is the source of truth for
 *what* it must do.
 
-1. At first it will be just for Queens.
+1. At first it will be just for Thrones.
 2. A game can have up to 8 players (make this number easy to increase in the
    future).
 3. All players will have the same copy of the board.
@@ -67,7 +67,7 @@ on `127.0.0.1`.
 **Clients never claim to have won.** A player sends the placements they believe
 solve the board; the server validates against the puzzle it generated and stamps
 the time itself. There is no "I finished" message to forge. Every generated
-Queens board is checked for a unique solution already (`games/queens.py`), so
+Thrones board is checked for a unique solution already (`games/thrones.py`), so
 validating a submission is exactly "does this set of cells equal the solution
 set" — no need to re-run the adjacency/region rules server-side.
 
@@ -95,10 +95,10 @@ message contract instead of splitting lobby creation from lobby life.
 
 **Progress has two grades, and who you are decides which you get.** Watching a
 rival's board while you are still racing is not exciting, it is cheating: their
-queens are your answers, because everyone is solving the same board. So the
+thrones are your answers, because everyone is solving the same board. So the
 client sends its placements, and the server splits them.
 
-- **Counts** — queens placed, how many are on solution squares, how many are
+- **Counts** — thrones placed, how many are on solution squares, how many are
   not — go to everyone. They convey pace and pressure and reveal nothing about
   position. Because everyone sees only their rivals' counts and never their own,
   the numbers cannot be used as a hint system either: watching your own
@@ -215,7 +215,7 @@ ratings floor at 100.
 
 Ratings persist in the `elo_ratings` table (already migrated in, previously
 unused) keyed by `(user_id, mode)` for accounts and `(guest_key, mode)` for
-guests, with `mode = "queens"` — a future second multiplayer game gets its own
+guests, with `mode = "thrones"` — a future second multiplayer game gets its own
 mode string and its own ladder, exactly as the migration's comment intended.
 
 ## Spectating

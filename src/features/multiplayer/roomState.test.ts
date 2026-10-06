@@ -38,7 +38,7 @@ function state(phase: RoomPhase, players: RoomPlayer[], serverTime = 1_000_000):
   return {
     code: "ABC123",
     hostId: players[0]?.id ?? null,
-    settings: { gameId: "queens", maxPlayers: 8, roundSeconds: 180, boardSize: 8 },
+    settings: { gameId: "thrones", maxPlayers: 8, roundSeconds: 180, boardSize: 8 },
     phase,
     players,
     puzzle: { board: [[0]] },

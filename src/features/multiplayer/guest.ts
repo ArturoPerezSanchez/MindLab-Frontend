@@ -1,4 +1,4 @@
-const GUEST_KEY = "mindlab-guest-id";
+const GUEST_KEY = "mindora-guest-id";
 
 /**
  * A stable per-browser id for players without an account.

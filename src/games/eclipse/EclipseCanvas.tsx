@@ -10,11 +10,11 @@ import {
 import { drawCellSurface, withSurfaceAssets } from "@/shared/canvas/surface";
 import type { BoardSurface } from "@/features/skins/skins";
 import { addLabel, addRect, addSprite, cssVar } from "@/shared/canvas/drawing";
-import { drawTangoCelebration, type CellRef } from "@/shared/canvas/winCelebration";
+import { drawEclipseCelebration, type CellRef } from "@/shared/canvas/winCelebration";
 import { positionKey } from "./game";
 import type { CellValue, Constraint, Puzzle, SymbolValue } from "./types";
 
-type TangoCanvasProps = {
+type EclipseCanvasProps = {
   /** Material laid over the cell colours by the chosen board. */
   surface?: BoardSurface;
   puzzle: Puzzle;
@@ -47,7 +47,7 @@ function relationPosition(constraint: Constraint, cellWidth: number, cellHeight:
       };
 }
 
-export function TangoCanvas({
+export function EclipseCanvas({
   surface,
   puzzle,
   entries,
@@ -59,7 +59,7 @@ export function TangoCanvas({
   hud,
   onActivate,
   onContextMenu,
-}: TangoCanvasProps) {
+}: EclipseCanvasProps) {
   const cells = useMemo(
     () =>
       entries.flatMap((rowValues, row) =>
@@ -171,8 +171,8 @@ export function TangoCanvas({
       });
       const frame = { context, cellWidth, cellHeight, progress: celebration };
       // Moons take the first slice of the sequence; suns answer at 0.35.
-      drawTangoCelebration({ ...frame, color: cssVar(host, "--moon-glow", "#5b7fd4") }, moons, 0);
-      drawTangoCelebration({ ...frame, color: cssVar(host, "--sun-glow", "#e0a83c") }, suns, 0.35);
+      drawEclipseCelebration({ ...frame, color: cssVar(host, "--moon-glow", "#5b7fd4") }, moons, 0);
+      drawEclipseCelebration({ ...frame, color: cssVar(host, "--sun-glow", "#e0a83c") }, suns, 0.35);
     },
     [celebration, entries],
   );
@@ -180,7 +180,7 @@ export function TangoCanvas({
   return (
     <CanvasBoard
       className="board"
-      ariaLabel={`${puzzle.size} by ${puzzle.size} Tango board`}
+      ariaLabel={`${puzzle.size} by ${puzzle.size} Eclipse board`}
       rows={puzzle.size}
       cols={puzzle.size}
       cells={cells}

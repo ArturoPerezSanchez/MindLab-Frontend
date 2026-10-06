@@ -16,7 +16,7 @@ export function AdSlot({ placement }: { placement: AdPlacement }) {
 
   useEffect(() => {
     if (enabled && provider === "native") {
-      window.dispatchEvent(new CustomEvent("mindlab:ad-request", { detail: { placement } }));
+      window.dispatchEvent(new CustomEvent("mindora:ad-request", { detail: { placement } }));
     }
   }, [enabled, placement, provider]);
 

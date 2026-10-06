@@ -1900,7 +1900,7 @@ a {
   background: var(--surface-solid);
 }
 
-.player-game-tango {
+.player-game-eclipse {
   --player-game-accent: #c58a26;
 }
 
@@ -1912,7 +1912,7 @@ a {
   --player-game-accent: #208f83;
 }
 
-.player-game-zip {
+.player-game-dash {
   --player-game-accent: #c36f3c;
 }
 
@@ -2795,13 +2795,13 @@ a {
   color: var(--ink, #d4d4d4);
 }
 
-[data-theme="dark"] .game-zip .cell {
+[data-theme="dark"] .game-dash .cell {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0) 74%),
     var(--cell);
 }
 
-[data-theme="dark"] .game-zip .cell:nth-child(even) {
+[data-theme="dark"] .game-dash .cell:nth-child(even) {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0) 74%),
     var(--cell-alt);
@@ -2831,11 +2831,11 @@ a {
     var(--empty-cell);
 }
 
-[data-theme="dark"] .game-queens,
-[data-theme="dark"] .game-tango,
+[data-theme="dark"] .game-thrones,
+[data-theme="dark"] .game-eclipse,
 [data-theme="dark"] .game-lights,
 [data-theme="dark"] .game-tracks,
-[data-theme="dark"] .game-zip,
+[data-theme="dark"] .game-dash,
 [data-theme="dark"] .game-mine-islands,
 [data-theme="dark"] .game-mini-chess {
   --ink: #d4d4d4;
@@ -2855,11 +2855,11 @@ a {
     var(--page);
 }
 
-[data-theme="dark"] .game-queens {
+[data-theme="dark"] .game-thrones {
   --success: #89d185;
 }
 
-[data-theme="dark"] .game-tango {
+[data-theme="dark"] .game-eclipse {
   --sun: #d7ba7d;
   --sun-soft: #c8a86a;
   --moon: #3794ff;
@@ -2893,7 +2893,7 @@ a {
   --gold-soft: #c8a86a;
 }
 
-[data-theme="dark"] .game-zip {
+[data-theme="dark"] .game-dash {
   --cell: #2d2d30;
   --cell-alt: #29292c;
   --route: #d7ba7d;
@@ -2924,13 +2924,13 @@ a {
   --accent-soft: #4d4432;
 }
 
-[data-theme="dark"] .game-queens .app-shell {
+[data-theme="dark"] .game-thrones .app-shell {
   background:
     linear-gradient(180deg, rgba(55, 148, 255, 0.045), rgba(30, 30, 30, 0) 260px),
     var(--page);
 }
 
-[data-theme="dark"] .game-queens .board {
+[data-theme="dark"] .game-thrones .board {
   border-color: rgba(128, 128, 128, 0.42);
   background: #1e1e1e;
   box-shadow:
@@ -2938,7 +2938,7 @@ a {
     inset 0 0 0 1px rgba(128, 128, 128, 0.24);
 }
 
-[data-theme="dark"] .game-queens .cell {
+[data-theme="dark"] .game-thrones .cell {
   color: #d4d4d4;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0) 90%),
@@ -2947,7 +2947,7 @@ a {
   border-bottom-color: rgba(30, 30, 30, 0.5);
 }
 
-[data-theme="dark"] .game-queens .board.patterns-enabled .cell {
+[data-theme="dark"] .game-thrones .board.patterns-enabled .cell {
   background:
     var(--region-pattern-dark),
     linear-gradient(145deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 90%),
@@ -2979,30 +2979,30 @@ a {
   background: rgba(90, 93, 94, 0.28);
 }
 
-[data-theme="dark"] .game-tango .cell,
+[data-theme="dark"] .game-eclipse .cell,
 [data-theme="dark"] .game-lights .cell,
 [data-theme="dark"] .game-lights .cell:nth-child(even),
-[data-theme="dark"] .game-zip .cell,
+[data-theme="dark"] .game-dash .cell,
 [data-theme="dark"] .game-tracks .cell.is-empty {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.018), rgba(255, 255, 255, 0) 78%),
     var(--cell, #2d2d30);
 }
 
-[data-theme="dark"] .game-tango .cell:nth-child(even),
-[data-theme="dark"] .game-zip .cell:nth-child(even) {
+[data-theme="dark"] .game-eclipse .cell:nth-child(even),
+[data-theme="dark"] .game-dash .cell:nth-child(even) {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.014), rgba(255, 255, 255, 0) 78%),
     var(--cell-alt, #29292c);
 }
 
-[data-theme="dark"] .game-tango .cell.is-given {
+[data-theme="dark"] .game-eclipse .cell.is-given {
   background:
     repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.022) 0 3px, transparent 3px 9px),
     #333337;
 }
 
-[data-theme="dark"] .game-zip .cell.is-visited {
+[data-theme="dark"] .game-dash .cell.is-visited {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.024), rgba(255, 255, 255, 0) 90%),
     color-mix(in srgb, var(--route) 24%, #2d2d30);

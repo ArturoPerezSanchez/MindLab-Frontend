@@ -62,7 +62,7 @@ function part<V>(
   return { label, hint, options };
 }
 
-const QUEENS_PARTS: AssetParts<"queens"> = {
+const THRONES_PARTS: AssetParts<"thrones"> = {
   marker: part("Queen asset", "The piece you place on the board.", [
     // The four detailed markers pair with the boards of the same name, but the
     // parts stay independent - nothing stops an iron queen on the arcade board.
@@ -70,151 +70,151 @@ const QUEENS_PARTS: AssetParts<"queens"> = {
       id: "iron",
       name: "Wrought iron",
       description: "A hammered iron queen with pitting and a lichen patina.",
-      preview: { sources: ["/games/queens/skins/quarry/marker.svg"], presentation: "contain" },
+      preview: { sources: ["/games/thrones/skins/quarry/marker.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { marker: "/games/queens/skins/quarry/marker.svg" },
+      value: { marker: "/games/thrones/skins/quarry/marker.svg" },
     },
     {
       id: "coronet",
       name: "Jewelled coronet",
       description: "Gold filigree arches over a velvet cap, set with stones.",
-      preview: { sources: ["/games/queens/skins/regalia/marker.svg"], presentation: "contain" },
+      preview: { sources: ["/games/thrones/skins/regalia/marker.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { marker: "/games/queens/skins/regalia/marker.svg" },
+      value: { marker: "/games/thrones/skins/regalia/marker.svg" },
     },
     {
       id: "staunton",
       name: "Walnut queen",
       description: "A turned tournament queen with lathe rings and a felt base.",
-      preview: { sources: ["/games/queens/skins/timber/marker.svg"], presentation: "contain" },
+      preview: { sources: ["/games/thrones/skins/timber/marker.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { marker: "/games/queens/skins/timber/marker.svg" },
+      value: { marker: "/games/thrones/skins/timber/marker.svg" },
     },
     {
       id: "pixel-crown",
       name: "Pixel crown",
       description: "A 16-bit crown drawn on whole pixels, jewels and all.",
-      preview: { sources: ["/games/queens/skins/arcade/marker.svg"], presentation: "contain" },
+      preview: { sources: ["/games/thrones/skins/arcade/marker.svg"], presentation: "contain" },
       unlock: STARTER,
       pixelated: true,
-      value: { marker: "/games/queens/skins/arcade/marker.svg" },
+      value: { marker: "/games/thrones/skins/arcade/marker.svg" },
     },
     {
       id: "royal",
       name: "Royal",
       description: "The original crown marker.",
-      preview: { sources: ["/games/queens/queen.svg"], presentation: "contain" },
+      preview: { sources: ["/games/thrones/queen.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { marker: "/games/queens/queen.svg" },
+      value: { marker: "/games/thrones/queen.svg" },
     },
     {
       id: "rose",
       name: "Rose",
       description: "An open bloom in place of a queen.",
-      preview: { sources: ["/games/queens/skins/garden/rose.svg"], presentation: "contain" },
+      preview: { sources: ["/games/thrones/skins/garden/rose.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { marker: "/games/queens/skins/garden/rose.svg" },
+      value: { marker: "/games/thrones/skins/garden/rose.svg" },
     },
     {
       id: "crown",
       name: "Crown",
       description: "A jewelled coronet with a heavy band.",
-      preview: { sources: ["/games/queens/parts/crown.svg"], presentation: "contain" },
+      preview: { sources: ["/games/thrones/parts/crown.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { marker: "/games/queens/parts/crown.svg" },
+      value: { marker: "/games/thrones/parts/crown.svg" },
     },
     {
       id: "star",
       name: "Star",
       description: "A flat five-point star that reads at any board size.",
-      preview: { sources: ["/games/queens/parts/star.svg"], presentation: "contain" },
+      preview: { sources: ["/games/thrones/parts/star.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { marker: "/games/queens/parts/star.svg" },
+      value: { marker: "/games/thrones/parts/star.svg" },
     },
     {
       id: "gem",
       name: "Gem",
       description: "A faceted stone with a cool highlight.",
-      preview: { sources: ["/games/queens/parts/gem.svg"], presentation: "contain" },
+      preview: { sources: ["/games/thrones/parts/gem.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { marker: "/games/queens/parts/gem.svg" },
+      value: { marker: "/games/thrones/parts/gem.svg" },
     },
     {
       id: "chess-queen",
       name: "Chess queen",
       description: "A coronet-topped tournament queen.",
-      preview: { sources: ["/games/queens/parts/chess-queen.svg"], presentation: "contain" },
+      preview: { sources: ["/games/thrones/parts/chess-queen.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { marker: "/games/queens/parts/chess-queen.svg" },
+      value: { marker: "/games/thrones/parts/chess-queen.svg" },
     },
     {
       id: "lotus",
       name: "Lotus",
       description: "An open water bloom with a gold centre.",
-      preview: { sources: ["/games/queens/parts/lotus.svg"], presentation: "contain" },
+      preview: { sources: ["/games/thrones/parts/lotus.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { marker: "/games/queens/parts/lotus.svg" },
+      value: { marker: "/games/thrones/parts/lotus.svg" },
     },
   ]),
 };
 
-const TANGO_PARTS: AssetParts<"tango"> = {
+const ECLIPSE_PARTS: AssetParts<"eclipse"> = {
   sun: part("Sun asset", "The first of the two balanced symbols.", [
     {
       id: "classic",
       name: "Line sun",
       description: "The original stroked sun.",
-      preview: { sources: ["/games/tango/skins/classic/sun.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/skins/classic/sun.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/skins/classic/sun.svg", label: "Sun" } },
+      value: { symbol: { src: "/games/eclipse/skins/classic/sun.svg", label: "Sun" } },
     },
     {
       id: "emoji",
       name: "Sun face",
       description: "A detailed filled sun.",
-      preview: { sources: ["/games/tango/skins/emoji/sun-face.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/skins/emoji/sun-face.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/skins/emoji/sun-face.svg", label: "Sun" } },
+      value: { symbol: { src: "/games/eclipse/skins/emoji/sun-face.svg", label: "Sun" } },
     },
     {
       id: "fire",
       name: "Fire",
       description: "A flame for elemental boards.",
-      preview: { sources: ["/games/tango/skins/elements/fire.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/skins/elements/fire.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/skins/elements/fire.svg", label: "Fire" } },
+      value: { symbol: { src: "/games/eclipse/skins/elements/fire.svg", label: "Fire" } },
     },
     {
       id: "rays",
       name: "Rayed sun",
       description: "A bold disc with separated rays.",
-      preview: { sources: ["/games/tango/parts/sun-rays.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/parts/sun-rays.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/parts/sun-rays.svg", label: "Sun" } },
+      value: { symbol: { src: "/games/eclipse/parts/sun-rays.svg", label: "Sun" } },
     },
     {
       id: "leaf",
       name: "Leaf",
       description: "A single leaf for botanical boards.",
-      preview: { sources: ["/games/tango/parts/leaf.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/parts/leaf.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/parts/leaf.svg", label: "Leaf" } },
+      value: { symbol: { src: "/games/eclipse/parts/leaf.svg", label: "Leaf" } },
     },
     {
       id: "daisy",
       name: "Daisy",
       description: "White petals around a gold eye.",
-      preview: { sources: ["/games/tango/parts/daisy.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/parts/daisy.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/parts/daisy.svg", label: "Daisy" } },
+      value: { symbol: { src: "/games/eclipse/parts/daisy.svg", label: "Daisy" } },
     },
     {
       id: "bolt",
       name: "Bolt",
       description: "A hard-edged lightning strike.",
-      preview: { sources: ["/games/tango/parts/bolt.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/parts/bolt.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/parts/bolt.svg", label: "Bolt" } },
+      value: { symbol: { src: "/games/eclipse/parts/bolt.svg", label: "Bolt" } },
     },
   ]),
   moon: part("Moon asset", "The second of the two balanced symbols.", [
@@ -222,62 +222,62 @@ const TANGO_PARTS: AssetParts<"tango"> = {
       id: "classic",
       name: "Line moon",
       description: "The original stroked crescent.",
-      preview: { sources: ["/games/tango/skins/classic/moon.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/skins/classic/moon.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/skins/classic/moon.svg", label: "Moon" } },
+      value: { symbol: { src: "/games/eclipse/skins/classic/moon.svg", label: "Moon" } },
     },
     {
       id: "emoji",
       name: "Crescent",
       description: "A detailed filled crescent.",
       preview: {
-        sources: ["/games/tango/skins/emoji/crescent-moon.svg"],
+        sources: ["/games/eclipse/skins/emoji/crescent-moon.svg"],
         presentation: "contain",
       },
       unlock: STARTER,
       value: {
-        symbol: { src: "/games/tango/skins/emoji/crescent-moon.svg", label: "Moon" },
+        symbol: { src: "/games/eclipse/skins/emoji/crescent-moon.svg", label: "Moon" },
       },
     },
     {
       id: "water",
       name: "Water",
       description: "A wave for elemental boards.",
-      preview: { sources: ["/games/tango/skins/elements/water.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/skins/elements/water.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/skins/elements/water.svg", label: "Water" } },
+      value: { symbol: { src: "/games/eclipse/skins/elements/water.svg", label: "Water" } },
     },
     {
       id: "craters",
       name: "Full moon",
       description: "A full disc with shaded craters.",
-      preview: { sources: ["/games/tango/parts/moon-craters.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/parts/moon-craters.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/parts/moon-craters.svg", label: "Moon" } },
+      value: { symbol: { src: "/games/eclipse/parts/moon-craters.svg", label: "Moon" } },
     },
     {
       id: "droplet",
       name: "Droplet",
       description: "A single drop with a soft highlight.",
-      preview: { sources: ["/games/tango/parts/droplet.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/parts/droplet.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/parts/droplet.svg", label: "Droplet" } },
+      value: { symbol: { src: "/games/eclipse/parts/droplet.svg", label: "Droplet" } },
     },
     {
       id: "snowflake",
       name: "Snowflake",
       description: "A six-armed crystal.",
-      preview: { sources: ["/games/tango/parts/snowflake.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/parts/snowflake.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/parts/snowflake.svg", label: "Snowflake" } },
+      value: { symbol: { src: "/games/eclipse/parts/snowflake.svg", label: "Snowflake" } },
     },
     {
       id: "star",
       name: "Night star",
       description: "A four-point sparkle with companions.",
-      preview: { sources: ["/games/tango/parts/star-night.svg"], presentation: "contain" },
+      preview: { sources: ["/games/eclipse/parts/star-night.svg"], presentation: "contain" },
       unlock: STARTER,
-      value: { symbol: { src: "/games/tango/parts/star-night.svg", label: "Star" } },
+      value: { symbol: { src: "/games/eclipse/parts/star-night.svg", label: "Star" } },
     },
   ]),
 };
@@ -471,13 +471,13 @@ const TRACKS_PARTS: AssetParts<"tracks"> = {
   ]),
 };
 
-const ZIP_PARTS: AssetParts<"zip"> = {
+const DASH_PARTS: AssetParts<"dash"> = {
   background: part("Background image", "Revealed continuously inside the route.", [
     {
       id: "none",
       name: "None",
       description: "Keep the plain board surface.",
-      preview: { sources: ["/games/zip/logo.png"], presentation: "contain" },
+      preview: { sources: ["/games/dash/logo.png"], presentation: "contain" },
       unlock: STARTER,
       value: {},
     },
@@ -485,33 +485,33 @@ const ZIP_PARTS: AssetParts<"zip"> = {
       id: "spain",
       name: "Spanish flag",
       description: "A flat national flag.",
-      preview: { sources: ["/games/zip/skins/spain/flag.svg"], presentation: "cover" },
+      preview: { sources: ["/games/dash/skins/spain/flag.svg"], presentation: "cover" },
       unlock: STARTER,
-      value: { revealImage: "/games/zip/skins/spain/flag.svg" },
+      value: { revealImage: "/games/dash/skins/spain/flag.svg" },
     },
     {
       id: "aurora",
       name: "Aurora",
       description: "A night sky with drifting light bands.",
-      preview: { sources: ["/games/zip/parts/aurora.svg"], presentation: "cover" },
+      preview: { sources: ["/games/dash/parts/aurora.svg"], presentation: "cover" },
       unlock: STARTER,
-      value: { revealImage: "/games/zip/parts/aurora.svg" },
+      value: { revealImage: "/games/dash/parts/aurora.svg" },
     },
     {
       id: "circuit",
       name: "Circuit",
       description: "Etched traces and gold pads.",
-      preview: { sources: ["/games/zip/parts/circuit.svg"], presentation: "cover" },
+      preview: { sources: ["/games/dash/parts/circuit.svg"], presentation: "cover" },
       unlock: STARTER,
-      value: { revealImage: "/games/zip/parts/circuit.svg" },
+      value: { revealImage: "/games/dash/parts/circuit.svg" },
     },
     {
       id: "sunrise",
       name: "Sunrise",
       description: "A layered ridge line under a low sun.",
-      preview: { sources: ["/games/zip/parts/sunrise.svg"], presentation: "cover" },
+      preview: { sources: ["/games/dash/parts/sunrise.svg"], presentation: "cover" },
       unlock: STARTER,
-      value: { revealImage: "/games/zip/parts/sunrise.svg" },
+      value: { revealImage: "/games/dash/parts/sunrise.svg" },
     },
   ]),
 };
@@ -657,11 +657,11 @@ const MINI_CHESS_PARTS: AssetParts<"mini-chess"> = {
 };
 
 export const GAME_ASSET_PARTS: { [G in GameId]: AssetParts<G> } = {
-  queens: QUEENS_PARTS,
-  tango: TANGO_PARTS,
+  thrones: THRONES_PARTS,
+  eclipse: ECLIPSE_PARTS,
   lights: LIGHTS_PARTS,
   tracks: TRACKS_PARTS,
-  zip: ZIP_PARTS,
+  dash: DASH_PARTS,
   "mine-islands": MINE_ISLANDS_PARTS,
   "mini-chess": MINI_CHESS_PARTS,
 };
@@ -671,11 +671,11 @@ export const GAME_ASSET_PARTS: { [G in GameId]: AssetParts<G> } = {
  * Palette and tint are rendered first and are not listed here.
  */
 export const GAME_PART_ORDER: { [G in GameId]: readonly (keyof GamePartValues[G] & string)[] } = {
-  queens: ["marker"],
-  tango: ["sun", "moon"],
+  thrones: ["marker"],
+  eclipse: ["sun", "moon"],
   lights: ["bulb"],
   tracks: ["pipe", "liquid"],
-  zip: ["background"],
+  dash: ["background"],
   "mine-islands": ["mine", "flag"],
   "mini-chess": ["pawn", "knight", "bishop", "rook", "queen", "king"],
 };
@@ -687,18 +687,18 @@ type Resolvers = {
 };
 
 export const PART_RESOLVERS: Resolvers = {
-  queens: (values) => ({ marker: values.marker.marker }),
-  // Index 0 is the low symbol and index 1 the high one; Tango reads them
+  thrones: (values) => ({ marker: values.marker.marker }),
+  // Index 0 is the low symbol and index 1 the high one; Eclipse reads them
   // positionally, so the moon must stay first even though the sun is picked
   // first in the UI.
-  tango: (values) => ({ symbols: [values.moon.symbol, values.sun.symbol] }),
+  eclipse: (values) => ({ symbols: [values.moon.symbol, values.sun.symbol] }),
   lights: (values) => ({ bulbs: values.bulb.bulbs }),
   tracks: (values) => ({
     node: values.pipe.node,
     pipeStyle: values.pipe.pipeStyle,
     flowParticle: values.liquid.flowParticle,
   }),
-  zip: (values) => ({ revealImage: values.background.revealImage }),
+  dash: (values) => ({ revealImage: values.background.revealImage }),
   // `clueTiles` and `hud` are not here: they belong to the board, and
   // `resolveGameSkin` merges them in afterwards.
   "mine-islands": (values) => ({

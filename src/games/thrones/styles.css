@@ -1,5 +1,5 @@
-/* Scoped styles for queens. Generated from the original game stylesheet. */
-.game-queens {
+/* Scoped styles for thrones. Generated from the original game stylesheet. */
+.game-thrones {
   color-scheme: light;
   color: #17212b;
   background: #f4f2eb;
@@ -19,7 +19,7 @@
   --focus: #005fcc;
 }
 
-[data-theme="dark"] .game-queens {
+[data-theme="dark"] .game-thrones {
   color-scheme: dark;
   color: #f7efe4;
   background: #171411;
@@ -34,7 +34,7 @@
   --focus: #f0b447;
 }
 
-[data-theme="dark"] .game-queens .app-shell {
+[data-theme="dark"] .game-thrones .app-shell {
   background:
     linear-gradient(135deg, rgba(255, 211, 111, 0.08), rgba(255, 255, 255, 0) 42%),
     radial-gradient(circle at 12% 18%, rgba(86, 180, 233, 0.12), transparent 30%),
@@ -42,38 +42,38 @@
     #171411;
 }
 
-[data-theme="dark"] .game-queens .game-surface, [data-theme="dark"] .game-queens .side-panel, [data-theme="dark"] .game-queens .stats-grid, [data-theme="dark"] .game-queens .state-panel, [data-theme="dark"] .game-queens .secondary-action, [data-theme="dark"] .game-queens .size-control select, [data-theme="dark"] .game-queens .rule-item {
+[data-theme="dark"] .game-thrones .game-surface, [data-theme="dark"] .game-thrones .side-panel, [data-theme="dark"] .game-thrones .stats-grid, [data-theme="dark"] .game-thrones .state-panel, [data-theme="dark"] .game-thrones .secondary-action, [data-theme="dark"] .game-thrones .size-control select, [data-theme="dark"] .game-thrones .rule-item {
   background-color: rgba(34, 29, 25, 0.78);
 }
 
-[data-theme="dark"] .game-queens .icon-action:hover, [data-theme="dark"] .game-queens .icon-action:focus-visible, [data-theme="dark"] .game-queens .icon-action[aria-pressed="true"] {
+[data-theme="dark"] .game-thrones .icon-action:hover, [data-theme="dark"] .game-thrones .icon-action:focus-visible, [data-theme="dark"] .game-thrones .icon-action[aria-pressed="true"] {
   color: var(--ink);
   background: rgba(255, 255, 255, 0.08);
 }
 
-[data-theme="dark"] .game-queens .side-panel {
+[data-theme="dark"] .game-thrones .side-panel {
   background: rgba(34, 29, 25, 0.97);
 }
 
-.game-queens * {
+.game-thrones * {
   box-sizing: border-box;
 }
 
-.game-queens {
+.game-thrones {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
 }
 
-.game-queens button, .game-queens select {
+.game-thrones button, .game-thrones select {
   font: inherit;
 }
 
-.game-queens button {
+.game-thrones button {
   border: 0;
 }
 
-.game-queens .app-shell {
+.game-thrones .app-shell {
   display: grid;
   grid-template-columns: minmax(0, 760px);
   align-items: start;
@@ -88,11 +88,11 @@
     #f4f2eb;
 }
 
-.game-queens .app-shell.rules-open {
+.game-thrones .app-shell.rules-open {
   grid-template-columns: minmax(0, 760px);
 }
 
-.game-queens .app-shell.rules-open::before {
+.game-thrones .app-shell.rules-open::before {
   position: fixed;
   inset: 0;
   z-index: 20;
@@ -101,14 +101,14 @@
   backdrop-filter: blur(2px);
 }
 
-.game-queens .game-surface, .game-queens .side-panel {
+.game-thrones .game-surface, .game-thrones .side-panel {
   border: 1px solid var(--line);
   background: var(--panel);
   box-shadow: var(--shadow);
   backdrop-filter: blur(10px);
 }
 
-.game-queens .game-surface {
+.game-thrones .game-surface {
   display: grid;
   gap: 16px;
   width: 100%;
@@ -116,25 +116,25 @@
   border-radius: 8px;
 }
 
-.game-queens .top-bar, .game-queens .action-row {
+.game-thrones .top-bar, .game-thrones .action-row {
   display: flex;
   align-items: center;
 }
 
-.game-queens .top-bar {
+.game-thrones .top-bar {
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 4px;
 }
 
-.game-queens .brand-lockup {
+.game-thrones .brand-lockup {
   display: flex;
   align-items: center;
   gap: 10px;
   min-width: 0;
 }
 
-.game-queens .brand-mark {
+.game-thrones .brand-mark {
   display: grid;
   place-items: center;
   width: 42px;
@@ -146,14 +146,14 @@
   box-shadow: 0 10px 22px rgba(23, 33, 43, 0.14);
 }
 
-.game-queens .brand-mark img {
+.game-thrones .brand-mark img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.game-queens .eyebrow, .game-queens .stat-tile span, .game-queens .summary-block span {
+.game-thrones .eyebrow, .game-thrones .stat-tile span, .game-thrones .summary-block span {
   margin: 0;
   color: var(--muted);
   font-size: 0.74rem;
@@ -162,7 +162,7 @@
   text-transform: uppercase;
 }
 
-.game-queens h1 {
+.game-thrones h1 {
   margin: 0;
   color: var(--ink);
   font-size: clamp(1.55rem, 4vw, 2.2rem);
@@ -170,7 +170,7 @@
   letter-spacing: 0;
 }
 
-.game-queens .top-actions {
+.game-thrones .top-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -178,13 +178,13 @@
   margin-left: auto;
 }
 
-.game-queens .size-control {
+.game-thrones .size-control {
   position: relative;
   display: inline-flex;
   align-items: center;
 }
 
-.game-queens .size-control select {
+.game-thrones .size-control select {
   min-height: 38px;
   min-width: 104px;
   appearance: none;
@@ -200,19 +200,19 @@
   font-weight: 800;
 }
 
-.game-queens .size-control select:disabled {
+.game-thrones .size-control select:disabled {
   cursor: not-allowed;
   opacity: 0.62;
 }
 
-.game-queens .size-control svg {
+.game-thrones .size-control svg {
   position: absolute;
   right: 12px;
   color: #8e8e93;
   pointer-events: none;
 }
 
-.game-queens .icon-action {
+.game-thrones .icon-action {
   display: inline-grid;
   place-items: center;
   width: 38px;
@@ -230,17 +230,17 @@
     color 120ms ease;
 }
 
-.game-queens .icon-action:hover, .game-queens .icon-action:focus-visible, .game-queens .icon-action[aria-pressed="true"] {
+.game-thrones .icon-action:hover, .game-thrones .icon-action:focus-visible, .game-thrones .icon-action[aria-pressed="true"] {
   color: var(--ink);
   border-color: rgba(23, 33, 43, 0.1);
   background: rgba(255, 255, 255, 0.5);
 }
 
-.game-queens .icon-action:hover {
+.game-thrones .icon-action:hover {
   transform: translateY(-1px);
 }
 
-.game-queens .stats-grid {
+.game-thrones .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   overflow: hidden;
@@ -251,7 +251,7 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
-.game-queens .stat-tile {
+.game-thrones .stat-tile {
   display: grid;
   gap: 4px;
   min-width: 0;
@@ -259,18 +259,18 @@
   text-align: center;
 }
 
-.game-queens .stat-tile + .stat-tile {
+.game-thrones .stat-tile + .stat-tile {
   border-left: 1px solid rgba(142, 142, 147, 0.18);
 }
 
-.game-queens .stat-tile span {
+.game-thrones .stat-tile span {
   color: #8e8e93;
   font-size: 0.68rem;
   font-weight: 650;
   letter-spacing: 0;
 }
 
-.game-queens .stat-tile strong {
+.game-thrones .stat-tile strong {
   color: var(--ink);
   font-family:
     "SFMono-Regular", "Cascadia Mono", "Roboto Mono", ui-monospace, Menlo, Consolas, monospace;
@@ -280,14 +280,14 @@
   line-height: 1;
 }
 
-.game-queens .board-zone {
+.game-thrones .board-zone {
   position: relative;
   display: grid;
   place-items: center;
   min-height: min(76vw, 680px);
 }
 
-.game-queens .board {
+.game-thrones .board {
   display: grid;
   grid-template-columns: repeat(var(--board-size), minmax(0, 1fr));
   width: min(100%, 680px, calc(100vh - 280px));
@@ -303,7 +303,7 @@
   user-select: none;
 }
 
-.game-queens .cell {
+.game-thrones .cell {
   position: relative;
   display: grid;
   place-items: center;
@@ -326,25 +326,25 @@
     box-shadow 120ms ease;
 }
 
-.game-queens .board.patterns-enabled .cell {
+.game-thrones .board.patterns-enabled .cell {
   background:
     var(--region-pattern),
     linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 90%),
     var(--region-color);
 }
 
-.game-queens .cell:hover, .game-queens .cell:focus-visible {
+.game-thrones .cell:hover, .game-thrones .cell:focus-visible {
   z-index: 2;
   filter: saturate(1.12) brightness(1.04);
   outline: 3px solid var(--focus);
   outline-offset: -3px;
 }
 
-.game-queens .cell:active {
+.game-thrones .cell:active {
   transform: scale(0.94);
 }
 
-.game-queens .cell.is-conflict-hint::before {
+.game-thrones .cell.is-conflict-hint::before {
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -361,11 +361,11 @@
   pointer-events: none;
 }
 
-.game-queens .queen-piece, .game-queens .solution-piece, .game-queens .mark-icon {
+.game-thrones .queen-piece, .game-thrones .solution-piece, .game-thrones .mark-icon {
   z-index: 1;
 }
 
-.game-queens .queen-piece, .game-queens .solution-piece {
+.game-thrones .queen-piece, .game-thrones .solution-piece {
   display: block;
   width: 78%;
   height: 78%;
@@ -373,42 +373,42 @@
   filter: drop-shadow(0 3px 2px rgba(23, 33, 43, 0.28));
 }
 
-.suite-shell[data-skin="garden"] .game-queens .queen-piece,
-.suite-shell[data-skin="garden"] .game-queens .solution-piece {
+.suite-shell[data-skin="garden"] .game-thrones .queen-piece,
+.suite-shell[data-skin="garden"] .game-thrones .solution-piece {
   width: 86%;
   height: 86%;
 }
 
-.game-queens .solution-piece {
+.game-thrones .solution-piece {
   width: 72%;
   height: 72%;
   opacity: 0.42;
   filter: grayscale(0.24) drop-shadow(0 1px 1px rgba(23, 33, 43, 0.14));
 }
 
-.game-queens .mark-icon {
+.game-thrones .mark-icon {
   width: 48%;
   height: 48%;
   color: rgba(17, 24, 39, 0.28);
   filter: none;
 }
 
-.game-queens .cell.is-conflict-hint .mark-icon {
+.game-thrones .cell.is-conflict-hint .mark-icon {
   color: rgba(17, 24, 39, 0.2);
 }
 
-.game-queens .cell.is-solution:not(.has-queen) {
+.game-thrones .cell.is-solution:not(.has-queen) {
   filter: grayscale(0.18) brightness(1.02);
 }
 
-.game-queens .progress-track {
+.game-thrones .progress-track {
   height: 8px;
   overflow: hidden;
   border-radius: 999px;
   background: rgba(31, 41, 51, 0.1);
 }
 
-.game-queens .progress-track span {
+.game-thrones .progress-track span {
   display: block;
   height: 100%;
   border-radius: inherit;
@@ -416,13 +416,13 @@
   transition: width 180ms ease;
 }
 
-.game-queens .action-row {
+.game-thrones .action-row {
   justify-content: center;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.game-queens .primary-action, .game-queens .secondary-action {
+.game-thrones .primary-action, .game-thrones .secondary-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -438,35 +438,35 @@
     opacity 120ms ease;
 }
 
-.game-queens .primary-action {
+.game-thrones .primary-action {
   color: #fffdf7;
   background: #17212b;
   box-shadow: 0 12px 24px rgba(31, 41, 51, 0.2);
 }
 
-.game-queens .secondary-action {
+.game-thrones .secondary-action {
   color: var(--ink);
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.75);
 }
 
-.game-queens .secondary-action[aria-pressed="true"] {
+.game-thrones .secondary-action[aria-pressed="true"] {
   color: #fffdf7;
   border-color: #0072b2;
   background: #0072b2;
 }
 
-.game-queens .primary-action:hover, .game-queens .secondary-action:hover {
+.game-thrones .primary-action:hover, .game-thrones .secondary-action:hover {
   transform: translateY(-1px);
 }
 
-.game-queens .primary-action:disabled, .game-queens .secondary-action:disabled {
+.game-thrones .primary-action:disabled, .game-thrones .secondary-action:disabled {
   cursor: not-allowed;
   opacity: 0.55;
   transform: none;
 }
 
-.game-queens .state-panel {
+.game-thrones .state-panel {
   display: grid;
   place-items: center;
   gap: 12px;
@@ -481,15 +481,15 @@
   font-weight: 800;
 }
 
-.game-queens .error-state {
+.game-thrones .error-state {
   color: var(--danger);
 }
 
-.game-queens .spin {
+.game-thrones .spin {
   animation: spin 850ms linear infinite;
 }
 
-.game-queens .side-panel {
+.game-thrones .side-panel {
   position: fixed;
   z-index: 21;
   top: var(--suite-nav-offset);
@@ -508,7 +508,7 @@
   animation: rules-enter 180ms ease both;
 }
 
-.game-queens .win-panel {
+.game-thrones .win-panel {
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -526,7 +526,7 @@
   animation: win-enter 520ms cubic-bezier(.2, .9, .2, 1.15) both;
 }
 
-.game-queens .board-win-panel {
+.game-thrones .board-win-panel {
   position: absolute;
   z-index: 5;
   top: 50%;
@@ -543,7 +543,7 @@
   animation: board-win-enter 520ms cubic-bezier(.2, .9, .2, 1.15) both;
 }
 
-.game-queens .conflict-trigger {
+.game-thrones .conflict-trigger {
   position: absolute;
   z-index: 7;
   top: 12px;
@@ -565,13 +565,13 @@
     border-color 120ms ease;
 }
 
-.game-queens .conflict-trigger:hover, .game-queens .conflict-trigger:focus-visible, .game-queens .conflict-trigger[aria-expanded="true"] {
+.game-thrones .conflict-trigger:hover, .game-thrones .conflict-trigger:focus-visible, .game-thrones .conflict-trigger[aria-expanded="true"] {
   border-color: rgba(184, 50, 70, 0.46);
   background: rgba(255, 245, 247, 0.94);
   transform: translateY(-1px);
 }
 
-.game-queens .conflict-dismiss-layer {
+.game-thrones .conflict-dismiss-layer {
   position: absolute;
   inset: 0;
   z-index: 5;
@@ -579,7 +579,7 @@
   cursor: default;
 }
 
-.game-queens .conflict-panel {
+.game-thrones .conflict-panel {
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -596,7 +596,7 @@
   backdrop-filter: blur(10px);
 }
 
-.game-queens .conflict-close {
+.game-thrones .conflict-close {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -613,12 +613,12 @@
     background 120ms ease;
 }
 
-.game-queens .conflict-close:hover, .game-queens .conflict-close:focus-visible {
+.game-thrones .conflict-close:hover, .game-thrones .conflict-close:focus-visible {
   background: rgba(255, 255, 255, 0.86);
   transform: translateY(-1px);
 }
 
-.game-queens .board-conflict-panel {
+.game-thrones .board-conflict-panel {
   position: absolute;
   z-index: 6;
   top: 50%;
@@ -628,30 +628,30 @@
   animation: board-win-enter 260ms ease both;
 }
 
-.game-queens .conflict-panel > svg {
+.game-thrones .conflict-panel > svg {
   color: var(--danger);
 }
 
-.game-queens .conflict-panel strong {
+.game-thrones .conflict-panel strong {
   display: block;
   color: #17212b;
   font-size: 1.08rem;
 }
 
-.game-queens .conflict-panel p {
+.game-thrones .conflict-panel p {
   margin: 3px 0 0;
   color: #6b2b36;
   font-weight: 750;
 }
 
-.game-queens .conflict-list {
+.game-thrones .conflict-list {
   display: flex;
   grid-column: 1 / -1;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.game-queens .conflict-list span {
+.game-thrones .conflict-list span {
   min-height: 30px;
   padding: 6px 10px;
   border-radius: 999px;
@@ -661,7 +661,7 @@
   font-weight: 900;
 }
 
-.game-queens .conflict-rules-link {
+.game-thrones .conflict-rules-link {
   display: inline-flex;
   grid-column: 1 / -1;
   align-items: center;
@@ -679,28 +679,28 @@
     background 120ms ease;
 }
 
-.game-queens .conflict-rules-link:hover, .game-queens .conflict-rules-link:focus-visible {
+.game-thrones .conflict-rules-link:hover, .game-thrones .conflict-rules-link:focus-visible {
   background: rgba(255, 255, 255, 0.9);
   transform: translateY(-1px);
 }
 
-.game-queens .win-panel > svg {
+.game-thrones .win-panel > svg {
   color: #d55e00;
 }
 
-.game-queens .win-panel strong {
+.game-thrones .win-panel strong {
   display: block;
   color: #17212b;
   font-size: 1.12rem;
 }
 
-.game-queens .win-panel p {
+.game-thrones .win-panel p {
   margin: 3px 0 0;
   color: #4b5563;
   font-weight: 750;
 }
 
-.game-queens .record-badge {
+.game-thrones .record-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -714,7 +714,7 @@
   white-space: nowrap;
 }
 
-.game-queens .win-action {
+.game-thrones .win-action {
   display: inline-flex;
   grid-column: 1 / -1;
   align-items: center;
@@ -729,14 +729,14 @@
   cursor: pointer;
 }
 
-.game-queens .confetti-field {
+.game-thrones .confetti-field {
   position: absolute;
   inset: 0;
   pointer-events: none;
   overflow: hidden;
 }
 
-.game-queens .confetti-field span {
+.game-thrones .confetti-field span {
   position: absolute;
   top: -14px;
   left: calc(var(--confetti-x, 50) * 1%);
@@ -750,51 +750,51 @@
   transform: rotate(var(--confetti-rotate, 0deg));
 }
 
-.game-queens .confetti-field span:nth-child(1) { --confetti-x: 6; --confetti-color: #f0e442; --confetti-delay: 0ms; --confetti-rotate: 22deg; }
-.game-queens .confetti-field span:nth-child(2) { --confetti-x: 13; --confetti-color: #56b4e9; --confetti-delay: 80ms; --confetti-rotate: -14deg; }
-.game-queens .confetti-field span:nth-child(3) { --confetti-x: 20; --confetti-color: #009e73; --confetti-delay: 20ms; --confetti-rotate: 35deg; }
-.game-queens .confetti-field span:nth-child(4) { --confetti-x: 27; --confetti-color: #e69f00; --confetti-delay: 140ms; --confetti-rotate: -28deg; }
-.game-queens .confetti-field span:nth-child(5) { --confetti-x: 34; --confetti-color: #0072b2; --confetti-delay: 60ms; --confetti-rotate: 18deg; }
-.game-queens .confetti-field span:nth-child(6) { --confetti-x: 41; --confetti-color: #cc79a7; --confetti-delay: 180ms; --confetti-rotate: -40deg; }
-.game-queens .confetti-field span:nth-child(7) { --confetti-x: 48; --confetti-color: #d55e00; --confetti-delay: 30ms; --confetti-rotate: 12deg; }
-.game-queens .confetti-field span:nth-child(8) { --confetti-x: 55; --confetti-color: #8da0cb; --confetti-delay: 110ms; --confetti-rotate: -22deg; }
-.game-queens .confetti-field span:nth-child(9) { --confetti-x: 62; --confetti-color: #66c2a5; --confetti-delay: 10ms; --confetti-rotate: 31deg; }
-.game-queens .confetti-field span:nth-child(10) { --confetti-x: 69; --confetti-color: #f0e442; --confetti-delay: 150ms; --confetti-rotate: -19deg; }
-.game-queens .confetti-field span:nth-child(11) { --confetti-x: 76; --confetti-color: #56b4e9; --confetti-delay: 70ms; --confetti-rotate: 43deg; }
-.game-queens .confetti-field span:nth-child(12) { --confetti-x: 83; --confetti-color: #009e73; --confetti-delay: 190ms; --confetti-rotate: -9deg; }
-.game-queens .confetti-field span:nth-child(13) { --confetti-x: 90; --confetti-color: #e69f00; --confetti-delay: 40ms; --confetti-rotate: 27deg; }
-.game-queens .confetti-field span:nth-child(14) { --confetti-x: 96; --confetti-color: #0072b2; --confetti-delay: 120ms; --confetti-rotate: -33deg; }
-.game-queens .confetti-field span:nth-child(15) { --confetti-x: 18; --confetti-color: #cc79a7; --confetti-delay: 220ms; --confetti-rotate: 16deg; }
-.game-queens .confetti-field span:nth-child(16) { --confetti-x: 39; --confetti-color: #d55e00; --confetti-delay: 240ms; --confetti-rotate: -16deg; }
-.game-queens .confetti-field span:nth-child(17) { --confetti-x: 64; --confetti-color: #8da0cb; --confetti-delay: 210ms; --confetti-rotate: 39deg; }
-.game-queens .confetti-field span:nth-child(18) { --confetti-x: 88; --confetti-color: #66c2a5; --confetti-delay: 260ms; --confetti-rotate: -25deg; }
+.game-thrones .confetti-field span:nth-child(1) { --confetti-x: 6; --confetti-color: #f0e442; --confetti-delay: 0ms; --confetti-rotate: 22deg; }
+.game-thrones .confetti-field span:nth-child(2) { --confetti-x: 13; --confetti-color: #56b4e9; --confetti-delay: 80ms; --confetti-rotate: -14deg; }
+.game-thrones .confetti-field span:nth-child(3) { --confetti-x: 20; --confetti-color: #009e73; --confetti-delay: 20ms; --confetti-rotate: 35deg; }
+.game-thrones .confetti-field span:nth-child(4) { --confetti-x: 27; --confetti-color: #e69f00; --confetti-delay: 140ms; --confetti-rotate: -28deg; }
+.game-thrones .confetti-field span:nth-child(5) { --confetti-x: 34; --confetti-color: #0072b2; --confetti-delay: 60ms; --confetti-rotate: 18deg; }
+.game-thrones .confetti-field span:nth-child(6) { --confetti-x: 41; --confetti-color: #cc79a7; --confetti-delay: 180ms; --confetti-rotate: -40deg; }
+.game-thrones .confetti-field span:nth-child(7) { --confetti-x: 48; --confetti-color: #d55e00; --confetti-delay: 30ms; --confetti-rotate: 12deg; }
+.game-thrones .confetti-field span:nth-child(8) { --confetti-x: 55; --confetti-color: #8da0cb; --confetti-delay: 110ms; --confetti-rotate: -22deg; }
+.game-thrones .confetti-field span:nth-child(9) { --confetti-x: 62; --confetti-color: #66c2a5; --confetti-delay: 10ms; --confetti-rotate: 31deg; }
+.game-thrones .confetti-field span:nth-child(10) { --confetti-x: 69; --confetti-color: #f0e442; --confetti-delay: 150ms; --confetti-rotate: -19deg; }
+.game-thrones .confetti-field span:nth-child(11) { --confetti-x: 76; --confetti-color: #56b4e9; --confetti-delay: 70ms; --confetti-rotate: 43deg; }
+.game-thrones .confetti-field span:nth-child(12) { --confetti-x: 83; --confetti-color: #009e73; --confetti-delay: 190ms; --confetti-rotate: -9deg; }
+.game-thrones .confetti-field span:nth-child(13) { --confetti-x: 90; --confetti-color: #e69f00; --confetti-delay: 40ms; --confetti-rotate: 27deg; }
+.game-thrones .confetti-field span:nth-child(14) { --confetti-x: 96; --confetti-color: #0072b2; --confetti-delay: 120ms; --confetti-rotate: -33deg; }
+.game-thrones .confetti-field span:nth-child(15) { --confetti-x: 18; --confetti-color: #cc79a7; --confetti-delay: 220ms; --confetti-rotate: 16deg; }
+.game-thrones .confetti-field span:nth-child(16) { --confetti-x: 39; --confetti-color: #d55e00; --confetti-delay: 240ms; --confetti-rotate: -16deg; }
+.game-thrones .confetti-field span:nth-child(17) { --confetti-x: 64; --confetti-color: #8da0cb; --confetti-delay: 210ms; --confetti-rotate: 39deg; }
+.game-thrones .confetti-field span:nth-child(18) { --confetti-x: 88; --confetti-color: #66c2a5; --confetti-delay: 260ms; --confetti-rotate: -25deg; }
 
-.game-queens .summary-block {
+.game-thrones .summary-block {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.game-queens .close-rules {
+.game-thrones .close-rules {
   margin-left: auto;
 }
 
-.game-queens .summary-block svg {
+.game-thrones .summary-block svg {
   color: #d79a1e;
 }
 
-.game-queens .summary-block strong {
+.game-thrones .summary-block strong {
   display: block;
   margin-top: 2px;
   font-size: 1.2rem;
 }
 
-.game-queens .rules-list {
+.game-thrones .rules-list {
   display: grid;
   gap: 8px;
 }
 
-.game-queens .rule-item {
+.game-thrones .rule-item {
   display: grid;
   gap: 4px;
   padding: 10px 12px;
@@ -804,14 +804,14 @@
   color: var(--ink);
 }
 
-.game-queens .rule-item strong {
+.game-thrones .rule-item strong {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-weight: 800;
 }
 
-.game-queens .rule-item span {
+.game-thrones .rule-item span {
   color: var(--muted);
   font-size: 0.86rem;
   font-weight: 650;
@@ -877,7 +877,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .game-queens *, .game-queens *::before, .game-queens *::after {
+  .game-thrones *, .game-thrones *::before, .game-thrones *::after {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
@@ -886,106 +886,106 @@
 }
 
 @media (max-width: 900px) {
-  .game-queens .app-shell, .game-queens .app-shell.rules-open {
+  .game-thrones .app-shell, .game-thrones .app-shell.rules-open {
     grid-template-columns: minmax(0, 1fr);
     padding: 14px;
   }
 }
 
 @media (max-width: 640px) {
-  .game-queens .top-bar {
+  .game-thrones .top-bar {
     align-items: center;
     gap: 10px;
   }
 
-  .game-queens .brand-mark {
+  .game-thrones .brand-mark {
     width: 38px;
     height: 38px;
   }
 
-  .game-queens .stats-grid {
+  .game-thrones .stats-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     border-radius: 8px;
   }
 
-  .game-queens .stat-tile {
+  .game-thrones .stat-tile {
     padding: 10px 7px;
   }
 
-  .game-queens .stat-tile span {
+  .game-thrones .stat-tile span {
     font-size: 0.6rem;
   }
 
-  .game-queens .stat-tile strong {
+  .game-thrones .stat-tile strong {
     font-size: clamp(0.92rem, 4vw, 1.08rem);
   }
 
-  .game-queens .board-zone {
+  .game-thrones .board-zone {
     min-height: auto;
   }
 
-  .game-queens .board {
+  .game-thrones .board {
     width: min(100%, calc(100vw - 28px));
   }
 
-  .game-queens .action-row {
+  .game-thrones .action-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .game-queens .primary-action, .game-queens .secondary-action {
+  .game-thrones .primary-action, .game-thrones .secondary-action {
     width: 100%;
     padding: 0 10px;
   }
 
-  .game-queens .win-panel {
+  .game-thrones .win-panel {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  .game-queens .record-badge {
+  .game-thrones .record-badge {
     grid-column: 1 / -1;
     justify-self: start;
   }
 }
 
 @media (max-width: 420px) {
-  .game-queens .game-surface {
+  .game-thrones .game-surface {
     gap: 14px;
     padding: 12px;
   }
 
-  .game-queens .brand-lockup {
+  .game-thrones .brand-lockup {
     gap: 8px;
   }
 
-  .game-queens .brand-mark {
+  .game-thrones .brand-mark {
     width: 34px;
     height: 34px;
   }
 
-  .game-queens h1 {
+  .game-thrones h1 {
     font-size: 1.45rem;
   }
 
-  .game-queens .size-control select {
+  .game-thrones .size-control select {
     min-width: 86px;
     min-height: 34px;
     padding: 0 28px 0 11px;
     font-size: 0.82rem;
   }
 
-  .game-queens .size-control svg {
+  .game-thrones .size-control svg {
     right: 9px;
     width: 14px;
     height: 14px;
   }
 
-  .game-queens .icon-action {
+  .game-thrones .icon-action {
     width: 34px;
     height: 34px;
   }
 
-  .game-queens .action-row {
+  .game-thrones .action-row {
     grid-template-columns: 1fr;
   }
 }

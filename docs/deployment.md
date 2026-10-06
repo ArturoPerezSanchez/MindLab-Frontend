@@ -23,4 +23,4 @@ For a public deployment:
 
 Public launch also requires the legal/operator, data-retention, password
 recovery, PostgreSQL/Redis, observability, backup/restore, ad/CMP, and external
-security work listed in `MindLab-Backend/docs/production.md`.
+security work listed in `Mindora-Backend/docs/production.md`.

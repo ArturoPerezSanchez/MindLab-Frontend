@@ -13,7 +13,7 @@ import {
 import { Avatar } from "@/features/profile/Avatar";
 import { resolveGameSkin } from "@/features/skins/skins";
 import { useGameSkin } from "@/features/skins/useSkins";
-import { formatTime } from "@/games/queens/game";
+import { formatTime } from "@/games/thrones/game";
 import { ChatPanel } from "./ChatPanel";
 import { EloChangeBadge } from "./EloChangeBadge";
 import { PlayerBoard } from "./PlayerBoard";
@@ -30,7 +30,7 @@ import {
   type RoomView,
 } from "./roomState";
 
-const AUTO_MARK_KEY = "queens-auto-mark";
+const AUTO_MARK_KEY = "thrones-auto-mark";
 
 /** The board clock is the server's, so it has to be re-read, not counted down. */
 function useClockTick(active: boolean): void {
@@ -62,8 +62,8 @@ function statusLabel(player: RoomPlayer): string {
  *
  * The screen has two modes and makes a point of looking different in each. While
  * you are racing, your board fills the stage and the rail carries only *counts*
- * for your rivals - queens down, how many are right, how many are not - because
- * seeing where someone has put their queens would hand you the answer. The
+ * for your rivals - thrones down, how many are right, how many are not - because
+ * seeing where someone has put their thrones would hand you the answer. The
  * moment your round ends, the page flips into spectator mode, says so loudly,
  * and the real boards appear.
  *
@@ -86,7 +86,7 @@ export function RaceView({
   const state = view.state;
   const phase = state?.phase;
   const self = selfPlayer(view);
-  const ownSkin = useGameSkin("queens");
+  const ownSkin = useGameSkin("thrones");
   const [spectating, setSpectating] = useState<PlayerId | null>(null);
   const [autoMark, setAutoMark] = useState(() => localStorage.getItem(AUTO_MARK_KEY) === "true");
   const [celebratedRound, setCelebratedRound] = useState<number | null>(null);
@@ -189,7 +189,7 @@ export function RaceView({
               type="button"
               aria-pressed={autoMark}
               onClick={() => setAutoMark((current) => !current)}
-              title="Mark cells your queens already rule out"
+              title="Mark cells your thrones already rule out"
             >
               <ShieldX size={18} aria-hidden="true" />
               Auto X
@@ -233,7 +233,7 @@ export function RaceView({
               hud={{
                 metrics: [
                   { label: "Round", value: String(round) },
-                  { label: "Queens", value: `${self?.placed ?? 0}/${state.settings.boardSize}` },
+                  { label: "Thrones", value: `${self?.placed ?? 0}/${state.settings.boardSize}` },
                   { label: "Still in", value: String(stillIn) },
                 ],
               }}
@@ -307,7 +307,7 @@ function PlayerCard({
 }) {
   // Their marker, resolved from their own selections, so the rail is where you
   // see what everyone is playing with (requirement 10).
-  const marker = useMemo(() => resolveGameSkin("queens", player.skin).assets.marker, [player.skin]);
+  const marker = useMemo(() => resolveGameSkin("thrones", player.skin).assets.marker, [player.skin]);
   const correct = player.status === "finished" ? boardSize : (progress?.correct ?? player.correct);
   const wrong = progress ? progress.wrong : Math.max(0, player.placed - player.correct);
   const done = player.status === "finished";

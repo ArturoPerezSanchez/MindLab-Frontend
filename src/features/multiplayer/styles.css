@@ -1,7 +1,7 @@
 /**
- * Multiplayer Queens.
+ * Multiplayer Thrones.
  *
- * Everything here lives inside `.suite-shell[data-game="queens"]`, so the race
+ * Everything here lives inside `.suite-shell[data-game="thrones"]`, so the race
  * inherits the same frame tokens, buttons, and palette variables as the
  * single-player board. Spectator tiles then override `--region-*` per tile by
  * carrying their own `data-palette`, which is how eight boards in eight

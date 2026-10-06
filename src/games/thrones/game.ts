@@ -30,7 +30,7 @@ function createConflictHints(): Record<ViolationKind, Set<string>> {
   };
 }
 
-function markDuplicateQueens(
+function markDuplicateThrones(
   groups: Iterable<string[]>,
   conflicts: Set<string>,
   violations: Record<ViolationKind, number>,
@@ -85,7 +85,7 @@ function addConflictHint(
   conflictHints.adjacent.add(positionKey(secondRow, secondCol));
 }
 
-export function evaluateGame(board: number[][], queens: Set<string>): GameStatus {
+export function evaluateGame(board: number[][], thrones: Set<string>): GameStatus {
   const size = board.length;
   const rows = new Map<number, string[]>();
   const columns = new Map<number, string[]>();
@@ -99,7 +99,7 @@ export function evaluateGame(board: number[][], queens: Set<string>): GameStatus
     adjacent: 0,
   };
 
-  for (const key of queens) {
+  for (const key of thrones) {
     const [row, col] = parsePositionKey(key);
     const region = board[row]?.[col];
 
@@ -108,11 +108,11 @@ export function evaluateGame(board: number[][], queens: Set<string>): GameStatus
     regions.set(region, [...(regions.get(region) ?? []), key]);
   }
 
-  markDuplicateQueens(rows.values(), conflicts, violations, "row");
-  markDuplicateQueens(columns.values(), conflicts, violations, "column");
-  markDuplicateQueens(regions.values(), conflicts, violations, "region");
+  markDuplicateThrones(rows.values(), conflicts, violations, "row");
+  markDuplicateThrones(columns.values(), conflicts, violations, "column");
+  markDuplicateThrones(regions.values(), conflicts, violations, "region");
 
-  const queenPositions = [...queens].map(parsePositionKey);
+  const queenPositions = [...thrones].map(parsePositionKey);
   for (let first = 0; first < queenPositions.length; first += 1) {
     for (let second = first + 1; second < queenPositions.length; second += 1) {
       const [firstRow, firstCol] = queenPositions[first];
@@ -152,8 +152,8 @@ export function evaluateGame(board: number[][], queens: Set<string>): GameStatus
   return {
     conflictHints,
     conflicts,
-    isSolved: queens.size === size && hasOnePerRow && hasOnePerColumn && hasOnePerRegion && hasNoConflicts,
-    queenCount: queens.size,
+    isSolved: thrones.size === size && hasOnePerRow && hasOnePerColumn && hasOnePerRegion && hasNoConflicts,
+    queenCount: thrones.size,
     violations,
   };
 }
@@ -162,9 +162,9 @@ export function toPositionSet(positions: readonly Position[] | null): Set<string
   return new Set((positions ?? []).map(([row, col]) => positionKey(row, col)));
 }
 
-export function getForbiddenMarks(board: number[][], queens: Set<string>): Set<string> {
+export function getForbiddenMarks(board: number[][], thrones: Set<string>): Set<string> {
   const marks = new Set<string>();
-  const queenPositions = [...queens].map(parsePositionKey);
+  const queenPositions = [...thrones].map(parsePositionKey);
 
   for (const [queenRow, queenCol] of queenPositions) {
     const queenRegion = board[queenRow][queenCol];
@@ -186,7 +186,7 @@ export function getForbiddenMarks(board: number[][], queens: Set<string>): Set<s
     }
   }
 
-  for (const queen of queens) {
+  for (const queen of thrones) {
     marks.delete(queen);
   }
 

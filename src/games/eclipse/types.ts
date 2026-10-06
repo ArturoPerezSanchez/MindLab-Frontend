@@ -10,7 +10,7 @@ export type Constraint = {
   relation: Relation;
 };
 
-export type TangoResponse = {
+export type EclipseResponse = {
   board_size: number;
   board: CellValue[][];
   constraints: Constraint[];

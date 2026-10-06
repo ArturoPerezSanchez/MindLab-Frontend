@@ -128,10 +128,10 @@ export type BoardExtras = {
  * part.
  */
 export type GameSkinAssetMap = {
-  queens: {
+  thrones: {
     marker: string;
   };
-  tango: {
+  eclipse: {
     symbols: readonly [SkinSymbolAsset, SkinSymbolAsset];
   };
   lights: {
@@ -146,7 +146,7 @@ export type GameSkinAssetMap = {
     pipeStyle?: "flat" | "cylindrical";
     flowParticle?: FlowParticle;
   };
-  zip: {
+  dash: {
     revealImage?: string;
   };
   "mine-islands": {
@@ -168,10 +168,10 @@ export type GameSkinAssetMap = {
  * asset map, so the resolver for a game is a plain merge.
  */
 export type GamePartValues = {
-  queens: {
+  thrones: {
     marker: { marker: string };
   };
-  tango: {
+  eclipse: {
     moon: { symbol: SkinSymbolAsset };
     sun: { symbol: SkinSymbolAsset };
   };
@@ -182,7 +182,7 @@ export type GamePartValues = {
     pipe: { node: string; pipeStyle?: "flat" | "cylindrical" };
     liquid: { flowParticle?: FlowParticle };
   };
-  zip: {
+  dash: {
     background: { revealImage?: string };
   };
   "mine-islands": {

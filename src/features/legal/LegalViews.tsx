@@ -5,10 +5,10 @@ export function PrivacyView() {
         <p className="legal-kicker">Last updated 2 September 2026</p>
         <h1 id="privacy-title">Privacy</h1>
         <p>
-          MindLab is a logic-game service. This notice describes the data used by the local-ready
+          Mindora is a logic-game service. This notice describes the data used by the local-ready
           application and the controls already available to players.
         </p>
-        <h2>Data MindLab uses</h2>
+        <h2>Data Mindora uses</h2>
         <p>
           Guest play stores a random guest identifier, appearance, accessibility settings and privacy
           choices in this browser. Accounts store an email address, a one-way password hash, profile
@@ -23,7 +23,7 @@ export function PrivacyView() {
         </p>
         <h2>Optional analytics and ads</h2>
         <p>
-          They are disabled in the local build. MindLab does not load an optional provider before you
+          They are disabled in the local build. Mindora does not load an optional provider before you
           allow its category. A production operator must name every provider, retention period and legal
           basis here before enabling it, and must use a certified consent flow where required.
         </p>
@@ -51,7 +51,7 @@ export function TermsView() {
         <p className="legal-kicker">Last updated 2 September 2026</p>
         <h1 id="terms-title">Terms of use</h1>
         <p>
-          MindLab is provided for personal puzzle play and local evaluation. Public commercial terms
+          Mindora is provided for personal puzzle play and local evaluation. Public commercial terms
           must be completed by the deploying operator before a production launch.
         </p>
         <h2>Fair play</h2>
@@ -70,7 +70,7 @@ export function TermsView() {
         <p>
           Local and preview builds may change and are supplied without a service-level commitment.
           Puzzle progress can be interrupted by device, browser, network or server failures. Do not use
-          MindLab where a game result has legal, financial or safety consequences.
+          Mindora where a game result has legal, financial or safety consequences.
         </p>
         <h2>Production operator</h2>
         <p>

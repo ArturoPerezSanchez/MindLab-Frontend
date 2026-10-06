@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const gamesApiOrigin =
     env.VITE_GAMES_API_ORIGIN ??
-    env.VITE_QUEENS_API_ORIGIN ??
+    env.VITE_THRONES_API_ORIGIN ??
     "https://api.arturops.com";
 
   return {

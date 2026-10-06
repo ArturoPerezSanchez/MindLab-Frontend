@@ -7,5 +7,5 @@ its `src/assets/minesweeper` directory. `open0.png` comes from that project's
 
 The source project states that the Windows XP name, artwork, and trademarks
 are property of Microsoft and that the recreation is provided for educational
-purposes without Microsoft affiliation or approval. MindLab uses these files
+purposes without Microsoft affiliation or approval. Mindora uses these files
 only as an optional nostalgic game skin and makes no claim to those marks.

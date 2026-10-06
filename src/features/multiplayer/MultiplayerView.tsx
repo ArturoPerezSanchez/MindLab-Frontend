@@ -9,7 +9,7 @@ import { RaceView } from "./RaceView";
 import { isHost } from "./roomState";
 import { useMultiplayerRoom } from "./useMultiplayerRoom";
 
-const NICKNAME_KEY = "mindlab-guest-nickname";
+const NICKNAME_KEY = "mindora-guest-nickname";
 
 function storedNickname(): string {
   try {
@@ -46,11 +46,11 @@ export function MultiplayerView({ initialCode }: { initialCode?: string | null }
     () => ({
       token,
       nickname: (user?.nickname ?? nickname).trim() || "Player",
-      skin: selectedSkins.queens,
+      skin: selectedSkins.thrones,
       avatarUrl: user?.profile_image_url ?? avatarSource(DEFAULT_APPEARANCE),
       portraitId: DEFAULT_APPEARANCE.portraitId,
     }),
-    [nickname, selectedSkins.queens, token, user],
+    [nickname, selectedSkins.thrones, token, user],
   );
 
   const room = useMultiplayerRoom(identity);
@@ -66,7 +66,7 @@ export function MultiplayerView({ initialCode }: { initialCode?: string | null }
 
   if (status === "open" && view.state) {
     return (
-      <main className="mp-shell" aria-label="Multiplayer Queens">
+      <main className="mp-shell" aria-label="Multiplayer Thrones">
         {view.state.phase.name === "lobby" ? (
           <LobbyView
             state={view.state}
@@ -94,7 +94,7 @@ export function MultiplayerView({ initialCode }: { initialCode?: string | null }
 
   if (status === "connecting" || status === "reconnecting" || (status === "open" && !view.state)) {
     return (
-      <main className="mp-shell mp-shell-centered" aria-label="Multiplayer Queens">
+      <main className="mp-shell mp-shell-centered" aria-label="Multiplayer Thrones">
         <p className="mp-connecting" role="status">
           <Loader2 className="spin" size={26} aria-hidden="true" />
           {status === "reconnecting"
@@ -106,7 +106,7 @@ export function MultiplayerView({ initialCode }: { initialCode?: string | null }
   }
 
   return (
-    <main className="mp-shell mp-shell-centered" aria-label="Multiplayer Queens">
+    <main className="mp-shell mp-shell-centered" aria-label="Multiplayer Thrones">
       <section className="mp-entry">
         <h1>Multiplayer</h1>
 

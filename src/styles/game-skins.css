@@ -3,7 +3,7 @@
  * are generated into a style element at runtime and override these at a
  * higher specificity tier, so a palette declares only what it changes.
  */
-[data-game="queens"] {
+[data-game="thrones"] {
   --game-accent: #7057d9;
   --game-logo-bg: #ece8fb;
   --region-1: #efd35b;
@@ -18,7 +18,7 @@
   --region-10: #b8bdc4;
 }
 
-[data-game="tango"] {
+[data-game="eclipse"] {
   --game-accent: #3478bd;
   --game-logo-bg: #eef1f4;
   --symbol-1: #d69e2e;
@@ -64,7 +64,7 @@
   --gold-soft: #f1dda7;
 }
 
-[data-game="zip"] {
+[data-game="dash"] {
   --game-accent: #2f82b7;
   --game-logo-bg: #e8f1f7;
   --cell: #f3f5f6;
@@ -102,7 +102,7 @@
   --accent-soft: #e6d8b8;
 }
 
-[data-theme="dark"] [data-game="queens"] {
+[data-theme="dark"] [data-game="thrones"] {
   --game-accent: #9d8cff;
   --game-logo-bg: #302d3e;
   --region-1: #70632e;
@@ -117,7 +117,7 @@
   --region-10: #55585d;
 }
 
-[data-theme="dark"] [data-game="tango"] {
+[data-theme="dark"] [data-game="eclipse"] {
   --game-accent: #75a8dc;
   --game-logo-bg: #2e3238;
   --symbol-1: #e7b64e;
@@ -159,7 +159,7 @@
   --end: #e06f62;
 }
 
-[data-theme="dark"] [data-game="zip"] {
+[data-theme="dark"] [data-game="dash"] {
   --game-accent: #5aa9d7;
   --game-logo-bg: #29363e;
   --cell: #2d2d30;
@@ -200,27 +200,27 @@
   image-rendering: pixelated;
 }
 
-.suite-shell[data-game="queens"] .cell {
+.suite-shell[data-game="thrones"] .cell {
   background: var(--region-color);
 }
 
-.suite-shell[data-game="queens"] .board.patterns-enabled .cell {
+.suite-shell[data-game="thrones"] .board.patterns-enabled .cell {
   background:
     var(--region-pattern),
     var(--region-color);
 }
 
-[data-theme="dark"] .suite-shell[data-game="queens"] .board.patterns-enabled .cell {
+[data-theme="dark"] .suite-shell[data-game="thrones"] .board.patterns-enabled .cell {
   background:
     var(--region-pattern-dark),
     var(--region-color);
 }
 
-.suite-shell[data-game="tango"] .cell {
+.suite-shell[data-game="eclipse"] .cell {
   background: var(--board-cell);
 }
 
-.suite-shell[data-game="tango"] .cell.is-given {
+.suite-shell[data-game="eclipse"] .cell.is-given {
   background: var(--board-given);
 }
 
@@ -269,19 +269,19 @@
   background: color-mix(in srgb, var(--end) 20%, var(--cell));
 }
 
-.suite-shell[data-game="zip"] .cell {
+.suite-shell[data-game="dash"] .cell {
   background: var(--cell);
 }
 
-.suite-shell[data-game="zip"] .cell:nth-child(even) {
+.suite-shell[data-game="dash"] .cell:nth-child(even) {
   background: var(--cell-alt);
 }
 
-.suite-shell[data-game="zip"] .cell.is-visited {
+.suite-shell[data-game="dash"] .cell.is-visited {
   background: var(--route-visited);
 }
 
-.suite-shell[data-game="zip"] .clue {
+.suite-shell[data-game="dash"] .clue {
   border-color: color-mix(in srgb, var(--game-text) 72%, transparent);
   color: var(--game-text);
   background: var(--game-surface);
@@ -290,7 +290,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
-[data-theme="dark"] .suite-shell[data-game="zip"] .clue {
+[data-theme="dark"] .suite-shell[data-game="dash"] .clue {
   color: var(--game-text);
   background: var(--game-elevated);
   box-shadow:

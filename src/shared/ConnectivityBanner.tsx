@@ -24,7 +24,7 @@ export function ConnectivityBanner() {
       });
       setStatus((current) => {
         if (response.ok && (current === "offline" || current === "api-down")) {
-          window.dispatchEvent(new Event("mindlab:api-online"));
+          window.dispatchEvent(new Event("mindora:api-online"));
         }
         return response.ok ? "online" : "api-down";
       });
@@ -66,7 +66,7 @@ export function ConnectivityBanner() {
       <span>
         {status === "offline"
           ? "You are offline. Open games remain visible, but new puzzles and multiplayer need a connection."
-          : "The MindLab server is unavailable. Your saved session has been kept; try again shortly."}
+          : "The Mindora server is unavailable. Your saved session has been kept; try again shortly."}
       </span>
       <button type="button" onClick={() => void check()}>Retry</button>
     </div>
