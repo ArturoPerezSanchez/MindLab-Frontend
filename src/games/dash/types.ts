@@ -7,7 +7,7 @@ export type Wall = {
   direction: WallDirection;
 };
 
-export type ZipResponse = {
+export type DashResponse = {
   board_size: number;
   board: Array<Array<number | null>>;
   walls: Wall[];

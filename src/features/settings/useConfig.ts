@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-const QUEENS_PATTERNS_KEY = "queens-show-patterns";
+const THRONES_PATTERNS_KEY = "thrones-show-patterns";
 const CONFIG_CHANGED_EVENT = "logic-games-config-change";
 
 function readStoredBoolean(key: string, fallback = false): boolean {
@@ -21,15 +21,15 @@ function writeStoredBoolean(key: string, value: boolean): void {
   }
 }
 
-export function getStoredQueensPatterns(): boolean {
-  return readStoredBoolean(QUEENS_PATTERNS_KEY);
+export function getStoredThronesPatterns(): boolean {
+  return readStoredBoolean(THRONES_PATTERNS_KEY);
 }
 
-export function useQueensPatternsSetting() {
-  const [enabled, setEnabledState] = useState(() => getStoredQueensPatterns());
+export function useThronesPatternsSetting() {
+  const [enabled, setEnabledState] = useState(() => getStoredThronesPatterns());
 
   useEffect(() => {
-    const refresh = () => setEnabledState(getStoredQueensPatterns());
+    const refresh = () => setEnabledState(getStoredThronesPatterns());
 
     window.addEventListener("storage", refresh);
     window.addEventListener(CONFIG_CHANGED_EVENT, refresh);
@@ -43,7 +43,7 @@ export function useQueensPatternsSetting() {
   const setEnabled = useCallback((nextValue: boolean | ((current: boolean) => boolean)) => {
     setEnabledState((current) => {
       const resolved = typeof nextValue === "function" ? nextValue(current) : nextValue;
-      writeStoredBoolean(QUEENS_PATTERNS_KEY, resolved);
+      writeStoredBoolean(THRONES_PATTERNS_KEY, resolved);
       return resolved;
     });
   }, []);

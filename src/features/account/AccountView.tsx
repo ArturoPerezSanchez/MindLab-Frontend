@@ -137,7 +137,7 @@ export function AccountView() {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `mindlab-account-${new Date().toISOString().slice(0, 10)}.json`;
+      anchor.download = `mindora-account-${new Date().toISOString().slice(0, 10)}.json`;
       anchor.click();
       URL.revokeObjectURL(url);
     } catch (error) {

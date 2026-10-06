@@ -11,7 +11,7 @@ docker compose -f compose.local.yml up --build
 
 Open <http://127.0.0.1:8080>. The backend is private to the Compose network,
 the Nginx frontend proxies REST and WebSocket traffic under `/api/v1`, and the
-SQLite user database persists in the `mindlab-data` volume. Stop without
+SQLite user database persists in the `mindora-data` volume. Stop without
 deleting data:
 
 ```powershell
@@ -35,5 +35,5 @@ npm run lint
 npm test -- --run
 npm run build
 npm audit --audit-level=high
-docker build -t mindlab-frontend .
+docker build -t mindora-frontend .
 ```

@@ -36,7 +36,7 @@ import {
   formatTime,
   nextCellValue,
 } from "./game";
-import { TangoCanvas } from "./TangoCanvas";
+import { EclipseCanvas } from "./EclipseCanvas";
 import type { CellValue, Puzzle, ViolationKind, SymbolValue } from "./types";
 
 const CONFLICT_LABELS: Record<ViolationKind, string> = {
@@ -58,8 +58,8 @@ function metricLabel(count: number): string {
   return `${count} ${count === 1 ? "issue" : "issues"}`;
 }
 
-export function TangoGame() {
-  const skin = useGameSkin("tango");
+export function EclipseGame() {
+  const skin = useGameSkin("eclipse");
   const [selectedSize, setSelectedSize] = useState(6);
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
   const [entries, setEntries] = useState<CellValue[][]>([]);
@@ -93,7 +93,7 @@ export function TangoGame() {
     solution: revealedSolution,
     reveal,
     isRevealing,
-  } = useRevealedSolution<SymbolValue[][]>("tango", `${selectedSize}x${selectedSize}`, puzzle);
+  } = useRevealedSolution<SymbolValue[][]>("eclipse", `${selectedSize}x${selectedSize}`, puzzle);
   const solutionRevealed = revealedSolution !== null;
   const assisted = solutionRevealed || usedHint;
   const totalCells = selectedSize * selectedSize;
@@ -107,7 +107,7 @@ export function TangoGame() {
   useGameResultReporter({
     runKey: puzzle,
     completed: status.isSolved,
-    game: "tango",
+    game: "eclipse",
     difficulty: `${selectedSize}x${selectedSize}`,
     time_seconds: elapsedSeconds,
     submission: entries,
@@ -126,10 +126,10 @@ export function TangoGame() {
       setElapsedSeconds(0);
       setShowSolution(false);
       setUsedHint(false);
-      const stored = window.localStorage.getItem(`tango-best-${size}`);
+      const stored = window.localStorage.getItem(`eclipse-best-${size}`);
       setBestTime(stored ? Number(stored) : null);
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Could not load a Tango puzzle.");
+      setError(requestError instanceof Error ? requestError.message : "Could not load a Eclipse puzzle.");
     } finally {
       setIsLoading(false);
     }
@@ -141,12 +141,12 @@ export function TangoGame() {
       .then((nextPuzzle) => {
         setPuzzle(nextPuzzle);
         setEntries(cloneBoard(nextPuzzle.board));
-        const stored = window.localStorage.getItem("tango-best-6");
+        const stored = window.localStorage.getItem("eclipse-best-6");
         setBestTime(stored ? Number(stored) : null);
       })
       .catch((requestError) => {
         if (!(requestError instanceof DOMException && requestError.name === "AbortError")) {
-          setError(requestError instanceof Error ? requestError.message : "Could not load a Tango puzzle.");
+          setError(requestError instanceof Error ? requestError.message : "Could not load a Eclipse puzzle.");
         }
       })
       .finally(() => setIsLoading(false));
@@ -171,7 +171,7 @@ export function TangoGame() {
     }
 
     if (bestTime === null || elapsedSeconds < bestTime) {
-      window.localStorage.setItem(`tango-best-${selectedSize}`, String(elapsedSeconds));
+      window.localStorage.setItem(`eclipse-best-${selectedSize}`, String(elapsedSeconds));
     }
   }, [assisted, bestTime, elapsedSeconds, selectedSize, status.isSolved]);
 
@@ -279,11 +279,11 @@ export function TangoGame() {
 
   return (
     <main className="app-shell">
-      <section className="game-surface" aria-label="Tango game">
+      <section className="game-surface" aria-label="Eclipse game">
         <header className="top-bar">
           <div className="brand-lockup">
-            <img className="brand-mark asset-mark" src="/games/tango/logo.png" alt="" />
-            <h1>Tango</h1>
+            <img className="brand-mark asset-mark" src="/games/eclipse/logo.png" alt="" />
+            <h1>Eclipse</h1>
           </div>
 
           <div className="top-actions">
@@ -350,7 +350,7 @@ export function TangoGame() {
             </div>
           ) : (
             <>
-              <TangoCanvas
+              <EclipseCanvas
                 surface={skin.assets.surface}
                 puzzle={puzzle}
                 entries={entries}
@@ -459,7 +459,7 @@ export function TangoGame() {
                       New best
                     </span>
                   )}
-                  <LeaderboardLink game="tango" difficulty={`${selectedSize}x${selectedSize}`} />
+                  <LeaderboardLink game="eclipse" difficulty={`${selectedSize}x${selectedSize}`} />
                   <button className="win-action" type="button" onClick={() => void loadPuzzle(selectedSize)}>
                     <RefreshCcw aria-hidden="true" size={18} />
                     Play again
@@ -519,11 +519,11 @@ export function TangoGame() {
             aria-label="Close game rules"
             onClick={() => setShowRules(false)}
           />
-          <aside className="rules-panel" aria-label="How to play Tango">
+          <aside className="rules-panel" aria-label="How to play Eclipse">
             <div className="rules-heading">
               <div>
                 <span>How to play</span>
-                <h2>Tango rules</h2>
+                <h2>Eclipse rules</h2>
               </div>
               <button className="icon-action" type="button" aria-label="Close game rules" onClick={() => setShowRules(false)}>
                 <X aria-hidden="true" size={20} />

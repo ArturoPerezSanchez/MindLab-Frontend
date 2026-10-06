@@ -29,24 +29,24 @@ function cellCentre(cell: CellRef, cellWidth: number, cellHeight: number) {
 }
 
 /**
- * Queens: every queen swells and settles back, twice.
+ * Thrones: every queen swells and settles back, twice.
  *
  * The marker is redrawn over the static one rather than the board being
  * repainted, so the scale never drops below 1 - shrinking past that would let
  * the sprite underneath peek out around the edges.
  */
-export function drawQueensCelebration(
+export function drawThronesCelebration(
   {
     context,
     cellWidth,
     cellHeight,
     progress,
   }: Omit<Frame, "color">,
-  queens: readonly CellRef[],
+  thrones: readonly CellRef[],
   marker: HTMLImageElement,
   baseScale = 0.62,
 ): void {
-  if (queens.length === 0 || !marker.complete || marker.naturalWidth === 0) {
+  if (thrones.length === 0 || !marker.complete || marker.naturalWidth === 0) {
     return;
   }
 
@@ -56,7 +56,7 @@ export function drawQueensCelebration(
   const size = cellWidth * baseScale * swell;
 
   context.save();
-  queens.forEach((queen) => {
+  thrones.forEach((queen) => {
     const { x, y } = cellCentre(queen, cellWidth, cellHeight);
     context.drawImage(marker, x - size / 2, y - size / 2, size, size);
   });
@@ -64,12 +64,12 @@ export function drawQueensCelebration(
 }
 
 /**
- * Tango: one group lights, then the other a beat later.
+ * Eclipse: one group lights, then the other a beat later.
  *
  * `offset` shifts a group's slice of the timeline, which is how the moons get
  * their moment before the suns answer.
  */
-export function drawTangoCelebration(
+export function drawEclipseCelebration(
   { context, cellWidth, cellHeight, progress, color }: Frame,
   cells: readonly CellRef[],
   offset: number,

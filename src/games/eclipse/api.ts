@@ -1,6 +1,6 @@
 import { apiPath } from "@/shared/api";
 import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
-import type { CellValue, Constraint, Puzzle, TangoResponse } from "./types";
+import type { CellValue, Constraint, Puzzle, EclipseResponse } from "./types";
 
 function isCell(value: unknown): value is CellValue {
   return value === null || value === 0 || value === 1;
@@ -43,23 +43,23 @@ function isConstraint(value: unknown, size: number): value is Constraint {
  */
 export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<Puzzle> {
   const params = new URLSearchParams({ board_size: String(size) });
-  const response = await fetch(`${apiPath("/tango")}?${params}`, { signal });
+  const response = await fetch(`${apiPath("/eclipse")}?${params}`, { signal });
 
   if (!response.ok) {
     throw new Error(`Puzzle generation failed with status ${response.status}.`);
   }
 
-  const payload = (await response.json()) as TangoResponse;
+  const payload = (await response.json()) as EclipseResponse;
   if (
     payload.board_size !== size ||
     !isBoard(payload.board, size) ||
     !Array.isArray(payload.constraints) ||
     !payload.constraints.every((constraint) => isConstraint(constraint, size))
   ) {
-    throw new Error("The API returned an invalid Tango puzzle.");
+    throw new Error("The API returned an invalid Eclipse puzzle.");
   }
 
-  rememberPuzzleHandleFrom("tango", squareDifficulty(size), payload);
+  rememberPuzzleHandleFrom("eclipse", squareDifficulty(size), payload);
 
   return {
     size,

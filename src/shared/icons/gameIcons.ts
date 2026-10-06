@@ -11,11 +11,11 @@ import { ChessKnightIcon } from "./ChessKnightIcon";
 import type { GameId } from "@/shared/gameOptions";
 
 export const GAME_ICONS: Record<GameId, LucideIcon> = {
-  queens: Crown,
-  tango: SunMoon,
+  thrones: Crown,
+  eclipse: SunMoon,
   lights: Lightbulb,
   tracks: Spline,
-  zip: Route,
+  dash: Route,
   "mine-islands": Bomb,
   "mini-chess": ChessKnightIcon,
 };

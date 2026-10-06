@@ -15,15 +15,15 @@ import {
 } from "./protocol";
 
 /**
- * The games a race can be played with. Only Queens exists today; the rest are
+ * The games a race can be played with. Only Thrones exists today; the rest are
  * listed as disabled so the shape of where this is going is visible in the
  * product rather than only in a backlog. "Mixed" is the Mario Kart idea: each
  * round picks a game, later from the players' own shortlists.
  */
 const GAME_CHOICES: ReadonlyArray<{ id: string; label: string; ready: boolean }> = [
-  { id: "queens", label: "Queens", ready: true },
-  { id: "tango", label: "Tango", ready: false },
-  { id: "zip", label: "Zip", ready: false },
+  { id: "thrones", label: "Thrones", ready: true },
+  { id: "eclipse", label: "Eclipse", ready: false },
+  { id: "dash", label: "Dash", ready: false },
   { id: "lights", label: "Lights", ready: false },
   { id: "tracks", label: "Tracks", ready: false },
   { id: "mine-islands", label: "Mine Islands", ready: false },
@@ -96,7 +96,7 @@ export function LobbyView({
     <div className="mp-lobby">
       <header className="mp-lobby-head">
         <div>
-          <h1>Queens race</h1>
+          <h1>Thrones race</h1>
           <p>
             Share this code. Last to finish each round is knocked out until one player is left.
           </p>
@@ -159,7 +159,7 @@ export function LobbyView({
           <select
             value={state.settings.gameId}
             disabled={!isHost}
-            onChange={(event) => onUpdateSettings({ gameId: event.target.value as "queens" })}
+            onChange={(event) => onUpdateSettings({ gameId: event.target.value as "thrones" })}
           >
             {GAME_CHOICES.map((choice) => (
               <option key={choice.id} value={choice.id} disabled={!choice.ready}>

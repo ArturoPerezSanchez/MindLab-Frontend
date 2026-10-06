@@ -18,7 +18,7 @@ import type { GameCustomization } from "@/features/skins/skins";
  *    lies is rejected rather than believed.
  * 3. Player cosmetics travel with the roster, so spectators render each board
  *    with its owner's own skin (requirement 10) without a second round trip.
- * 4. Live progress comes in two grades. Everyone gets *counts* - queens placed,
+ * 4. Live progress comes in two grades. Everyone gets *counts* - thrones placed,
  *    how many are on the right squares - which reveal nothing about position.
  *    Actual cells arrive only for players who are out of the round, in a
  *    separate `board` message the server sends to them alone. Watching a rival
@@ -41,11 +41,11 @@ export const MIN_BOARD_SIZE = 4;
 export const MAX_BOARD_SIZE = 10;
 
 /**
- * Only Queens is implemented, but the setting is real and host-configurable, so
- * adding Tango or Zip is a generator and a validator rather than a protocol
+ * Only Thrones is implemented, but the setting is real and host-configurable, so
+ * adding Eclipse or Dash is a generator and a validator rather than a protocol
  * change. A "random each round" mode is the obvious next entry.
  */
-export const MULTIPLAYER_GAME_IDS = ["queens"] as const;
+export const MULTIPLAYER_GAME_IDS = ["thrones"] as const;
 export type MultiplayerGameId = (typeof MULTIPLAYER_GAME_IDS)[number];
 
 export type PlayerId = string;
@@ -79,7 +79,7 @@ export type RoomPlayer = {
   /** Server-measured seconds for the current round, once finished. */
   finishedInSeconds: number | null;
   connected: boolean;
-  /** Queens on their board this round. Safe to show anyone: it is a count. */
+  /** Thrones on their board this round. Safe to show anyone: it is a count. */
   placed: number;
   /** How many of those are on solution squares. Never shown to its own owner. */
   correct: number;
@@ -109,7 +109,7 @@ export type RoomPhase =
   | { name: "finished"; winner: PlayerId | null };
 
 export type RoomPuzzle = {
-  /** Region ids per cell, exactly as the single-player Queens generator emits. */
+  /** Region ids per cell, exactly as the single-player Thrones generator emits. */
   board: number[][];
 };
 
@@ -158,7 +158,7 @@ export type ClientMessage =
    */
   | { type: "submit"; round: number; placements: readonly Placement[] }
   /**
-   * Where the player's queens currently are. The server turns this into counts
+   * Where the player's thrones currently are. The server turns this into counts
    * for everyone and forwards the cells themselves only to players who are out
    * of the round, so a rival still racing learns pace but not position.
    */

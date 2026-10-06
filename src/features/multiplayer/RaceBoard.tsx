@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQueensPatternsSetting } from "@/features/settings/useConfig";
+import { useThronesPatternsSetting } from "@/features/settings/useConfig";
 import { useWinSequence } from "@/shared/useWinSequence";
 import type { BoardSurface } from "@/features/skins/skins";
 import type { CanvasBoardHud, CanvasBoardPointer, CanvasCellPosition } from "@/shared/canvas/CanvasBoard";
-import { evaluateGame, getForbiddenMarks, parsePositionKey, positionKey } from "@/games/queens/game";
-import { QueensCanvas } from "@/games/queens/QueensCanvas";
+import { evaluateGame, getForbiddenMarks, parsePositionKey, positionKey } from "@/games/thrones/game";
+import { ThronesCanvas } from "@/games/thrones/ThronesCanvas";
 import type { Placement } from "./protocol";
 
 /**
  * The player's own board during a race.
  *
- * It is the single-player Queens board minus everything requirement 8 removes:
+ * It is the single-player Thrones board minus everything requirement 8 removes:
  * there is no hint, no solution reveal, and no new-game control, and no code
  * path here can produce one - the solution is never sent to this client in the
  * first place, so there is nothing to reveal even by accident.
@@ -41,9 +41,9 @@ export function RaceBoard({
   onCelebrationEnd?: () => void;
   hud: CanvasBoardHud;
 }) {
-  const [queens, setQueens] = useState<Set<string>>(() => new Set());
+  const [thrones, setThrones] = useState<Set<string>>(() => new Set());
   const [manualMarks, setManualMarks] = useState<Set<string>>(() => new Set());
-  const [showPatterns] = useQueensPatternsSetting();
+  const [showPatterns] = useThronesPatternsSetting();
   const longPressTimer = useRef<number | null>(null);
   const suppressClickKey = useRef<string | null>(null);
   const isMarkDragging = useRef(false);
@@ -52,26 +52,26 @@ export function RaceBoard({
   const suppressNextContextMenu = useRef(false);
 
   useEffect(() => {
-    setQueens(new Set());
+    setThrones(new Set());
     setManualMarks(new Set());
   }, [roundKey]);
 
-  const status = useMemo(() => evaluateGame(board, queens), [board, queens]);
+  const status = useMemo(() => evaluateGame(board, thrones), [board, thrones]);
   const forbidden = useMemo(
-    () => (autoMark ? getForbiddenMarks(board, queens) : new Set<string>()),
-    [autoMark, board, queens],
+    () => (autoMark ? getForbiddenMarks(board, thrones) : new Set<string>()),
+    [autoMark, board, thrones],
   );
   const marks = useMemo(() => {
     const next = new Set([...manualMarks, ...forbidden]);
-    for (const queen of queens) {
+    for (const queen of thrones) {
       next.delete(queen);
     }
     return next;
-  }, [forbidden, manualMarks, queens]);
+  }, [forbidden, manualMarks, thrones]);
 
   const placements = useMemo<readonly Placement[]>(
-    () => [...queens].map((key) => parsePositionKey(key)),
-    [queens],
+    () => [...thrones].map((key) => parsePositionKey(key)),
+    [thrones],
   );
 
   const notify = useRef(onPlacementsChange);
@@ -99,7 +99,7 @@ export function RaceBoard({
         return;
       }
       const key = positionKey(row, col);
-      setQueens((current) => {
+      setThrones((current) => {
         const next = new Set(current);
         if (next.has(key)) {
           next.delete(key);
@@ -123,7 +123,7 @@ export function RaceBoard({
         return;
       }
       const key = positionKey(row, col);
-      setQueens((current) => {
+      setThrones((current) => {
         if (!current.has(key)) {
           return current;
         }
@@ -150,7 +150,7 @@ export function RaceBoard({
         return;
       }
       const key = positionKey(row, col);
-      setQueens((current) => {
+      setThrones((current) => {
         if (!current.has(key)) {
           return current;
         }
@@ -268,12 +268,12 @@ export function RaceBoard({
   }
 
   return (
-    <QueensCanvas
+    <ThronesCanvas
       celebration={win.isCelebrating ? win.progress : null}
       board={board}
       marker={marker}
       surface={surface}
-      queens={queens}
+      thrones={thrones}
       marks={marks}
       conflicts={status.conflicts}
       conflictHints={new Set()}

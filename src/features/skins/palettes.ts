@@ -29,7 +29,7 @@ export type PaletteOption = {
 
 /**
  * A tint is a second, narrower colour part that a game layers on top of its
- * palette: the Lights bulb colour and the Zip arrow colour. Tints always win
+ * palette: the Lights bulb colour and the Dash arrow colour. Tints always win
  * over the palette because they are emitted at a higher specificity tier.
  */
 export type TintOption = {
@@ -413,20 +413,20 @@ function materialBoard(
 
 
 /**
- * The hand-written boards. Queens' four material boards are here rather than
+ * The hand-written boards. Thrones' four material boards are here rather than
  * generated because its ten region colours were tuned individually — a
  * mechanical recolour would blur regions into each other, which is the one
- * thing a Queens board must never do. Every other game's material boards are
+ * thing a Thrones board must never do. Every other game's material boards are
  * derived below.
  */
 const BASE_PALETTES: { [G in GameId]: readonly PaletteOption[] } = {
-  queens: [
+  thrones: [
     /*
      * The four boards below carry a `surface`: neutral artwork drawn over the
      * region colours to give the board a material rather than only a hue. Their
      * region colours are picked to read as that material - quarried stone,
      * veined marble, oiled hardwood, a CRT palette - while keeping the ten
-     * regions separable, which is the one thing a Queens board cannot trade
+     * regions separable, which is the one thing a Thrones board cannot trade
      * away. See `docs/skins.md`.
      */
     {
@@ -706,7 +706,7 @@ const BASE_PALETTES: { [G in GameId]: readonly PaletteOption[] } = {
       },
     },
   ],
-  tango: [
+  eclipse: [
     {
       id: "classic",
       name: "Classic",
@@ -1100,7 +1100,7 @@ const BASE_PALETTES: { [G in GameId]: readonly PaletteOption[] } = {
       },
     },
   ],
-  zip: [
+  dash: [
     {
       id: "current",
       name: "Current",
@@ -1470,17 +1470,17 @@ const BASE_PALETTES: { [G in GameId]: readonly PaletteOption[] } = {
  * what the board is *saying*.
  *
  * Only the first kind is replaced by a material. A game's meaningful colours —
- * which symbol is which in Tango, where a hazard is in Mine Islands, the route
- * in Zip — are inherited from the base board untouched, because a material may
+ * which symbol is which in Eclipse, where a hazard is in Mine Islands, the route
+ * in Dash — are inherited from the base board untouched, because a material may
  * change what a board is made of but never what it tells you.
  */
 const SURFACE_TOKENS: Partial<{
   [G in GameId]: (shades: MaterialShades) => ThemeTokens;
 }> = {
-  tango: (s) => ({ "--board-cell": s.base, "--board-given": s.deep }),
+  eclipse: (s) => ({ "--board-cell": s.base, "--board-given": s.deep }),
   lights: (s) => ({ "--cell": s.base, "--cell-alt": s.alt }),
   tracks: (s) => ({ "--cell": s.base, "--cell-alt": s.alt, "--empty-cell": s.deep }),
-  zip: (s) => ({ "--cell": s.base, "--cell-alt": s.alt }),
+  dash: (s) => ({ "--cell": s.base, "--cell-alt": s.alt }),
   "mine-islands": (s) => ({
     "--covered": s.base,
     "--covered-hover": s.alt,
@@ -1505,7 +1505,7 @@ const SURFACE_TOKENS: Partial<{
  * wooden neighbour. Whatever is not upgraded is prepended as a new board.
  */
 function withMaterials(
-  gameId: Exclude<GameId, "queens">,
+  gameId: Exclude<GameId, "thrones">,
   upgrade: Readonly<Record<string, string>> = {},
 ): readonly PaletteOption[] {
   const tokens = SURFACE_TOKENS[gameId];
@@ -1533,11 +1533,11 @@ function withMaterials(
 }
 
 export const GAME_PALETTES: { [G in GameId]: readonly PaletteOption[] } = {
-  // Queens writes its own region colours, but still takes the shared accent and
+  // Thrones writes its own region colours, but still takes the shared accent and
   // page chrome, so its material boards dress the screen like everyone else's.
   // The empty token map is the point: nothing about the board itself is
   // replaced, only the furniture around it.
-  queens: BASE_PALETTES.queens.map((board) =>
+  thrones: BASE_PALETTES.thrones.map((board) =>
     MATERIALS.some((entry) => entry.id === board.id)
       ? materialBoard(board.id, board, () => ({}), {
           id: board.id,
@@ -1546,10 +1546,10 @@ export const GAME_PALETTES: { [G in GameId]: readonly PaletteOption[] } = {
         })
       : board,
   ),
-  tango: withMaterials("tango"),
+  eclipse: withMaterials("eclipse"),
   lights: withMaterials("lights", { walnut: "timber" }),
   tracks: withMaterials("tracks"),
-  zip: withMaterials("zip"),
+  dash: withMaterials("dash"),
   "mine-islands": withMaterials("mine-islands"),
   "mini-chess": withMaterials("mini-chess", { walnut: "timber", marble: "regalia" }),
 };
@@ -1593,7 +1593,7 @@ export const GAME_TINTS: Partial<{ [G in GameId]: readonly TintOption[] }> = {
       dark: { "--glow": "#5aa9e6", "--glow-soft": "#a4d3f2", "--light-off": "#4d545c" },
     },
   ],
-  zip: [
+  dash: [
     {
       id: "cerulean",
       name: "Cerulean",

@@ -1,8 +1,8 @@
-# MindLab Frontend
+# Mindora Frontend
 
-React, TypeScript, Vite, and PixiJS client for the MindLab logic-game suite.
+React, TypeScript, Vite, and PixiJS client for the Mindora logic-game suite.
 The API is maintained independently in
-[MindLab-Backend](https://github.com/ArturoPerezSanchez/MindLab-Backend).
+[Mindora-Backend](https://github.com/ArturoPerezSanchez/Mindora-Backend).
 
 ## Local development
 

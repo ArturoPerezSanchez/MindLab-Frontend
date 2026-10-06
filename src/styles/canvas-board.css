@@ -11,7 +11,7 @@
   user-select: none;
 }
 
-.suite-shell[data-game="zip"] .canvas-board,
+.suite-shell[data-game="dash"] .canvas-board,
 .suite-shell[data-game="mini-chess"] .canvas-board {
   touch-action: none;
 }

@@ -30,16 +30,16 @@ path.
   why the part is called Board rather than Palette. `BoardExtras` is the place
   to add textures and further chrome.
 - **tint** — a second, narrower colour part layered over the palette. Only
-  Lights (bulb colour) and Zip (arrow colour) have one.
+  Lights (bulb colour) and Dash (arrow colour) have one.
 - **asset** — a slice of the resolved asset map. Listed per game below.
 
 | Game | Asset slots |
 | --- | --- |
-| Queens | Queen asset |
-| Tango | Sun asset, Moon asset |
+| Thrones | Queen asset |
+| Eclipse | Sun asset, Moon asset |
 | Lights | Lightbulb asset |
 | Tracks | Pipe asset, Liquid texture |
-| Zip | Background image |
+| Dash | Background image |
 | Mine Islands | Mine asset, Flag asset |
 | MiniChess | Pawn, Knight, Bishop, Rook, Queen, King |
 
@@ -93,13 +93,13 @@ expected to do the same. The bar mirrors `drawSuiteHud` and `drawXpHud` in
 `CanvasBoard` — three metric columns (Timer, Best, and a per-game third) with
 dividers and an accent rule. Keep the two in step when either changes.
 
-The Queens preview is a real 4x4 board: four regions, one queen per row, column,
+The Thrones preview is a real 4x4 board: four regions, one queen per row, column,
 and region, and no two touching even diagonally. Mine Islands shows clue numbers,
 drawn from the board's clue tiles when it brings them and as classic-coloured
 numerals when it does not.
 
-Each game supplies its own cell map and sprite placement — regions for Queens,
-givens for Tango, lit cells for Lights, an SVG route for Zip and Tracks, covered
+Each game supplies its own cell map and sprite placement — regions for Thrones,
+givens for Eclipse, lit cells for Lights, an SVG route for Dash and Tracks, covered
 and revealed cells plus both failure sprites for Mine Islands, checkered squares
 for MiniChess. Two details are worth knowing:
 
@@ -112,7 +112,7 @@ for MiniChess. Two details are worth knowing:
   variants are needed. The Pixi renderer does not do this yet; `LightsCanvas`
   needs the equivalent `sprite.tint` from `--glow`.
 
-The Zip preview masks the background image with the route stroke, which is the
+The Dash preview masks the background image with the route stroke, which is the
 same idea the real scene uses at full size.
 
 Adding a game means adding a case to the switch; the compiler will not catch a
@@ -153,11 +153,11 @@ public/games/<game-id>/
 
 Names describe roles rather than appearance. Use optimized PNG or WebP for raster
 sprites, SVG for vectors, and either SVG or a raster image with at least 1024
-pixels on its shortest side for Zip background artwork. Transparent gameplay
+pixels on its shortest side for Dash background artwork. Transparent gameplay
 sprites should normally be 384 pixels or smaller. Do not bake labels into
 artwork, and record every third-party asset in [assets.md](assets.md).
 
-## Zip background artwork
+## Dash background artwork
 
 The PixiJS scene scales one image proportionally to cover the complete board and
 masks it with the visited route. Every segment therefore reveals the pixels at
@@ -174,7 +174,7 @@ Carved stone, Royal marble, Chess club, Arcade — that carry `extras.surface`,
 which is what makes them detailed rather than merely recoloured:
 
 ```ts
-surface: { cellTexture: "/games/queens/skins/quarry/surface.svg",
+surface: { cellTexture: "/games/thrones/skins/quarry/surface.svg",
            bevel: "carved", edgeColor: "#4a443c" }
 ```
 
@@ -183,7 +183,7 @@ authored as neutral shading — black and white at low alpha, plus the odd metal
 hairline. That is the whole trick: one stone tile serves all ten regions,
 because the colour underneath still says which region a cell belongs to and the
 artwork only supplies the material. A texture with a hue of its own would
-collapse the ten regions into one, which is the single thing a Queens board
+collapse the ten regions into one, which is the single thing a Thrones board
 cannot do.
 
 `bevel` lights the cell edges — `raised` from the top left, `carved` inverted so
@@ -210,11 +210,11 @@ one game's token names, and each game maps those roles onto its own tokens in
 `SURFACE_TOKENS`:
 
 ```ts
-tango: (s) => ({ "--board-cell": s.base, "--board-given": s.deep }),
+eclipse: (s) => ({ "--board-cell": s.base, "--board-given": s.deep }),
 ```
 
 Only surface tokens are replaced. A game's *meaningful* colours — which symbol
-is which, where a hazard is, the route in Zip — are inherited from its base board
+is which, where a hazard is, the route in Dash — are inherited from its base board
 untouched. That is the line the design holds: a material may change what a board
 is made of, never what it tells you.
 
@@ -229,8 +229,8 @@ so those three keep their ids and names and simply became real wood and marble.
 ### Watch the inherited foregrounds
 
 Swapping the surface under inherited foreground colours is where this breaks.
-The first pass used mid-toned cell shades and pushed Tango symbols to 1.2:1 and
-Zip's route markers to 1.1:1 against their own cells. The fix belonged in the
+The first pass used mid-toned cell shades and pushed Eclipse symbols to 1.2:1 and
+Dash's route markers to 1.1:1 against their own cells. The fix belonged in the
 material, not in each game: light-theme shades were made paler and dark-theme
 ones deeper, which restored every game at once.
 
@@ -249,7 +249,7 @@ default grey page and the skin visibly stopped at the edge of the board.
 
 These live on `MaterialShades.chrome` and are emitted by `materialBoard` for
 every game, because the frame tokens are game-agnostic: no game has to opt in.
-Queens is routed through the same function with an empty token map, so it keeps
+Thrones is routed through the same function with an empty token map, so it keeps
 its hand-written region colours and still gets the shared chrome.
 
 Text and muted are checked at 4.5:1 against both surface and page, and accent at

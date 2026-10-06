@@ -19,7 +19,7 @@ export class AppErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("MindLab route failed", error, info.componentStack);
+    console.error("Mindora route failed", error, info.componentStack);
   }
 
   componentDidUpdate(previous: Props) {

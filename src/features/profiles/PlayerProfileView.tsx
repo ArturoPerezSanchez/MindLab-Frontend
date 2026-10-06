@@ -25,18 +25,18 @@ import {
 import { GAME_OPTIONS, type GameId } from "@/shared/gameOptions";
 
 const GAME_LOGOS: Record<GameId, string> = {
-  queens: "/games/queens/logo.png",
-  tango: "/games/tango/logo.png",
+  thrones: "/games/thrones/logo.png",
+  eclipse: "/games/eclipse/logo.png",
   lights: "/games/lights/logo.png",
   tracks: "/games/tracks/logo.png",
-  zip: "/games/zip/logo.png",
+  dash: "/games/dash/logo.png",
   "mine-islands": "/games/mine-islands/logo.svg",
   "mini-chess": "/games/mini-chess/skins/club/bn.svg",
 };
 
 /** Rating modes are server strings; a missing label falls back to the raw mode. */
 const MODE_LABELS: Record<string, string> = {
-  queens: "Queens race",
+  thrones: "Thrones race",
 };
 
 const GENDER_LABELS: Record<ProfileGender, string> = {

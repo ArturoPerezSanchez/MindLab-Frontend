@@ -6,7 +6,7 @@ import { LeaderboardView } from "@/features/leaderboard/LeaderboardView";
 import { PrivacyView, TermsView } from "@/features/legal/LegalViews";
 import { useConsent } from "@/features/privacy/ConsentProvider";
 import { PlayerProfileView } from "@/features/profiles/PlayerProfileView";
-import { useQueensPatternsSetting } from "@/features/settings/useConfig";
+import { useThronesPatternsSetting } from "@/features/settings/useConfig";
 import { useTheme } from "@/features/settings/useTheme";
 import { AppearanceView } from "@/features/skins/AppearanceView";
 import { paletteToken, resolveGameSkin } from "@/features/skins/skins";
@@ -17,23 +17,23 @@ import { AppErrorBoundary } from "@/shared/ErrorBoundary";
 import "@/games/lights/styles.css";
 import "@/games/mine-islands/styles.css";
 import "@/games/mini-chess/styles.css";
-import "@/games/queens/styles.css";
-import "@/games/tango/styles.css";
+import "@/games/thrones/styles.css";
+import "@/games/eclipse/styles.css";
 import "@/games/tracks/styles.css";
-import "@/games/zip/styles.css";
+import "@/games/dash/styles.css";
 import "@/features/multiplayer/styles.css";
 import "@/styles/game-frame.css";
 import "@/styles/game-skins.css";
 import "@/styles/canvas-board.css";
 
-const APP_NAME = "MindLab";
-const APP_FAVICON = "/brand/mindlab-favicon.png";
+const APP_NAME = "Mindora";
+const APP_FAVICON = "/brand/mindora-emblem.svg";
 
-const QueensGame = lazy(() =>
-  import("@/games/queens/QueensGame").then((module) => ({ default: module.QueensGame })),
+const ThronesGame = lazy(() =>
+  import("@/games/thrones/ThronesGame").then((module) => ({ default: module.ThronesGame })),
 );
-const TangoGame = lazy(() =>
-  import("@/games/tango/TangoGame").then((module) => ({ default: module.TangoGame })),
+const EclipseGame = lazy(() =>
+  import("@/games/eclipse/EclipseGame").then((module) => ({ default: module.EclipseGame })),
 );
 const LightsGame = lazy(() =>
   import("@/games/lights/LightsGame").then((module) => ({ default: module.LightsGame })),
@@ -41,8 +41,8 @@ const LightsGame = lazy(() =>
 const TracksGame = lazy(() =>
   import("@/games/tracks/TracksGame").then((module) => ({ default: module.TracksGame })),
 );
-const ZipGame = lazy(() =>
-  import("@/games/zip/ZipGame").then((module) => ({ default: module.ZipGame })),
+const DashGame = lazy(() =>
+  import("@/games/dash/DashGame").then((module) => ({ default: module.DashGame })),
 );
 const MineIslandsGame = lazy(() =>
   import("@/games/mine-islands/MineIslandsGame").then((module) => ({
@@ -61,25 +61,25 @@ const MultiplayerView = lazy(() =>
 );
 
 const GAMES = {
-  queens: {
-    label: "Queens",
-    path: "/queens",
-    favicon: "/games/queens/favicon.png",
-    logo: "/games/queens/logo.png",
+  thrones: {
+    label: "Thrones",
+    path: "/thrones",
+    favicon: "/games/thrones/favicon.png",
+    logo: "/games/thrones/logo.png",
     description: "Place one queen per row, column, and region without touching.",
     meta: "4 x 4 to 10 x 10",
-    icon: GAME_ICONS.queens,
-    component: QueensGame,
+    icon: GAME_ICONS.thrones,
+    component: ThronesGame,
   },
-  tango: {
-    label: "Tango",
-    path: "/tango",
-    favicon: "/games/tango/favicon.png",
-    logo: "/games/tango/logo.png",
+  eclipse: {
+    label: "Eclipse",
+    path: "/eclipse",
+    favicon: "/games/eclipse/favicon.png",
+    logo: "/games/eclipse/logo.png",
     description: "Balance suns and moons while obeying equality clues.",
     meta: "Even boards",
-    icon: GAME_ICONS.tango,
-    component: TangoGame,
+    icon: GAME_ICONS.eclipse,
+    component: EclipseGame,
   },
   lights: {
     label: "Lights",
@@ -101,15 +101,15 @@ const GAMES = {
     icon: GAME_ICONS.tracks,
     component: TracksGame,
   },
-  zip: {
-    label: "Zip",
-    path: "/zip",
-    favicon: "/games/zip/favicon.png",
-    logo: "/games/zip/logo.png",
+  dash: {
+    label: "Dash",
+    path: "/dash",
+    favicon: "/games/dash/favicon.png",
+    logo: "/games/dash/logo.png",
     description: "Draw one path through every square in numbered order.",
     meta: "Path puzzle",
-    icon: GAME_ICONS.zip,
-    component: ZipGame,
+    icon: GAME_ICONS.dash,
+    component: DashGame,
   },
   "mine-islands": {
     label: "Mine Islands",
@@ -181,12 +181,12 @@ const MULTIPLAYER_MODES = [
 ] as const;
 
 /**
- * Knockout is Queens-only for now, so it borrows the Queens frame: the same
+ * Knockout is Thrones-only for now, so it borrows the Thrones frame: the same
  * palette variables, buttons, and board chrome the single-player route uses.
  * When a second game gets a race mode this becomes a lookup rather than a
  * constant.
  */
-const MULTIPLAYER_FRAME_GAME: GameId = "queens";
+const MULTIPLAYER_FRAME_GAME: GameId = "thrones";
 
 function pathFromLocation(): string {
   const hashPath = window.location.hash.replace(/^#/, "").replace(/^\/+/, "");
@@ -303,7 +303,7 @@ export default function App() {
     };
     const label = game?.label ?? routeTitles[route];
     document.title = label ? `${label} | ${APP_NAME}` : APP_NAME;
-    setFavicon(game?.favicon ?? (route === "knockout" ? GAMES.queens.favicon : APP_FAVICON));
+    setFavicon(game?.favicon ?? (route === "knockout" ? GAMES.thrones.favicon : APP_FAVICON));
   }, [game, route]);
 
   return (
@@ -326,7 +326,7 @@ export default function App() {
     >
       <nav className="suite-nav" aria-label="Game navigation">
         <a className="suite-brand" href="#/" aria-label={`${APP_NAME} menu`}>
-          <img className="suite-brand-mark" src="/brand/mindlab-logo-192.png" alt="" />
+          <img className="suite-brand-mark" src="/brand/mindora-emblem.svg" alt="" />
           <span>{APP_NAME}</span>
         </a>
         <div className="suite-tabs">
@@ -445,7 +445,7 @@ function AppFooter() {
   const { openPreferences } = useConsent();
   return (
     <footer className="suite-footer">
-      <span>MindLab</span>
+      <span>Mindora</span>
       <nav aria-label="Legal and privacy">
         <a href="#/privacy">Privacy</a>
         <a href="#/terms">Terms</a>
@@ -456,13 +456,13 @@ function AppFooter() {
 }
 
 function ConfigView() {
-  const [showQueensPatterns, setShowQueensPatterns] = useQueensPatternsSetting();
+  const [showThronesPatterns, setShowThronesPatterns] = useThronesPatternsSetting();
 
   return (
     <main className="config-shell" aria-labelledby="config-title">
       <section className="config-heading">
         <h1 id="config-title">Config</h1>
-        <p>Shared preferences for MindLab.</p>
+        <p>Shared preferences for Mindora.</p>
       </section>
 
       <section className="config-panel" aria-labelledby="accessibility-title">
@@ -477,13 +477,13 @@ function ConfigView() {
           </span>
           <span className="config-row-copy">
             <strong>Colorblind region patterns</strong>
-            <span>Show subtle patterns on Queens regions.</span>
+            <span>Show subtle patterns on Thrones regions.</span>
           </span>
           <span className="config-switch">
             <input
               type="checkbox"
-              checked={showQueensPatterns}
-              onChange={(event) => setShowQueensPatterns(event.target.checked)}
+              checked={showThronesPatterns}
+              onChange={(event) => setShowThronesPatterns(event.target.checked)}
             />
             <span aria-hidden="true" />
           </span>
@@ -508,9 +508,9 @@ function MultiplayerModes() {
       <section className="game-picker" aria-label="Multiplayer modes">
         {MULTIPLAYER_MODES.map((mode) =>
           mode.ready ? (
-            <a className="game-card game-card-queens" href={`#${mode.path}`} key={mode.id}>
+            <a className="game-card game-card-thrones" href={`#${mode.path}`} key={mode.id}>
               <span className="game-card-logo" aria-hidden="true">
-                <img src={GAMES.queens.logo} alt="" />
+                <img src={GAMES.thrones.logo} alt="" />
               </span>
               <span className="game-card-copy">
                 <span className="game-card-title">

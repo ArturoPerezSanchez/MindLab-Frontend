@@ -1,5 +1,5 @@
-/* Scoped styles for zip. Generated from the original game stylesheet. */
-.game-zip {
+/* Scoped styles for dash. Generated from the original game stylesheet. */
+.game-dash {
   color-scheme: light;
   --ink: #23333d;
   --muted: #687680;
@@ -18,7 +18,7 @@
   --focus: #3977a8;
 }
 
-[data-theme="dark"] .game-zip {
+[data-theme="dark"] .game-dash {
   color-scheme: dark;
   --ink: #f5efe7;
   --muted: #b9aea4;
@@ -37,42 +37,42 @@
   --focus: #f0b447;
 }
 
-[data-theme="dark"] .game-zip {
+[data-theme="dark"] .game-dash {
   background:
     linear-gradient(180deg, rgba(255, 154, 50, 0.1), rgba(255, 255, 255, 0) 280px),
     radial-gradient(circle at 84% 12%, rgba(217, 95, 95, 0.14), transparent 30%),
     var(--page);
 }
 
-[data-theme="dark"] .game-zip .game-surface, [data-theme="dark"] .game-zip .stats-bar, [data-theme="dark"] .game-zip .state-panel, [data-theme="dark"] .game-zip .rules-panel, [data-theme="dark"] .game-zip .secondary-action, [data-theme="dark"] .game-zip .size-control select, [data-theme="dark"] .game-zip .path-legend {
+[data-theme="dark"] .game-dash .game-surface, [data-theme="dark"] .game-dash .stats-bar, [data-theme="dark"] .game-dash .state-panel, [data-theme="dark"] .game-dash .rules-panel, [data-theme="dark"] .game-dash .secondary-action, [data-theme="dark"] .game-dash .size-control select, [data-theme="dark"] .game-dash .path-legend {
   background-color: rgba(32, 27, 23, 0.78);
 }
 
-[data-theme="dark"] .game-zip .cell.is-visited {
+[data-theme="dark"] .game-dash .cell.is-visited {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 90%),
     #3a2a1d;
 }
 
-[data-theme="dark"] .game-zip .clue, [data-theme="dark"] .game-zip .legend-number {
+[data-theme="dark"] .game-dash .clue, [data-theme="dark"] .game-dash .legend-number {
   color: #22180f;
 }
 
-[data-theme="dark"] .game-zip .icon-action:hover {
+[data-theme="dark"] .game-dash .icon-action:hover {
   color: var(--ink);
   background: rgba(255, 255, 255, 0.08);
 }
 
-.game-zip * {
+.game-dash * {
   box-sizing: border-box;
 }
 
-.game-zip {
+.game-dash {
   min-width: 320px;
   background: var(--page);
 }
 
-.game-zip {
+.game-dash {
   min-height: 100vh;
   margin: 0;
   color: var(--ink);
@@ -84,26 +84,26 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.game-zip button, .game-zip select {
+.game-dash button, .game-dash select {
   color: inherit;
   font: inherit;
 }
 
-.game-zip button {
+.game-dash button {
   border: 0;
 }
 
-.game-zip h1, .game-zip h2, .game-zip p {
+.game-dash h1, .game-dash h2, .game-dash p {
   margin: 0;
 }
 
-.game-zip .app-shell {
+.game-dash .app-shell {
   width: 100%;
   min-height: 100vh;
   padding: 24px;
 }
 
-.game-zip .game-surface {
+.game-dash .game-surface {
   display: grid;
   gap: 16px;
   width: min(100%, 760px);
@@ -116,22 +116,22 @@
   backdrop-filter: blur(10px);
 }
 
-.game-zip .top-bar, .game-zip .brand-lockup, .game-zip .top-actions, .game-zip .action-row, .game-zip .rules-heading {
+.game-dash .top-bar, .game-dash .brand-lockup, .game-dash .top-actions, .game-dash .action-row, .game-dash .rules-heading {
   display: flex;
   align-items: center;
 }
 
-.game-zip .top-bar {
+.game-dash .top-bar {
   justify-content: space-between;
   gap: 16px;
 }
 
-.game-zip .brand-lockup {
+.game-dash .brand-lockup {
   min-width: 0;
   gap: 11px;
 }
 
-.game-zip .brand-mark {
+.game-dash .brand-mark {
   display: block;
   width: 44px;
   height: 44px;
@@ -140,29 +140,29 @@
   box-shadow: 0 8px 18px rgba(35, 51, 61, 0.14);
 }
 
-.game-zip .asset-mark {
+.game-dash .asset-mark {
   background: rgba(255, 255, 255, 0.86);
   object-fit: contain;
 }
 
-.game-zip h1 {
+.game-dash h1 {
   font-size: 1.75rem;
   font-weight: 900;
   letter-spacing: 0;
   line-height: 1;
 }
 
-.game-zip .top-actions {
+.game-dash .top-actions {
   gap: 6px;
 }
 
-.game-zip .size-control {
+.game-dash .size-control {
   position: relative;
   display: grid;
   align-items: center;
 }
 
-.game-zip .size-control select {
+.game-dash .size-control select {
   min-width: 96px;
   min-height: 38px;
   padding: 0 34px 0 14px;
@@ -175,19 +175,19 @@
   cursor: pointer;
 }
 
-.game-zip .size-control select:disabled {
+.game-dash .size-control select:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-.game-zip .size-control svg {
+.game-dash .size-control svg {
   position: absolute;
   right: 11px;
   color: var(--muted);
   pointer-events: none;
 }
 
-.game-zip .icon-action {
+.game-dash .icon-action {
   display: grid;
   width: 38px;
   height: 38px;
@@ -203,18 +203,18 @@
     transform 120ms ease;
 }
 
-.game-zip .icon-action:hover {
+.game-dash .icon-action:hover {
   color: var(--ink);
   background: rgba(255, 255, 255, 0.65);
   transform: translateY(-1px);
 }
 
-.game-zip .size-control select:focus-visible, .game-zip .icon-action:focus-visible, .game-zip .secondary-action:focus-visible, .game-zip .primary-action:focus-visible, .game-zip .win-action:focus-visible, .game-zip .text-action:focus-visible, .game-zip .popup-close:focus-visible, .game-zip .conflict-trigger:focus-visible {
+.game-dash .size-control select:focus-visible, .game-dash .icon-action:focus-visible, .game-dash .secondary-action:focus-visible, .game-dash .primary-action:focus-visible, .game-dash .win-action:focus-visible, .game-dash .text-action:focus-visible, .game-dash .popup-close:focus-visible, .game-dash .conflict-trigger:focus-visible {
   outline: 3px solid rgba(57, 119, 168, 0.42);
   outline-offset: 2px;
 }
 
-.game-zip .stats-bar {
+.game-dash .stats-bar {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   overflow: hidden;
@@ -224,7 +224,7 @@
   backdrop-filter: blur(10px);
 }
 
-.game-zip .stat {
+.game-dash .stat {
   display: grid;
   gap: 4px;
   min-width: 0;
@@ -232,11 +232,11 @@
   text-align: center;
 }
 
-.game-zip .stat + .stat {
+.game-dash .stat + .stat {
   border-left: 1px solid rgba(104, 118, 128, 0.17);
 }
 
-.game-zip .stat span {
+.game-dash .stat span {
   overflow: hidden;
   color: #7a858d;
   font-size: 0.66rem;
@@ -246,7 +246,7 @@
   white-space: nowrap;
 }
 
-.game-zip .stat strong {
+.game-dash .stat strong {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 1.22rem;
   font-variant-numeric: tabular-nums;
@@ -254,13 +254,13 @@
   line-height: 1;
 }
 
-.game-zip .board-zone {
+.game-dash .board-zone {
   position: relative;
   display: grid;
   place-items: center;
 }
 
-.game-zip .board {
+.game-dash .board {
   --board-size: 6;
   position: relative;
   display: grid;
@@ -280,7 +280,7 @@
   -webkit-user-select: none;
 }
 
-.game-zip .cell {
+.game-dash .cell {
   position: relative;
   display: grid;
   min-width: 0;
@@ -298,30 +298,30 @@
     filter 120ms ease;
 }
 
-.game-zip .cell:nth-child(even) {
+.game-dash .cell:nth-child(even) {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 90%),
     var(--cell-alt);
 }
 
-.game-zip .cell.is-visited {
+.game-dash .cell.is-visited {
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 90%),
     #d6eee9;
 }
 
-.game-zip .cell:hover, .game-zip .cell:focus-visible {
+.game-dash .cell:hover, .game-dash .cell:focus-visible {
   z-index: 1;
   filter: brightness(1.03);
   outline: 3px solid rgba(57, 119, 168, 0.5);
   outline-offset: -3px;
 }
 
-.game-zip .cell:focus-visible {
+.game-dash .cell:focus-visible {
   z-index: 7;
 }
 
-.game-zip .cell.is-invalid::after {
+.game-dash .cell.is-invalid::after {
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -337,7 +337,7 @@
   animation: invalid-pulse 240ms ease both;
 }
 
-.game-zip .path-layer {
+.game-dash .path-layer {
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -347,7 +347,7 @@
   pointer-events: none;
 }
 
-.game-zip .path-layer .route-path {
+.game-dash .path-layer .route-path {
   fill: none;
   stroke: url("#route-gradient");
   stroke-linecap: round;
@@ -356,7 +356,7 @@
   filter: drop-shadow(0 0.04px 0.04px rgba(133, 65, 15, 0.48));
 }
 
-.game-zip .path-layer .route-outline {
+.game-dash .path-layer .route-outline {
   fill: none;
   stroke: rgba(21, 28, 32, 0.62);
   stroke-linecap: round;
@@ -364,22 +364,22 @@
   stroke-width: 0.38;
 }
 
-.game-zip .path-layer circle {
+.game-dash .path-layer circle {
   fill: var(--route);
   stroke: none;
 }
 
-.game-zip .path-layer.solution-path .route-path {
+.game-dash .path-layer.solution-path .route-path {
   stroke: var(--gold);
   opacity: 0.74;
 }
 
-.game-zip .path-layer.solution-path circle {
+.game-dash .path-layer.solution-path circle {
   fill: var(--gold);
   opacity: 0.74;
 }
 
-.game-zip .clue {
+.game-dash .clue {
   position: relative;
   z-index: 5;
   display: grid;
@@ -399,14 +399,14 @@
   line-height: 1;
 }
 
-.game-zip .cell.is-endpoint .clue, .game-zip .cell.is-endpoint:not(.has-clue)::before {
+.game-dash .cell.is-endpoint .clue, .game-dash .cell.is-endpoint:not(.has-clue)::before {
   border-color: var(--route-dark);
   box-shadow:
     0 0 0 4px rgba(242, 140, 40, 0.24),
     0 4px 10px rgba(35, 51, 61, 0.15);
 }
 
-.game-zip .cell.is-endpoint:not(.has-clue)::before {
+.game-dash .cell.is-endpoint:not(.has-clue)::before {
   position: absolute;
   z-index: 4;
   width: clamp(13px, calc(88px / var(--board-size)), 22px);
@@ -418,12 +418,12 @@
   animation: endpoint-breathe 1.4s ease-in-out infinite;
 }
 
-.game-zip .is-showing-solution .cell.is-endpoint .clue, .game-zip .is-showing-solution .cell.is-endpoint:not(.has-clue)::before {
+.game-dash .is-showing-solution .cell.is-endpoint .clue, .game-dash .is-showing-solution .cell.is-endpoint:not(.has-clue)::before {
   border-color: #a86d05;
   box-shadow: 0 0 0 4px rgba(233, 167, 47, 0.22);
 }
 
-.game-zip .wall {
+.game-dash .wall {
   position: absolute;
   z-index: 6;
   border-radius: 999px;
@@ -434,28 +434,28 @@
   pointer-events: none;
 }
 
-.game-zip .wall-right {
+.game-dash .wall-right {
   top: -1px;
   right: -3px;
   width: clamp(5px, 0.62vw, 7px);
   height: calc(100% + 2px);
 }
 
-.game-zip .wall-down {
+.game-dash .wall-down {
   bottom: -3px;
   left: -1px;
   width: calc(100% + 2px);
   height: clamp(5px, 0.62vw, 7px);
 }
 
-.game-zip .progress-track {
+.game-dash .progress-track {
   height: 8px;
   overflow: hidden;
   border-radius: 999px;
   background: rgba(35, 51, 61, 0.1);
 }
 
-.game-zip .progress-track span {
+.game-dash .progress-track span {
   display: block;
   height: 100%;
   border-radius: inherit;
@@ -463,13 +463,13 @@
   transition: width 180ms ease;
 }
 
-.game-zip .action-row {
+.game-dash .action-row {
   justify-content: center;
   flex-wrap: wrap;
   gap: 9px;
 }
 
-.game-zip .primary-action, .game-zip .secondary-action, .game-zip .win-action {
+.game-dash .primary-action, .game-dash .secondary-action, .game-dash .win-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -486,34 +486,34 @@
     background 120ms ease;
 }
 
-.game-zip .primary-action, .game-zip .win-action {
+.game-dash .primary-action, .game-dash .win-action {
   color: #ffffff;
   background: var(--ink);
   box-shadow: 0 10px 22px rgba(35, 51, 61, 0.18);
 }
 
-.game-zip .secondary-action {
+.game-dash .secondary-action {
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.72);
 }
 
-.game-zip .secondary-action[aria-pressed="true"] {
+.game-dash .secondary-action[aria-pressed="true"] {
   color: #ffffff;
   border-color: var(--route-dark);
   background: var(--route-dark);
 }
 
-.game-zip .primary-action:hover, .game-zip .secondary-action:hover, .game-zip .win-action:hover {
+.game-dash .primary-action:hover, .game-dash .secondary-action:hover, .game-dash .win-action:hover {
   transform: translateY(-1px);
 }
 
-.game-zip .primary-action:disabled, .game-zip .secondary-action:disabled {
+.game-dash .primary-action:disabled, .game-dash .secondary-action:disabled {
   cursor: not-allowed;
   opacity: 0.48;
   transform: none;
 }
 
-.game-zip .state-panel {
+.game-dash .state-panel {
   display: grid;
   width: min(100%, 420px);
   min-height: 230px;
@@ -527,21 +527,21 @@
   text-align: center;
 }
 
-.game-zip .state-panel p {
+.game-dash .state-panel p {
   max-width: 34ch;
   font-size: 0.9rem;
   line-height: 1.45;
 }
 
-.game-zip .error-state > svg {
+.game-dash .error-state > svg {
   color: var(--danger);
 }
 
-.game-zip .spin {
+.game-dash .spin {
   animation: spin 850ms linear infinite;
 }
 
-.game-zip .conflict-trigger {
+.game-dash .conflict-trigger {
   position: absolute;
   z-index: 8;
   top: 12px;
@@ -563,12 +563,12 @@
     background 120ms ease;
 }
 
-.game-zip .conflict-trigger:hover {
+.game-dash .conflict-trigger:hover {
   background: #ffffff;
   transform: translateY(-1px);
 }
 
-.game-zip .board-dismiss-layer {
+.game-dash .board-dismiss-layer {
   position: absolute;
   inset: 0;
   z-index: 9;
@@ -576,7 +576,7 @@
   cursor: default;
 }
 
-.game-zip .board-popup {
+.game-dash .board-popup {
   position: absolute;
   z-index: 10;
   top: 50%;
@@ -598,13 +598,13 @@
   animation: popup-enter 340ms cubic-bezier(0.2, 0.9, 0.2, 1.1) both;
 }
 
-.game-zip .board-popup strong {
+.game-dash .board-popup strong {
   display: block;
   padding-right: 18px;
   font-size: 1.1rem;
 }
 
-.game-zip .board-popup p {
+.game-dash .board-popup p {
   margin-top: 3px;
   color: var(--muted);
   font-size: 0.91rem;
@@ -612,11 +612,11 @@
   line-height: 1.4;
 }
 
-.game-zip .conflict-popup > svg {
+.game-dash .conflict-popup > svg {
   color: var(--danger);
 }
 
-.game-zip .popup-close {
+.game-dash .popup-close {
   position: absolute;
   top: 9px;
   right: 9px;
@@ -630,7 +630,7 @@
   cursor: pointer;
 }
 
-.game-zip .text-action {
+.game-dash .text-action {
   grid-column: 1 / -1;
   justify-self: start;
   padding: 0;
@@ -642,7 +642,7 @@
   cursor: pointer;
 }
 
-.game-zip .win-popup {
+.game-dash .win-popup {
   overflow: hidden;
   border-color: rgba(242, 140, 40, 0.3);
   background:
@@ -650,11 +650,11 @@
     rgba(255, 255, 255, 0.96);
 }
 
-.game-zip .win-popup > svg {
+.game-dash .win-popup > svg {
   color: var(--gold);
 }
 
-.game-zip .record-badge {
+.game-dash .record-badge {
   display: inline-flex;
   grid-column: 1 / -1;
   justify-self: start;
@@ -669,11 +669,11 @@
   font-weight: 900;
 }
 
-.game-zip .win-action {
+.game-dash .win-action {
   grid-column: 1 / -1;
 }
 
-.game-zip .artwork-action {
+.game-dash .artwork-action {
   display: inline-flex;
   grid-column: 1 / -1;
   justify-self: start;
@@ -690,13 +690,13 @@
   cursor: pointer;
 }
 
-.game-zip .artwork-action:hover,
-.game-zip .artwork-action:focus-visible {
+.game-dash .artwork-action:hover,
+.game-dash .artwork-action:focus-visible {
   border-color: var(--route-dark);
   outline: none;
 }
 
-.game-zip .win-reopen {
+.game-dash .win-reopen {
   position: absolute;
   z-index: 8;
   top: 12px;
@@ -715,14 +715,14 @@
   backdrop-filter: blur(8px);
 }
 
-.game-zip .win-reopen:hover,
-.game-zip .win-reopen:focus-visible {
+.game-dash .win-reopen:hover,
+.game-dash .win-reopen:focus-visible {
   background: #ffffff;
   outline: 3px solid color-mix(in srgb, var(--route) 48%, transparent);
   outline-offset: 2px;
 }
 
-.game-zip .confetti-field {
+.game-dash .confetti-field {
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -730,12 +730,12 @@
   pointer-events: none;
 }
 
-.game-zip .win-popup > *:not(.confetti-field) {
+.game-dash .win-popup > *:not(.confetti-field) {
   position: relative;
   z-index: 1;
 }
 
-.game-zip .confetti-field span {
+.game-dash .confetti-field span {
   position: absolute;
   top: -14px;
   left: var(--x);
@@ -748,7 +748,7 @@
   animation-delay: var(--delay);
 }
 
-.game-zip .rules-backdrop {
+.game-dash .rules-backdrop {
   position: fixed;
   inset: 0;
   z-index: 20;
@@ -757,7 +757,7 @@
   backdrop-filter: blur(2px);
 }
 
-.game-zip .rules-panel {
+.game-dash .rules-panel {
   position: fixed;
   z-index: 21;
   top: var(--suite-nav-offset);
@@ -776,25 +776,25 @@
   animation: rules-enter 210ms ease both;
 }
 
-.game-zip .rules-heading {
+.game-dash .rules-heading {
   justify-content: space-between;
   gap: 16px;
 }
 
-.game-zip .rules-heading span {
+.game-dash .rules-heading span {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 750;
   text-transform: uppercase;
 }
 
-.game-zip .rules-heading h2 {
+.game-dash .rules-heading h2 {
   margin-top: 3px;
   font-size: 1.45rem;
   line-height: 1.1;
 }
 
-.game-zip .path-legend {
+.game-dash .path-legend {
   display: grid;
   grid-template-columns: auto 1fr auto 1fr auto;
   align-items: center;
@@ -805,7 +805,7 @@
   background: rgba(255, 255, 255, 0.7);
 }
 
-.game-zip .legend-number {
+.game-dash .legend-number {
   position: relative;
   z-index: 1;
   display: grid;
@@ -819,18 +819,18 @@
   font-weight: 900;
 }
 
-.game-zip .legend-number.finish {
+.game-dash .legend-number.finish {
   border-color: #a86d05;
   background: var(--gold-soft);
 }
 
-.game-zip .legend-line {
+.game-dash .legend-line {
   height: 7px;
   margin: 0 -1px;
   background: var(--route);
 }
 
-.game-zip .rules-list {
+.game-dash .rules-list {
   display: grid;
   margin: 0;
   padding: 0;
@@ -838,7 +838,7 @@
   counter-reset: rules;
 }
 
-.game-zip .rules-list li {
+.game-dash .rules-list li {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr);
   padding: 14px 0;
@@ -847,7 +847,7 @@
   counter-increment: rules;
 }
 
-.game-zip .rules-list li::before {
+.game-dash .rules-list li::before {
   grid-row: 1 / span 2;
   display: grid;
   width: 25px;
@@ -862,18 +862,18 @@
   font-weight: 900;
 }
 
-.game-zip .rules-list strong {
+.game-dash .rules-list strong {
   font-size: 0.96rem;
 }
 
-.game-zip .rules-list span {
+.game-dash .rules-list span {
   color: var(--muted);
   font-size: 0.86rem;
   font-weight: 600;
   line-height: 1.43;
 }
 
-.game-zip .rules-note {
+.game-dash .rules-note {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   padding: 13px;
@@ -885,14 +885,14 @@
   line-height: 1.45;
 }
 
-.game-zip .rules-note-asset {
+.game-dash .rules-note-asset {
   display: block;
   width: 24px;
   height: 24px;
   object-fit: contain;
 }
 
-.game-zip .sr-only {
+.game-dash .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -972,7 +972,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .game-zip *, .game-zip *::before, .game-zip *::after {
+  .game-dash *, .game-dash *::before, .game-dash *::after {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
@@ -981,93 +981,93 @@
 }
 
 @media (max-width: 680px) {
-  .game-zip .app-shell {
+  .game-dash .app-shell {
     padding: 12px;
   }
 
-  .game-zip .game-surface {
+  .game-dash .game-surface {
     gap: 13px;
     padding: 13px;
   }
 
-  .game-zip .brand-mark {
+  .game-dash .brand-mark {
     width: 38px;
     height: 38px;
   }
 
-  .game-zip h1 {
+  .game-dash h1 {
     font-size: 1.5rem;
   }
 
-  .game-zip .stats-bar {
+  .game-dash .stats-bar {
     border-radius: 8px;
   }
 
-  .game-zip .stat {
+  .game-dash .stat {
     padding: 10px 7px;
   }
 
-  .game-zip .stat strong {
+  .game-dash .stat strong {
     font-size: 1rem;
   }
 
-  .game-zip .board-zone {
+  .game-dash .board-zone {
     min-height: auto;
   }
 
-  .game-zip .board {
+  .game-dash .board {
     width: min(100%, calc(100vw - 26px));
   }
 
-  .game-zip .action-row {
+  .game-dash .action-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .game-zip .primary-action, .game-zip .secondary-action {
+  .game-dash .primary-action, .game-dash .secondary-action {
     width: 100%;
     padding: 0 9px;
   }
 
-  .game-zip .primary-action:last-child {
+  .game-dash .primary-action:last-child {
     grid-column: 1 / -1;
   }
 }
 
 @media (max-width: 390px) {
-  .game-zip .brand-lockup {
+  .game-dash .brand-lockup {
     gap: 8px;
   }
 
-  .game-zip .brand-mark {
+  .game-dash .brand-mark {
     width: 34px;
     height: 34px;
   }
 
-  .game-zip h1 {
+  .game-dash h1 {
     font-size: 1.35rem;
   }
 
-  .game-zip .size-control select {
+  .game-dash .size-control select {
     min-width: 84px;
     min-height: 34px;
     padding-left: 11px;
   }
 
-  .game-zip .icon-action {
+  .game-dash .icon-action {
     width: 34px;
     height: 34px;
   }
 
-  .game-zip .stat span {
+  .game-dash .stat span {
     font-size: 0.58rem;
   }
 
-  .game-zip .action-row {
+  .game-dash .action-row {
     grid-template-columns: 1fr;
   }
 
-  .game-zip .primary-action:last-child {
+  .game-dash .primary-action:last-child {
     grid-column: auto;
   }
 }

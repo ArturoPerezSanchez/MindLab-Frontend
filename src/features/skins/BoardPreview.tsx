@@ -283,12 +283,12 @@ function TrackOverlay({
 }
 
 /*
- * A real 4x4 Queens board: four regions, one queen per row, column, and region,
- * and no two queens touching even diagonally. An invalid arrangement here would
+ * A real 4x4 Thrones board: four regions, one queen per row, column, and region,
+ * and no two thrones touching even diagonally. An invalid arrangement here would
  * teach the wrong thing about the game.
  */
-const QUEENS_REGIONS = [1, 1, 2, 2, 1, 2, 2, 2, 3, 3, 3, 4, 3, 4, 4, 4];
-const QUEENS_MARKERS = [1, 7, 8, 14];
+const THRONES_REGIONS = [1, 1, 2, 2, 1, 2, 2, 2, 3, 3, 3, 4, 3, 4, 4, 4];
+const THRONES_MARKERS = [1, 7, 8, 14];
 
 const LIT = new Set([1, 4, 6, 11, 14]);
 const GIVEN = new Set([0, 5, 10, 15]);
@@ -315,30 +315,30 @@ export function BoardPreview({ skin, label }: { skin: ResolvedGameSkin; label: s
   let hudStyle: BoardHudStyle | undefined;
 
   switch (gameId) {
-    case "queens": {
-      const assets = skin.assets as GameSkinAssetMap["queens"];
-      third = { label: "Queens", value: "4/4" };
+    case "thrones": {
+      const assets = skin.assets as GameSkinAssetMap["thrones"];
+      third = { label: "Thrones", value: "4/4" };
       hudStyle = skin.assets.surface?.hud;
       body = (
         <Grid
           cellStyle={(index) => ({
             // Material over colour, as the real board layers it, so the picker
             // shows the board you are actually choosing.
-            backgroundColor: `var(--region-${QUEENS_REGIONS[index]})`,
+            backgroundColor: `var(--region-${THRONES_REGIONS[index]})`,
             backgroundImage: skin.assets.surface ? `url("${skin.assets.surface.cellTexture}")` : undefined,
             backgroundSize: "100% 100%",
             borderColor: skin.assets.surface?.edgeColor,
           })}
         >
-          {QUEENS_MARKERS.map((index) => (
+          {THRONES_MARKERS.map((index) => (
             <Piece key={index} index={index} src={assets.marker} />
           ))}
         </Grid>
       );
       break;
     }
-    case "tango": {
-      const [low, high] = (skin.assets as GameSkinAssetMap["tango"]).symbols;
+    case "eclipse": {
+      const [low, high] = (skin.assets as GameSkinAssetMap["eclipse"]).symbols;
       third = { label: "Filled", value: "6/16" };
       body = (
         <Grid cellStyle={(index) => ({ background: GIVEN.has(index) ? "var(--board-given)" : "var(--board-cell)" })}>
@@ -387,8 +387,8 @@ export function BoardPreview({ skin, label }: { skin: ResolvedGameSkin; label: s
       );
       break;
     }
-    case "zip": {
-      const assets = skin.assets as GameSkinAssetMap["zip"];
+    case "dash": {
+      const assets = skin.assets as GameSkinAssetMap["dash"];
       third = { label: "Path", value: "6/16" };
       body = (
         <Grid

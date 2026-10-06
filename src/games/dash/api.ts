@@ -1,6 +1,6 @@
 import { apiPath } from "@/shared/api";
 import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
-import type { Puzzle, Wall, ZipResponse } from "./types";
+import type { Puzzle, Wall, DashResponse } from "./types";
 
 function isBoard(value: unknown, size: number): value is Puzzle["board"] {
   if (
@@ -41,23 +41,23 @@ function isWall(value: unknown, size: number): value is Wall {
 
 export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<Puzzle> {
   const params = new URLSearchParams({ board_size: String(size) });
-  const response = await fetch(`${apiPath("/zip")}?${params}`, { signal });
+  const response = await fetch(`${apiPath("/dash")}?${params}`, { signal });
 
   if (!response.ok) {
     throw new Error(`Puzzle generation failed with status ${response.status}.`);
   }
 
-  const payload = (await response.json()) as ZipResponse;
+  const payload = (await response.json()) as DashResponse;
   if (
     payload.board_size !== size ||
     !isBoard(payload.board, size) ||
     !Array.isArray(payload.walls) ||
     !payload.walls.every((wall) => isWall(wall, size))
   ) {
-    throw new Error("The API returned an invalid Zip puzzle.");
+    throw new Error("The API returned an invalid Dash puzzle.");
   }
 
-  rememberPuzzleHandleFrom("zip", squareDifficulty(size), payload);
+  rememberPuzzleHandleFrom("dash", squareDifficulty(size), payload);
 
   return {
     size,

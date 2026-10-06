@@ -1,9 +1,9 @@
 # Frontend architecture
 
-MindLab is delivered from two independent repositories:
+Mindora is delivered from two independent repositories:
 
-- `MindLab-Frontend`: static React application and all visual assets.
-- `MindLab-Backend`: versioned FastAPI contract, persistence, and puzzle engines.
+- `Mindora-Frontend`: static React application and all visual assets.
+- `Mindora-Backend`: versioned FastAPI contract, persistence, and puzzle engines.
 
 The browser communicates with the API exclusively through `/api/v1`. The
 frontend can therefore be deployed as static files and scaled independently of

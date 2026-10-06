@@ -10,10 +10,10 @@ import {
 import { addLine, addRect, addSprite, cssVar } from "@/shared/canvas/drawing";
 import { drawCellSurface, withSurfaceAssets } from "@/shared/canvas/surface";
 import type { BoardSurface } from "@/features/skins/skins";
-import { drawQueensCelebration, type CellRef } from "@/shared/canvas/winCelebration";
+import { drawThronesCelebration, type CellRef } from "@/shared/canvas/winCelebration";
 import { positionKey } from "./game";
 
-type QueensCanvasProps = {
+type ThronesCanvasProps = {
   /** 0..1 while the solved board celebrates, null when idle. */
   celebration: number | null;
   board: number[][];
@@ -23,7 +23,7 @@ type QueensCanvasProps = {
    * flat boards, which are still the default.
    */
   surface?: BoardSurface;
-  queens: ReadonlySet<string>;
+  thrones: ReadonlySet<string>;
   marks: ReadonlySet<string>;
   conflicts: ReadonlySet<string>;
   conflictHints: ReadonlySet<string>;
@@ -39,12 +39,12 @@ type QueensCanvasProps = {
   onPointerCancel: () => void;
 };
 
-export function QueensCanvas({
+export function ThronesCanvas({
   celebration,
   board,
   marker,
   surface,
-  queens,
+  thrones,
   marks,
   conflicts,
   conflictHints,
@@ -58,7 +58,7 @@ export function QueensCanvas({
   onPointerMove,
   onPointerUp,
   onPointerCancel,
-}: QueensCanvasProps) {
+}: ThronesCanvasProps) {
   const size = board.length;
   const cells = useMemo(
     () =>
@@ -72,11 +72,11 @@ export function QueensCanvas({
             label: `Row ${row + 1}, column ${col + 1}, region ${region}${
               marks.has(key) ? ", marked unavailable" : ""
             }`,
-            pressed: queens.has(key),
+            pressed: thrones.has(key),
           };
         }),
       ),
-    [board, marks, queens],
+    [board, marks, thrones],
   );
 
   const draw = useCallback(
@@ -110,8 +110,8 @@ export function QueensCanvas({
             addRect(root, x + 5, y + 5, cellWidth - 10, cellHeight - 10, danger, undefined, 5).alpha = 0.12;
           }
 
-          const isSolution = showSolution && solutionCells.has(key) && !queens.has(key);
-          if (queens.has(key) || isSolution) {
+          const isSolution = showSolution && solutionCells.has(key) && !thrones.has(key);
+          if (thrones.has(key) || isSolution) {
             const piece = addSprite(
               root,
               textures.get(marker),
@@ -175,7 +175,7 @@ export function QueensCanvas({
       conflictHints,
       conflicts,
       marker,
-      queens,
+      thrones,
       showPatterns,
       showSolution,
       size,
@@ -208,23 +208,23 @@ export function QueensCanvas({
       if (celebration === null || !markerImage) {
         return;
       }
-      const queenCells: CellRef[] = [...queens].map((key) => {
+      const queenCells: CellRef[] = [...thrones].map((key) => {
         const [row, col] = key.split(":").map(Number);
         return { row, col };
       });
-      drawQueensCelebration(
+      drawThronesCelebration(
         { context, cellWidth, cellHeight, progress: celebration },
         queenCells,
         markerImage,
       );
     },
-    [celebration, markerImage, queens],
+    [celebration, markerImage, thrones],
   );
 
   return (
     <CanvasBoard
       className="board"
-      ariaLabel={`${size} by ${size} Queens board`}
+      ariaLabel={`${size} by ${size} Thrones board`}
       rows={size}
       cols={size}
       cells={cells}

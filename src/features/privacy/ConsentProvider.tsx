@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 
-const CONSENT_KEY = "mindlab-consent-v1";
+const CONSENT_KEY = "mindora-consent-v1";
 
 export type OptionalConsent = {
   analytics: boolean;
@@ -73,7 +73,7 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
           <div className="consent-copy">
             <h2 id="consent-title">Privacy choices</h2>
             <p id="consent-copy">
-              MindLab uses necessary local storage for your settings and session. Optional analytics
+              Mindora uses necessary local storage for your settings and session. Optional analytics
               and personalized ads stay off unless you allow them. No optional provider is enabled in
               the local build.
             </p>

@@ -9,7 +9,7 @@ npm run dev
 ```
 
 Set `VITE_GAMES_API_ORIGIN=http://127.0.0.1:8010` in `.env.local`. The Vite
-proxy sends `/api/v1` requests to the separately running MindLab backend.
+proxy sends `/api/v1` requests to the separately running Mindora backend.
 
 ## Add a game
 
@@ -17,7 +17,7 @@ proxy sends `/api/v1` requests to the separately running MindLab backend.
    component, the Canvas scene component, and scoped styles.
 2. Put visual assets under `public/games/<game>/`.
 3. Register navigation metadata, the icon, and skins in their shared registries.
-4. Add the matching generator and public contract in `MindLab-Backend`.
+4. Add the matching generator and public contract in `Mindora-Backend`.
 5. Run lint and build, then inspect desktop and mobile layouts in both themes.
 
 ## Data rules
@@ -35,4 +35,4 @@ npm run build
 ```
 
 For a complete feature, also run `python -m ruff check .` and
-`python -m pytest -q` from a sibling checkout of `MindLab-Backend`.
+`python -m pytest -q` from a sibling checkout of `Mindora-Backend`.

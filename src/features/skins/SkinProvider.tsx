@@ -11,10 +11,10 @@ import {
   type GameSkinSelections,
 } from "./skins";
 
-const STORAGE_KEY = "mindlab-game-skins-v2";
+const STORAGE_KEY = "mindora-game-skins-v2";
 /** Selections written before skins were split into parts. */
-const LEGACY_STORAGE_KEY = "mindlab-game-skins-v1";
-const STYLE_ELEMENT_ID = "mindlab-palette-tokens";
+const LEGACY_STORAGE_KEY = "mindora-game-skins-v1";
+const STYLE_ELEMENT_ID = "mindora-palette-tokens";
 const NO_ACHIEVEMENTS: readonly string[] = [];
 
 type StoredShape = Partial<Record<string, Readonly<Record<string, unknown>>>>;

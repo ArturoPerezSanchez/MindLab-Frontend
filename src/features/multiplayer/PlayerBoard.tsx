@@ -1,10 +1,10 @@
 import { memo, useMemo } from "react";
 import { paletteToken, resolveGameSkin, type GameCustomization } from "@/features/skins/skins";
-import { positionKey } from "@/games/queens/game";
+import { positionKey } from "@/games/thrones/game";
 import type { Placement } from "./protocol";
 
 /**
- * A read-only Queens board drawn in *its owner's* skin, not the viewer's
+ * A read-only Thrones board drawn in *its owner's* skin, not the viewer's
  * (requirement 10). Used for the side rail tiles and for the main stage while
  * spectating.
  *
@@ -33,9 +33,9 @@ export const PlayerBoard = memo(function PlayerBoard({
   dimmed?: boolean;
   label: string;
 }) {
-  const resolved = useMemo(() => resolveGameSkin("queens", skin), [skin]);
+  const resolved = useMemo(() => resolveGameSkin("thrones", skin), [skin]);
   const size = board.length;
-  const queens = useMemo(
+  const thrones = useMemo(
     () => new Set(placements.map(([row, col]) => positionKey(row, col))),
     [placements],
   );
@@ -43,7 +43,7 @@ export const PlayerBoard = memo(function PlayerBoard({
   return (
     <div
       className={`mp-board mp-board-${variant}`}
-      data-palette={paletteToken("queens", resolved.palette.id)}
+      data-palette={paletteToken("thrones", resolved.palette.id)}
       data-pixelated={resolved.pixelated ? "true" : undefined}
       data-dimmed={dimmed ? "true" : undefined}
       style={{ "--mp-board-size": size } as React.CSSProperties}
@@ -75,7 +75,7 @@ export const PlayerBoard = memo(function PlayerBoard({
                 borderColor: resolved.assets.surface?.edgeColor,
               }}
             >
-              {queens.has(key) ? (
+              {thrones.has(key) ? (
                 <img className="mp-board-piece" src={resolved.assets.marker} alt="" aria-hidden="true" />
               ) : null}
             </span>

@@ -14,7 +14,7 @@ import { addCircle, addLabel, addLine, addRect, cssVar } from "@/shared/canvas/d
 import { positionKey } from "./game";
 import type { InvalidMove, Position, Puzzle } from "./types";
 
-type ZipCanvasProps = {
+type DashCanvasProps = {
   /** Material laid over the cell colours by the chosen board. */
   surface?: BoardSurface;
   puzzle: Puzzle;
@@ -35,7 +35,7 @@ type ZipCanvasProps = {
 
 const COMPLETION_REVEAL_DURATION_MS = 1200;
 
-export function ZipCanvas({
+export function DashCanvas({
   surface,
   puzzle,
   path,
@@ -51,7 +51,7 @@ export function ZipCanvas({
   onPointerDown,
   onPointerMove,
   onPointerUp,
-}: ZipCanvasProps) {
+}: DashCanvasProps) {
   const [animationImage, setAnimationImage] = useState<HTMLImageElement | null>(null);
   const [animationImageFailed, setAnimationImageFailed] = useState(false);
   const visited = useMemo(() => new Set(path.map(positionKey)), [path]);
@@ -280,7 +280,7 @@ export function ZipCanvas({
   return (
     <CanvasBoard
       className="board"
-      ariaLabel={`${puzzle.size} by ${puzzle.size} Zip board`}
+      ariaLabel={`${puzzle.size} by ${puzzle.size} Dash board`}
       rows={puzzle.size}
       cols={puzzle.size}
       cells={cells}

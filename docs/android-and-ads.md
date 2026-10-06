@@ -30,7 +30,7 @@ at a stable boundary rather than forking game logic.
 `VITE_AD_PROVIDER=none`, so no provider code or empty ad space is rendered.
 
 - `placeholder` displays named boxes for layout QA only.
-- `native` dispatches a `mindlab:ad-request` DOM event with
+- `native` dispatches a `mindora:ad-request` DOM event with
   `{ placement }`. The wrapper may listen for this event and call its native ad
   plugin. Games never import an ad SDK.
 

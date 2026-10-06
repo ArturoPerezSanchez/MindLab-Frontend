@@ -21,4 +21,4 @@ jobs:
       - run: npm run test -- --run
       - run: npm run build
       - run: npm audit --audit-level=high
-      - run: docker build -t mindlab-frontend-ci .
+      - run: docker build -t mindora-frontend-ci .

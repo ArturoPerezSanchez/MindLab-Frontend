@@ -38,7 +38,7 @@ import {
   solutionPrefixWithHint,
   tryStep,
 } from "./game";
-import { ZipCanvas } from "./ZipCanvas";
+import { DashCanvas } from "./DashCanvas";
 import type { InvalidMove, Position, Puzzle } from "./types";
 
 const CONFETTI_COLORS = ["#f28c28", "#f0ad3d", "#3977a8", "#d65b5b", "#263642"];
@@ -73,8 +73,8 @@ function invalidMoveCopy(move: InvalidMove): { title: string; description: strin
   }
 }
 
-export function ZipGame() {
-  const skin = useGameSkin("zip");
+export function DashGame() {
+  const skin = useGameSkin("dash");
   const revealImage = skin.assets.revealImage;
   const [selectedSize, setSelectedSize] = useState(6);
   const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
@@ -104,14 +104,14 @@ export function ZipGame() {
     solution: revealedSolution,
     reveal,
     isRevealing,
-  } = useRevealedSolution<Position[]>("zip", `${selectedSize}x${selectedSize}`, puzzle);
+  } = useRevealedSolution<Position[]>("dash", `${selectedSize}x${selectedSize}`, puzzle);
   const solutionRevealed = revealedSolution !== null;
   const assisted = solutionRevealed || usedHint;
   const totalCells = selectedSize * selectedSize;
   const displayedBestTime = isNewBest ? elapsedSeconds : bestTime;
   const progress = totalCells === 0 ? 0 : (path.length / totalCells) * 100;
 
-  // Zip needs no board animation - the pause alone gives the skin's reveal
+  // Dash needs no board animation - the pause alone gives the skin's reveal
   // image a moment to be seen. It composes with the existing reveal gate
   // rather than replacing it, so image skins still wait for their own
   // completion signal on top of this.
@@ -127,7 +127,7 @@ export function ZipGame() {
   useGameResultReporter({
     runKey: puzzle,
     completed: solved,
-    game: "zip",
+    game: "dash",
     difficulty: `${selectedSize}x${selectedSize}`,
     time_seconds: elapsedSeconds,
     submission: path,
@@ -154,7 +154,7 @@ export function ZipGame() {
       setShowWinSummary(true);
       setCompletionRevealComplete(false);
       completedRef.current = false;
-      const stored = window.localStorage.getItem(`zip-best-${size}`);
+      const stored = window.localStorage.getItem(`dash-best-${size}`);
       setBestTime(stored ? Number(stored) : null);
     },
     [setCurrentPath],
@@ -188,7 +188,7 @@ export function ZipGame() {
         if (signal?.aborted || requestSequence !== requestSequenceRef.current) {
           return;
         }
-        setError(requestError instanceof Error ? requestError.message : "Could not load a Zip puzzle.");
+        setError(requestError instanceof Error ? requestError.message : "Could not load a Dash puzzle.");
       } finally {
         if (!signal?.aborted && requestSequence === requestSequenceRef.current) {
           setIsLoading(false);
@@ -209,7 +209,7 @@ export function ZipGame() {
       })
       .catch((requestError) => {
         if (!controller.signal.aborted && requestSequence === requestSequenceRef.current) {
-          setError(requestError instanceof Error ? requestError.message : "Could not load a Zip puzzle.");
+          setError(requestError instanceof Error ? requestError.message : "Could not load a Dash puzzle.");
         }
       })
       .finally(() => {
@@ -258,7 +258,7 @@ export function ZipGame() {
         if (isSolved(result.path, puzzle) && !assisted && !completedRef.current) {
           completedRef.current = true;
           if (bestTime === null || elapsedSeconds < bestTime) {
-            window.localStorage.setItem(`zip-best-${selectedSize}`, String(elapsedSeconds));
+            window.localStorage.setItem(`dash-best-${selectedSize}`, String(elapsedSeconds));
             setBestTime(elapsedSeconds);
             setIsNewBest(true);
           }
@@ -360,11 +360,11 @@ export function ZipGame() {
 
   return (
     <main className="app-shell">
-      <section className="game-surface" aria-label="Zip game">
+      <section className="game-surface" aria-label="Dash game">
         <header className="top-bar">
           <div className="brand-lockup">
-            <img className="brand-mark asset-mark" src="/games/zip/logo.png" alt="" />
-            <h1>Zip</h1>
+            <img className="brand-mark asset-mark" src="/games/dash/logo.png" alt="" />
+            <h1>Dash</h1>
           </div>
 
           <div className="top-actions">
@@ -431,7 +431,7 @@ export function ZipGame() {
             </div>
           ) : (
             <>
-              <ZipCanvas
+              <DashCanvas
                 surface={skin.assets.surface}
                 puzzle={puzzle}
                 path={showSolution && revealedSolution ? revealedSolution : path}
@@ -551,7 +551,7 @@ export function ZipGame() {
                       View artwork
                     </button>
                   )}
-                  <LeaderboardLink game="zip" difficulty={`${selectedSize}x${selectedSize}`} />
+                  <LeaderboardLink game="dash" difficulty={`${selectedSize}x${selectedSize}`} />
                   <button className="win-action" type="button" onClick={() => void loadPuzzle(selectedSize)}>
                     <RefreshCcw aria-hidden="true" size={18} />
                     Play again
@@ -632,11 +632,11 @@ export function ZipGame() {
             aria-label="Close game rules"
             onClick={() => setShowRules(false)}
           />
-          <aside className="rules-panel" aria-label="How to play Zip">
+          <aside className="rules-panel" aria-label="How to play Dash">
             <div className="rules-heading">
               <div>
                 <span>How to play</span>
-                <h2>Zip rules</h2>
+                <h2>Dash rules</h2>
               </div>
               <button className="icon-action" type="button" aria-label="Close game rules" onClick={() => setShowRules(false)}>
                 <X aria-hidden="true" size={20} />
@@ -675,7 +675,7 @@ export function ZipGame() {
             </ol>
 
             <div className="rules-note">
-              <img className="rules-note-asset" src="/games/zip/logo.png" alt="" />
+              <img className="rules-note-asset" src="/games/dash/logo.png" alt="" />
               <p>Tap any earlier path square to rewind there. Hints and solution reveals make the run ineligible for a best time.</p>
             </div>
           </aside>

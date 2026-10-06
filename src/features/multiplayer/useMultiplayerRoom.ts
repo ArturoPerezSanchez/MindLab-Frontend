@@ -184,7 +184,7 @@ export function useMultiplayerRoom(identity: JoinIdentity) {
         }
       },
       /**
-       * Rate-limited so a fast solver dragging queens around does not flood
+       * Rate-limited so a fast solver dragging thrones around does not flood
        * seven other sockets. The trailing send matters: without it the final
        * board before a submit could be the one that got dropped, and spectator
        * tiles would freeze a move short.

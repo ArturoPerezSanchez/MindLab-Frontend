@@ -1,8 +1,8 @@
 import { apiPath } from "@/shared/api";
 import { rememberPuzzleHandleFrom, squareDifficulty } from "@/shared/puzzleHandles";
-import type { Puzzle, QueensResponse } from "./types";
+import type { Puzzle, ThronesResponse } from "./types";
 
-const API_PATH = apiPath("/queens");
+const API_PATH = apiPath("/thrones");
 
 function assertBoard(board: number[][], size: number): void {
   if (board.length !== size || board.some((row) => row.length !== size)) {
@@ -11,7 +11,7 @@ function assertBoard(board: number[][], size: number): void {
 }
 
 /**
- * Loads a uniquely solvable Queens puzzle from the backend.
+ * Loads a uniquely solvable Thrones puzzle from the backend.
  *
  * The answer stays on the server so a recorded result can be checked against
  * it. Solve detection has always been based on the visible game rules, so it is
@@ -26,9 +26,9 @@ export async function fetchPuzzle(size: number, signal?: AbortSignal): Promise<P
     throw new Error(`Puzzle generation failed with status ${response.status}.`);
   }
 
-  const payload = (await response.json()) as QueensResponse;
+  const payload = (await response.json()) as ThronesResponse;
   assertBoard(payload.board, size);
-  rememberPuzzleHandleFrom("queens", squareDifficulty(size), payload);
+  rememberPuzzleHandleFrom("thrones", squareDifficulty(size), payload);
 
   return {
     board: payload.board,

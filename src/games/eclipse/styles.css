@@ -1,5 +1,5 @@
-/* Scoped styles for tango. Generated from the original game stylesheet. */
-.game-tango {
+/* Scoped styles for eclipse. Generated from the original game stylesheet. */
+.game-eclipse {
   color-scheme: light;
   --ink: #1f2d3a;
   --muted: #66717d;
@@ -16,7 +16,7 @@
   --focus: #1f2d3a;
 }
 
-[data-theme="dark"] .game-tango {
+[data-theme="dark"] .game-eclipse {
   color-scheme: dark;
   --ink: #f4efe6;
   --muted: #b9b0a4;
@@ -33,40 +33,40 @@
   --focus: #ffd36f;
 }
 
-[data-theme="dark"] .game-tango {
+[data-theme="dark"] .game-eclipse {
   background:
     linear-gradient(180deg, rgba(255, 211, 111, 0.08), rgba(255, 255, 255, 0) 260px),
     radial-gradient(circle at 82% 8%, rgba(118, 174, 233, 0.16), transparent 30%),
     var(--page);
 }
 
-[data-theme="dark"] .game-tango .game-surface, [data-theme="dark"] .game-tango .stats-bar, [data-theme="dark"] .game-tango .state-panel, [data-theme="dark"] .game-tango .rules-panel, [data-theme="dark"] .game-tango .board-popup, [data-theme="dark"] .game-tango .secondary-action, [data-theme="dark"] .game-tango .size-control select, [data-theme="dark"] .game-tango .symbol-legend span {
+[data-theme="dark"] .game-eclipse .game-surface, [data-theme="dark"] .game-eclipse .stats-bar, [data-theme="dark"] .game-eclipse .state-panel, [data-theme="dark"] .game-eclipse .rules-panel, [data-theme="dark"] .game-eclipse .board-popup, [data-theme="dark"] .game-eclipse .secondary-action, [data-theme="dark"] .game-eclipse .size-control select, [data-theme="dark"] .game-eclipse .symbol-legend span {
   background-color: rgba(39, 35, 31, 0.78);
 }
 
-[data-theme="dark"] .game-tango .cell {
+[data-theme="dark"] .game-eclipse .cell {
   background: var(--board-cell, #2d2d30);
 }
 
-[data-theme="dark"] .game-tango .cell.is-given {
+[data-theme="dark"] .game-eclipse .cell.is-given {
   background: var(--board-given, #3c3c3f);
 }
 
-[data-theme="dark"] .game-tango .relation-clue, [data-theme="dark"] .game-tango .icon-action:hover {
+[data-theme="dark"] .game-eclipse .relation-clue, [data-theme="dark"] .game-eclipse .icon-action:hover {
   color: var(--ink);
   background: rgba(39, 35, 31, 0.94);
 }
 
-.game-tango * {
+.game-eclipse * {
   box-sizing: border-box;
 }
 
-.game-tango {
+.game-eclipse {
   min-width: 320px;
   background: var(--page);
 }
 
-.game-tango {
+.game-eclipse {
   min-height: 100vh;
   margin: 0;
   color: var(--ink);
@@ -76,22 +76,22 @@
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-.game-tango button, .game-tango select {
+.game-eclipse button, .game-eclipse select {
   color: inherit;
   font: inherit;
 }
 
-.game-tango button {
+.game-eclipse button {
   border: 0;
 }
 
-.game-tango .app-shell {
+.game-eclipse .app-shell {
   width: 100%;
   min-height: 100vh;
   padding: 24px;
 }
 
-.game-tango .game-surface {
+.game-eclipse .game-surface {
   display: grid;
   gap: 16px;
   width: min(100%, 760px);
@@ -104,56 +104,56 @@
   backdrop-filter: blur(10px);
 }
 
-.game-tango .top-bar, .game-tango .brand-lockup, .game-tango .top-actions, .game-tango .action-row, .game-tango .symbol-legend, .game-tango .rules-heading {
+.game-eclipse .top-bar, .game-eclipse .brand-lockup, .game-eclipse .top-actions, .game-eclipse .action-row, .game-eclipse .symbol-legend, .game-eclipse .rules-heading {
   display: flex;
   align-items: center;
 }
 
-.game-tango .top-bar {
+.game-eclipse .top-bar {
   justify-content: space-between;
   gap: 16px;
 }
 
-.game-tango .brand-lockup {
+.game-eclipse .brand-lockup {
   min-width: 0;
   gap: 11px;
 }
 
-.game-tango .brand-mark {
+.game-eclipse .brand-mark {
   display: block;
   width: 44px;
   height: 44px;
   border-radius: 8px;
 }
 
-.game-tango .asset-mark {
+.game-eclipse .asset-mark {
   background: rgba(255, 255, 255, 0.86);
   object-fit: contain;
   box-shadow: 0 8px 18px rgba(35, 51, 61, 0.14);
 }
 
-.game-tango h1, .game-tango h2, .game-tango p {
+.game-eclipse h1, .game-eclipse h2, .game-eclipse p {
   margin: 0;
 }
 
-.game-tango h1 {
+.game-eclipse h1 {
   font-size: 1.75rem;
   font-weight: 900;
   letter-spacing: 0;
   line-height: 1;
 }
 
-.game-tango .top-actions {
+.game-eclipse .top-actions {
   gap: 6px;
 }
 
-.game-tango .size-control {
+.game-eclipse .size-control {
   position: relative;
   display: grid;
   align-items: center;
 }
 
-.game-tango .size-control select {
+.game-eclipse .size-control select {
   min-width: 96px;
   min-height: 38px;
   padding: 0 34px 0 14px;
@@ -166,18 +166,18 @@
   cursor: pointer;
 }
 
-.game-tango .size-control svg {
+.game-eclipse .size-control svg {
   position: absolute;
   right: 11px;
   pointer-events: none;
 }
 
-.game-tango .size-control select:focus-visible, .game-tango .icon-action:focus-visible, .game-tango .secondary-action:focus-visible, .game-tango .primary-action:focus-visible, .game-tango .win-action:focus-visible, .game-tango .text-action:focus-visible, .game-tango .popup-close:focus-visible {
+.game-eclipse .size-control select:focus-visible, .game-eclipse .icon-action:focus-visible, .game-eclipse .secondary-action:focus-visible, .game-eclipse .primary-action:focus-visible, .game-eclipse .win-action:focus-visible, .game-eclipse .text-action:focus-visible, .game-eclipse .popup-close:focus-visible {
   outline: 3px solid rgba(52, 120, 201, 0.42);
   outline-offset: 2px;
 }
 
-.game-tango .icon-action {
+.game-eclipse .icon-action {
   display: grid;
   place-items: center;
   width: 38px;
@@ -190,13 +190,13 @@
   transition: color 120ms ease, background 120ms ease, transform 120ms ease;
 }
 
-.game-tango .icon-action:hover {
+.game-eclipse .icon-action:hover {
   color: var(--ink);
   background: rgba(255, 255, 255, 0.62);
   transform: translateY(-1px);
 }
 
-.game-tango .stats-bar {
+.game-eclipse .stats-bar {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   overflow: hidden;
@@ -206,7 +206,7 @@
   backdrop-filter: blur(10px);
 }
 
-.game-tango .stat {
+.game-eclipse .stat {
   display: grid;
   gap: 4px;
   min-width: 0;
@@ -214,18 +214,18 @@
   text-align: center;
 }
 
-.game-tango .stat + .stat {
+.game-eclipse .stat + .stat {
   border-left: 1px solid rgba(102, 113, 125, 0.16);
 }
 
-.game-tango .stat span {
+.game-eclipse .stat span {
   color: #7c858e;
   font-size: 0.66rem;
   font-weight: 650;
   text-transform: uppercase;
 }
 
-.game-tango .stat strong {
+.game-eclipse .stat strong {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 1.22rem;
   font-variant-numeric: tabular-nums;
@@ -233,14 +233,14 @@
   line-height: 1;
 }
 
-.game-tango .board-zone {
+.game-eclipse .board-zone {
   position: relative;
   display: grid;
   min-height: min(74vw, 660px);
   place-items: center;
 }
 
-.game-tango .board {
+.game-eclipse .board {
   --board-size: 6;
   display: grid;
   grid-template-columns: repeat(var(--board-size), minmax(0, 1fr));
@@ -255,7 +255,7 @@
   user-select: none;
 }
 
-.game-tango .cell {
+.game-eclipse .cell {
   position: relative;
   display: grid;
   min-width: 0;
@@ -270,27 +270,27 @@
   transition: filter 120ms ease, transform 120ms ease, box-shadow 120ms ease;
 }
 
-.game-tango .cell.is-given {
+.game-eclipse .cell.is-given {
   background: var(--board-given, #e1e4e7);
   cursor: default;
 }
 
-.game-tango .cell:hover:not(:disabled), .game-tango .cell:focus-visible:not(:disabled) {
+.game-eclipse .cell:hover:not(:disabled), .game-eclipse .cell:focus-visible:not(:disabled) {
   z-index: 3;
   filter: brightness(1.025);
   outline: 3px solid rgba(52, 120, 201, 0.55);
   outline-offset: -3px;
 }
 
-.game-tango .cell:active:not(:disabled) {
+.game-eclipse .cell:active:not(:disabled) {
   transform: scale(0.95);
 }
 
-.game-tango .cell:disabled {
+.game-eclipse .cell:disabled {
   opacity: 1;
 }
 
-.game-tango .cell.is-conflict::before {
+.game-eclipse .cell.is-conflict::before {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -305,12 +305,12 @@
   pointer-events: none;
 }
 
-.game-tango .cell.is-solution:not(.is-given) .symbol-icon {
+.game-eclipse .cell.is-solution:not(.is-given) .symbol-icon {
   opacity: 0.48;
   filter: grayscale(0.2);
 }
 
-.game-tango .symbol-icon {
+.game-eclipse .symbol-icon {
   display: block;
   z-index: 2;
   width: 58%;
@@ -321,11 +321,11 @@
   filter: drop-shadow(0 3px 2px rgba(31, 45, 58, 0.15));
 }
 
-.game-tango .is-given .symbol-icon {
+.game-eclipse .is-given .symbol-icon {
   filter: drop-shadow(0 2px 1px rgba(31, 45, 58, 0.12));
 }
 
-.game-tango .relation-clue {
+.game-eclipse .relation-clue {
   position: absolute;
   z-index: 4;
   display: grid;
@@ -344,26 +344,26 @@
   pointer-events: none;
 }
 
-.game-tango .relation-clue.horizontal {
+.game-eclipse .relation-clue.horizontal {
   top: 50%;
   right: 0;
   transform: translate(50%, -50%);
 }
 
-.game-tango .relation-clue.vertical {
+.game-eclipse .relation-clue.vertical {
   bottom: 0;
   left: 50%;
   transform: translate(-50%, 50%);
 }
 
-.game-tango .progress-track {
+.game-eclipse .progress-track {
   height: 7px;
   overflow: hidden;
   border-radius: 999px;
   background: rgba(31, 45, 58, 0.09);
 }
 
-.game-tango .progress-track span {
+.game-eclipse .progress-track span {
   display: block;
   height: 100%;
   border-radius: inherit;
@@ -371,13 +371,13 @@
   transition: width 180ms ease;
 }
 
-.game-tango .action-row {
+.game-eclipse .action-row {
   flex-wrap: wrap;
   justify-content: center;
   gap: 9px;
 }
 
-.game-tango .primary-action, .game-tango .secondary-action, .game-tango .win-action {
+.game-eclipse .primary-action, .game-eclipse .secondary-action, .game-eclipse .win-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -390,34 +390,34 @@
   transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
 }
 
-.game-tango .primary-action, .game-tango .win-action {
+.game-eclipse .primary-action, .game-eclipse .win-action {
   color: #fff;
   background: var(--ink);
   box-shadow: 0 10px 22px rgba(31, 45, 58, 0.18);
 }
 
-.game-tango .secondary-action {
+.game-eclipse .secondary-action {
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.68);
 }
 
-.game-tango .secondary-action[aria-pressed="true"] {
+.game-eclipse .secondary-action[aria-pressed="true"] {
   color: #fff;
   border-color: var(--symbol-0);
   background: var(--symbol-0);
 }
 
-.game-tango .primary-action:hover, .game-tango .secondary-action:hover, .game-tango .win-action:hover {
+.game-eclipse .primary-action:hover, .game-eclipse .secondary-action:hover, .game-eclipse .win-action:hover {
   transform: translateY(-1px);
 }
 
-.game-tango .primary-action:disabled, .game-tango .secondary-action:disabled {
+.game-eclipse .primary-action:disabled, .game-eclipse .secondary-action:disabled {
   cursor: not-allowed;
   opacity: 0.44;
   transform: none;
 }
 
-.game-tango .state-panel {
+.game-eclipse .state-panel {
   display: grid;
   width: min(100%, 430px);
   min-height: 230px;
@@ -431,23 +431,23 @@
   text-align: center;
 }
 
-.game-tango .state-panel strong {
+.game-eclipse .state-panel strong {
   color: var(--ink);
 }
 
-.game-tango .state-panel p {
+.game-eclipse .state-panel p {
   line-height: 1.45;
 }
 
-.game-tango .error-state > svg {
+.game-eclipse .error-state > svg {
   color: var(--danger);
 }
 
-.game-tango .spin {
+.game-eclipse .spin {
   animation: spin 850ms linear infinite;
 }
 
-.game-tango .conflict-trigger {
+.game-eclipse .conflict-trigger {
   position: absolute;
   z-index: 7;
   top: 12px;
@@ -466,7 +466,7 @@
   backdrop-filter: blur(10px);
 }
 
-.game-tango .board-dismiss-layer {
+.game-eclipse .board-dismiss-layer {
   position: absolute;
   inset: 0;
   z-index: 5;
@@ -474,7 +474,7 @@
   cursor: default;
 }
 
-.game-tango .board-popup {
+.game-eclipse .board-popup {
   position: absolute;
   z-index: 6;
   top: 50%;
@@ -496,12 +496,12 @@
   animation: popup-enter 340ms cubic-bezier(0.2, 0.9, 0.2, 1.1) both;
 }
 
-.game-tango .board-popup strong {
+.game-eclipse .board-popup strong {
   display: block;
   font-size: 1.1rem;
 }
 
-.game-tango .board-popup p {
+.game-eclipse .board-popup p {
   margin-top: 3px;
   color: var(--muted);
   font-size: 0.91rem;
@@ -509,11 +509,11 @@
   line-height: 1.35;
 }
 
-.game-tango .conflict-popup > svg {
+.game-eclipse .conflict-popup > svg {
   color: var(--danger);
 }
 
-.game-tango .popup-close {
+.game-eclipse .popup-close {
   position: absolute;
   top: 9px;
   right: 9px;
@@ -527,14 +527,14 @@
   cursor: pointer;
 }
 
-.game-tango .conflict-list {
+.game-eclipse .conflict-list {
   display: flex;
   grid-column: 1 / -1;
   flex-wrap: wrap;
   gap: 7px;
 }
 
-.game-tango .conflict-list span {
+.game-eclipse .conflict-list span {
   padding: 6px 9px;
   border-radius: 999px;
   color: #fff;
@@ -543,7 +543,7 @@
   font-weight: 800;
 }
 
-.game-tango .text-action {
+.game-eclipse .text-action {
   grid-column: 1 / -1;
   justify-self: start;
   padding: 0;
@@ -555,7 +555,7 @@
   cursor: pointer;
 }
 
-.game-tango .win-popup {
+.game-eclipse .win-popup {
   overflow: hidden;
   border-color: rgba(20, 125, 104, 0.28);
   background:
@@ -563,11 +563,11 @@
     rgba(255, 253, 250, 0.95);
 }
 
-.game-tango .win-popup > svg {
+.game-eclipse .win-popup > svg {
   color: var(--symbol-1);
 }
 
-.game-tango .record-badge {
+.game-eclipse .record-badge {
   display: inline-flex;
   grid-column: 1 / -1;
   justify-self: start;
@@ -582,18 +582,18 @@
   font-weight: 900;
 }
 
-.game-tango .win-action {
+.game-eclipse .win-action {
   grid-column: 1 / -1;
 }
 
-.game-tango .confetti-field {
+.game-eclipse .confetti-field {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
 
-.game-tango .confetti-field span {
+.game-eclipse .confetti-field span {
   position: absolute;
   top: -14px;
   left: var(--x);
@@ -606,7 +606,7 @@
   animation-delay: var(--delay);
 }
 
-.game-tango .rules-backdrop {
+.game-eclipse .rules-backdrop {
   position: fixed;
   inset: 0;
   z-index: 20;
@@ -615,7 +615,7 @@
   backdrop-filter: blur(2px);
 }
 
-.game-tango .rules-panel {
+.game-eclipse .rules-panel {
   position: fixed;
   z-index: 21;
   top: var(--suite-nav-offset);
@@ -634,29 +634,29 @@
   animation: rules-enter 210ms ease both;
 }
 
-.game-tango .rules-heading {
+.game-eclipse .rules-heading {
   justify-content: space-between;
   gap: 16px;
 }
 
-.game-tango .rules-heading span {
+.game-eclipse .rules-heading span {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 750;
   text-transform: uppercase;
 }
 
-.game-tango .rules-heading h2 {
+.game-eclipse .rules-heading h2 {
   margin-top: 3px;
   font-size: 1.45rem;
   line-height: 1.1;
 }
 
-.game-tango .symbol-legend {
+.game-eclipse .symbol-legend {
   gap: 10px;
 }
 
-.game-tango .symbol-legend span {
+.game-eclipse .symbol-legend span {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -667,19 +667,19 @@
   font-weight: 800;
 }
 
-.game-tango .symbol-legend .symbol-icon {
+.game-eclipse .symbol-legend .symbol-icon {
   width: 22px;
   height: 22px;
 }
 
-.game-tango .legend-emoji {
+.game-eclipse .legend-emoji {
   display: block;
   width: 25px;
   height: 25px;
   object-fit: contain;
 }
 
-.game-tango .rules-list {
+.game-eclipse .rules-list {
   display: grid;
   margin: 0;
   padding: 0;
@@ -687,7 +687,7 @@
   counter-reset: rules;
 }
 
-.game-tango .rules-list li {
+.game-eclipse .rules-list li {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr);
   padding: 14px 0;
@@ -696,7 +696,7 @@
   counter-increment: rules;
 }
 
-.game-tango .rules-list li::before {
+.game-eclipse .rules-list li::before {
   grid-row: 1 / span 2;
   display: grid;
   width: 25px;
@@ -711,18 +711,18 @@
   font-weight: 900;
 }
 
-.game-tango .rules-list strong {
+.game-eclipse .rules-list strong {
   font-size: 0.96rem;
 }
 
-.game-tango .rules-list span {
+.game-eclipse .rules-list span {
   color: var(--muted);
   font-size: 0.86rem;
   font-weight: 600;
   line-height: 1.43;
 }
 
-.game-tango .rules-note {
+.game-eclipse .rules-note {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   padding: 13px;
@@ -734,7 +734,7 @@
   line-height: 1.45;
 }
 
-.game-tango .sr-only {
+.game-eclipse .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -789,7 +789,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .game-tango *, .game-tango *::before, .game-tango *::after {
+  .game-eclipse *, .game-eclipse *::before, .game-eclipse *::after {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
@@ -798,89 +798,89 @@
 }
 
 @media (max-width: 680px) {
-  .game-tango .app-shell {
+  .game-eclipse .app-shell {
     padding: 12px;
   }
 
-  .game-tango .game-surface {
+  .game-eclipse .game-surface {
     gap: 13px;
     padding: 13px;
   }
 
-  .game-tango .brand-mark {
+  .game-eclipse .brand-mark {
     width: 38px;
     height: 38px;
   }
 
-  .game-tango h1 {
+  .game-eclipse h1 {
     font-size: 1.5rem;
   }
 
-  .game-tango .stats-bar {
+  .game-eclipse .stats-bar {
     border-radius: 8px;
   }
 
-  .game-tango .stat {
+  .game-eclipse .stat {
     padding: 10px 7px;
   }
 
-  .game-tango .stat strong {
+  .game-eclipse .stat strong {
     font-size: 1rem;
   }
 
-  .game-tango .board-zone {
+  .game-eclipse .board-zone {
     min-height: auto;
   }
 
-  .game-tango .board {
+  .game-eclipse .board {
     width: min(100%, calc(100vw - 26px));
   }
 
-  .game-tango .action-row {
+  .game-eclipse .action-row {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .game-tango .primary-action, .game-tango .secondary-action {
+  .game-eclipse .primary-action, .game-eclipse .secondary-action {
     width: 100%;
     padding: 0 9px;
   }
 
-  .game-tango .primary-action:last-child {
+  .game-eclipse .primary-action:last-child {
     grid-column: 1 / -1;
   }
 }
 
 @media (max-width: 390px) {
-  .game-tango .brand-lockup {
+  .game-eclipse .brand-lockup {
     gap: 8px;
   }
 
-  .game-tango .brand-mark {
+  .game-eclipse .brand-mark {
     width: 34px;
     height: 34px;
   }
 
-  .game-tango h1 {
+  .game-eclipse h1 {
     font-size: 1.35rem;
   }
 
-  .game-tango .size-control select {
+  .game-eclipse .size-control select {
     min-width: 84px;
     min-height: 34px;
     padding-left: 11px;
   }
 
-  .game-tango .icon-action {
+  .game-eclipse .icon-action {
     width: 34px;
     height: 34px;
   }
 
-  .game-tango .action-row {
+  .game-eclipse .action-row {
     grid-template-columns: 1fr;
   }
 
-  .game-tango .primary-action:last-child {
+  .game-eclipse .primary-action:last-child {
     grid-column: auto;
   }
 }
